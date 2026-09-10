@@ -1,0 +1,184 @@
+name: Apply v93.8.13.5.3 route stability patch
+
+on:
+  push:
+    branches:
+      - fix/v93.8.13.5.3-route-stability
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/v93.8.13.5.3-route-stability
+
+      - name: Patch index.html surgically
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old_title = '<title>⚖️ מחולל טיעונים לעונש - v93.8.13.5.2.1</title>'
+          new_title = '<title>⚖️ מחולל טיעונים לעונש - v93.8.13.5.3</title>'
+          if old_title not in s and new_title not in s:
+              raise SystemExit('Expected title marker not found; refusing to patch unknown base')
+          if old_title in s:
+              s = s.replace(old_title, new_title, 1)
+
+          marker = 'id="v9353RouteUiStabilityFix"'
+          if marker not in s:
+              patch = r'''
+          
+          <!-- v93.8.13.5.3 — surgical route/UI stability fix only: (1) final enforcement of multiple-charge UI support after all route wrappers settle, so only route 67 can expose multiple/joined-case inputs; (2) v91 intro-card race stabilization across repeated route re-selections. No sentencing calculations, ranges, petition logic, accident logic, caselaw, or multiple-case generation logic changed. -->
+          <script id="v9353RouteUiStabilityFix">
+          (function(){
+            'use strict';
+            if(window.__v9353RouteUiStabilityFix) return;
+            window.__v9353RouteUiStabilityFix = true;
+
+            var INTRO_ID = 'v91_guided_intro_card';
+            var SUMMARY_ID = 'v91_guided_summary_card';
+            var introIntent = 'intro';
+
+            function currentRoute(){
+              var r = '';
+              try{ r = String(window._mashlul || ''); }catch(e){}
+              if(!r){ var h=document.getElementById('_mashlul'); if(h) r=String(h.value||''); }
+              return r;
+            }
+
+            function enforceMultipleSupport(){
+              var block = document.getElementById('multiple_support_block');
+              if(!block) return;
+              block.style.display = currentRoute() === '67' ? '' : 'none';
+            }
+
+            function cleanupIntroForSplash(){
+              document.body.classList.remove('v91-route-active','v91-stage-intro','v91-stage-full');
+              var i=document.getElementById(INTRO_ID), s=document.getElementById(SUMMARY_ID);
+              if(i && i.parentNode) i.parentNode.removeChild(i);
+              if(s && s.parentNode) s.parentNode.removeChild(s);
+            }
+
+            function enforceIntroIntent(){
+              if(introIntent === 'splash'){
+                cleanupIntroForSplash();
+                return;
+              }
+              var intro=document.getElementById(INTRO_ID), summary=document.getElementById(SUMMARY_ID);
+              if(!intro && !summary) return;
+              document.body.classList.add('v91-route-active');
+              if(introIntent === 'full'){
+                document.body.classList.remove('v91-stage-intro');
+                document.body.classList.add('v91-stage-full');
+              }else{
+                document.body.classList.remove('v91-stage-full');
+                document.body.classList.add('v91-stage-intro');
+              }
+            }
+
+            function settle(){
+              enforceMultipleSupport();
+              enforceIntroIntent();
+            }
+            function settleBurst(){
+              settle();
+              setTimeout(settle, 0);
+              setTimeout(settle, 90);
+              setTimeout(settle, 180);
+              setTimeout(settle, 320);
+            }
+
+            var prevChoose = window.chooseMashlul;
+            if(typeof prevChoose === 'function'){
+              window.chooseMashlul = function(type){
+                introIntent = 'intro';
+                var ret = prevChoose.apply(this, arguments);
+                settleBurst();
+                return ret;
+              };
+            }
+
+            var prevShow = window.showSplash;
+            if(typeof prevShow === 'function'){
+              window.showSplash = function(){
+                introIntent = 'splash';
+                cleanupIntroForSplash();
+                var ret = prevShow.apply(this, arguments);
+                setTimeout(settle, 0);
+                setTimeout(settle, 100);
+                setTimeout(settle, 220);
+                return ret;
+              };
+            }
+
+            document.addEventListener('click', function(ev){
+              var t=ev && ev.target;
+              if(!t || !t.closest) return;
+              if(t.closest('#v91_continue_btn')){
+                introIntent = 'full';
+                setTimeout(settle, 0);
+                setTimeout(settle, 100);
+                setTimeout(settle, 220);
+              }else if(t.closest('#v91_edit_btn')){
+                introIntent = 'intro';
+                settleBurst();
+              }
+            }, true);
+
+            try{
+              var obs = new MutationObserver(function(muts){
+                var relevant=false;
+                for(var i=0;i<muts.length;i++){
+                  var m=muts[i];
+                  if(m.type==='attributes' && m.target===document.body){ relevant=true; break; }
+                  if(m.type==='childList'){
+                    var nodes=[].slice.call(m.addedNodes||[]).concat([].slice.call(m.removedNodes||[]));
+                    for(var j=0;j<nodes.length;j++){
+                      var n=nodes[j];
+                      if(n && n.id && (n.id===INTRO_ID || n.id===SUMMARY_ID)){ relevant=true; break; }
+                    }
+                    if(relevant) break;
+                  }
+                }
+                if(relevant) setTimeout(settle,0);
+              });
+              obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+            }catch(e){}
+
+            if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', settleBurst);
+            else settleBurst();
+          })();
+          </script>
+          '''
+              pos = s.rfind('</body>')
+              if pos < 0:
+                  raise SystemExit('No </body> marker; refusing to patch')
+              s = s[:pos] + patch + s[pos:]
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Verify patch markers
+        shell: bash
+        run: |
+          grep -q 'v93.8.13.5.3' index.html
+          grep -q 'id="v9353RouteUiStabilityFix"' index.html
+          grep -q "currentRoute() === '67' ? '' : 'none'" index.html
+
+      - name: Commit patched index.html
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No changes needed'
+            exit 0
+          fi
+          git commit -m 'Fix route UI stability in v93.8.13.5.3'
+          git push origin HEAD:fix/v93.8.13.5.3-route-stability
