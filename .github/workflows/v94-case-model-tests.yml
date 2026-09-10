@@ -137,8 +137,14 @@ jobs:
       - name: Gate 13C - viewport matrix
         run: node v94/browser-case-model-deep.mjs viewports
 
-      - name: Gate 13D - live multiple cards
-        run: node v94/browser-case-model-deep.mjs multi-live
+      - name: Gate 13D1 - live multiple structure
+        run: node v94/browser-case-model-deep.mjs multi-structure
+
+      - name: Gate 13D2 - live multiple capture
+        run: node v94/browser-case-model-deep.mjs multi-capture
+
+      - name: Gate 13D3 - live multiple shrink
+        run: node v94/browser-case-model-deep.mjs multi-shrink
 
       - name: Gate 13E - live conditional lists
         run: node v94/browser-case-model-deep.mjs conditional-live
