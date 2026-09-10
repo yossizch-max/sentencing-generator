@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "requiredTopLevel": ["schemaVersion","route","defendant","proceeding","currentOffense","sentencing","accident","metadata"],
+  "proceedingModes": ["single","multiple","joined"],
+  "routeOrder": ["67","10a","67+10a","shichrut","67_shichrut","10a_shichrut","67_10a_shichrut","accident_injury"],
+  "phase": "read-only-adapter"
+}
