@@ -85,5 +85,17 @@ jobs:
           sleep 2
           curl -f http://127.0.0.1:4173/index.html >/dev/null
 
-      - name: Gate 12 - browser live-DOM adapter smoke
-        run: node v94/browser-case-model-smoke.mjs
+      - name: Gate 12A - browser load
+        run: node v94/browser-case-model-smoke.mjs load
+
+      - name: Gate 12B - browser read-only
+        run: node v94/browser-case-model-smoke.mjs readonly
+
+      - name: Gate 12C - browser routes
+        run: node v94/browser-case-model-smoke.mjs routes
+
+      - name: Gate 12D - browser deterministic
+        run: node v94/browser-case-model-smoke.mjs deterministic
+
+      - name: Gate 12E - browser parity
+        run: node v94/browser-case-model-smoke.mjs parity
