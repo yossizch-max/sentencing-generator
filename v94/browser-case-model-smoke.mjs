@@ -36,16 +36,33 @@ await run('readonly',async()=>{
 });
 
 await run('routes',async()=>{
-  const routes=['67','10a','67+10a','shichrut','67_shichrut','10a_shichrut','67_10a_shichrut','accident_injury'];
+  const routes=['67','10a','67+10a','shichrut','67_shichrut','10a_shichrut','67_10a_shichrut','accident_injury','accident_below_real'];
   for (const route of routes){
-    const result=await page.evaluate((r)=>{
-      window._mashlul=r;
+    const result=await page.evaluate(async (r)=>{
+      if(typeof window.chooseMashlul==='function'){
+        window.chooseMashlul(r);
+        await new Promise(resolve=>setTimeout(resolve,450));
+      } else {
+        window._mashlul=r;
+      }
       const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
-      return {route:m.route,accident:!!m.accident};
+      return {
+        requested:r,
+        route:m.route,
+        rawMashlul:String(window._mashlul||''),
+        routeEngine:(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):'',
+        accident:!!m.accident
+      };
     },route);
-    if(result.route!==route) throw new Error('route capture mismatch '+route+' got '+result.route);
-    if((route==='accident_injury')!==result.accident) throw new Error('accident mapping mismatch '+route);
+    if(result.route!==route) throw new Error('route capture mismatch '+JSON.stringify(result));
+    if((route==='accident_injury'||route==='accident_below_real')!==result.accident) throw new Error('accident mapping mismatch '+JSON.stringify(result));
   }
+  const aliases=await page.evaluate(()=>({
+    a:window.V94CaseModel.normalizeRoute('67_10a'),
+    b:window.V94CaseModel.normalizeRoute('67+shichrut'),
+    c:window.V94CaseModel.normalizeRoute('67shichrut')
+  }));
+  if(aliases.a!=='67+10a'||aliases.b!=='67_shichrut'||aliases.c!=='67_shichrut') throw new Error('route alias normalization failed '+JSON.stringify(aliases));
 });
 
 await run('deterministic',async()=>{
