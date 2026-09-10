@@ -141,7 +141,7 @@ async function runShrink(page){
   if(!prep.supported||!prep.ids.every(Boolean)) throw new Error('multi setup failed '+JSON.stringify(prep));
   return await page.evaluate(async ()=>{
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
-    set('m_case_1','MAIN-LIVE');set('m_case_2','JOIN-LIVE-2');set('m_case_3','JOIN-LIVE-3');
+    set('case_num','MAIN-LIVE');set('m_case_1','MAIN-LIVE');set('m_case_2','JOIN-LIVE-2');set('m_case_3','JOIN-LIVE-3');
     const count=document.getElementById('multi_count');
     count.value='2'; count.dispatchEvent(new Event('change',{bubbles:true}));
     await new Promise(r=>setTimeout(r,250));
@@ -150,7 +150,9 @@ async function runShrink(page){
       len:m.proceeding.cases.length,
       cases:m.proceeding.cases.map(x=>x.caseNumber),
       thirdExists:!!document.getElementById('m_case_3'),
-      countValue:document.getElementById('multi_count')?.value||''
+      countValue:document.getElementById('multi_count')?.value||'',
+      leadCase:document.getElementById('case_num')?.value||'',
+      firstCard:document.getElementById('m_case_1')?.value||''
     };
   });
 }
@@ -159,6 +161,7 @@ if(mode==='multi-shrink-model'){
   const r=await runShrink(page);
   if(r.len!==2) throw new Error('model still has wrong count '+JSON.stringify(r));
   if(r.cases.join('|')!=='MAIN-LIVE|JOIN-LIVE-2') throw new Error('remaining card values drifted '+JSON.stringify(r));
+  if(r.firstCard!==r.leadCase) throw new Error('lead case/card sync drift '+JSON.stringify(r));
   await browser.close();
   console.log('PASS multi-shrink-model');
 }
