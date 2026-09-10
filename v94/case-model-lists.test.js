@@ -1,0 +1,15 @@
+const fs=require('fs'),vm=require('vm');
+const {mkEl,mkDoc}=require('./test-utils');
+const src=fs.readFileSync('v94/case-model-adapter.js','utf8');
+const ctx={globalThis:{},module:{exports:{}},exports:{},Date}; vm.createContext(ctx); vm.runInContext(src,ctx);
+const api=ctx.module.exports;
+const map={_mashlul:mkEl('67'),has_multiple_yes:mkEl('',true),multi_proc_type:mkEl('consol'),multi_count:mkEl('3'),m_case_1:mkEl('MAIN'),m_case_2:mkEl('JOIN-2'),m_case_3:mkEl('JOIN-3'),cond_case_1:mkEl('C1'),cond_months_1:mkEl('4'),cond_case_3:mkEl('C3'),cond_months_3:mkEl('6'),disq_case_2:mkEl('D2'),disq_months_2:mkEl('12'),bond_case_1:mkEl('B1'),bond_amount_1:mkEl('5000'),bond_case_4:mkEl('B4'),bond_amount_4:mkEl('9000')};
+const ids=['cond_item_1','cond_item_3','disq_item_2','bond_item_1','bond_item_4'];
+const m=api.buildCaseModelFromCurrentState({_mashlul:'67'},mkDoc(map,ids));
+if(m.proceeding.mode!=='joined'||m.proceeding.cases.length!==3) throw new Error('joined cases');
+if(m.proceeding.cases[2].caseNumber!=='JOIN-3') throw new Error('third joined case');
+const p=m.defendant.record.pendingConditions;
+if(p.imprisonment.map(x=>x.index).join(',')!=='1,3') throw new Error('imprisonment indexes');
+if(p.disqualification.map(x=>x.index).join(',')!=='2') throw new Error('disqualification indexes');
+if(p.bonds.map(x=>x.index).join(',')!=='1,4') throw new Error('bond indexes');
+console.log('PASS lists');
