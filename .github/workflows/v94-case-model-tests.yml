@@ -1,4 +1,4 @@
-name: v94 CaseModel tests
+name: v94 migration gates
 
 on:
   push:
@@ -12,7 +12,34 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: v94/architecture-migration
-      - name: Syntax check adapter
-        run: node --check v94/case-model-adapter.js
-      - name: Run adapter unit test
+          fetch-depth: 0
+
+      - name: Gate 0 - production index remains untouched
+        run: |
+          git fetch origin main
+          git diff --exit-code origin/main...HEAD -- index.html
+
+      - name: Gate 1 - syntax
+        run: |
+          node --check v94/case-model-adapter.js
+          node --check v94/test-utils.js
+          node --check v94/case-model-adapter.test.js
+          node --check v94/case-model-contract.test.js
+          node --check v94/case-model-routes.test.js
+          node --check v94/case-model-lists.test.js
+          node --check v94/legacy-architecture-scan.js
+
+      - name: Gate 2 - base adapter unit test
         run: node v94/case-model-adapter.test.js
+
+      - name: Gate 3 - read-only contract
+        run: node v94/case-model-contract.test.js
+
+      - name: Gate 4 - all route snapshots
+        run: node v94/case-model-routes.test.js
+
+      - name: Gate 5 - dynamic lists and joined cases
+        run: node v94/case-model-lists.test.js
+
+      - name: Gate 6 - legacy architecture scan
+        run: node v94/legacy-architecture-scan.js
