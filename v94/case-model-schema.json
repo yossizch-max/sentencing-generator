@@ -23,8 +23,7 @@
     "67_shichrut",
     "10a_shichrut",
     "67_10a_shichrut",
-    "accident_injury",
-    "accident_below_real"
+    "accident_injury"
   ],
   "phase": "read-only-adapter"
 }
