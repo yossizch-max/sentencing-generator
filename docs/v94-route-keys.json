@@ -1,0 +1,30 @@
+{
+  "chooseMashlulCalls": [
+    "10a",
+    "10a_shichrut",
+    "67",
+    "67+10a",
+    "67_10a_shichrut",
+    "67_shichrut",
+    "accident_injury",
+    "shichrut"
+  ],
+  "mashlulAssignments": [
+    "67",
+    "67_shichrut"
+  ],
+  "routeComparisons": [
+    "10a",
+    "10a_shichrut",
+    "67",
+    "67+10a",
+    "67+shichrut",
+    "67_10a",
+    "67_10a_shichrut",
+    "67_shichrut",
+    "67shichrut",
+    "accident_below_real",
+    "accident_injury",
+    "shichrut"
+  ]
+}
