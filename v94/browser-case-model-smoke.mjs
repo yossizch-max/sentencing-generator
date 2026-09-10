@@ -53,21 +53,27 @@ async function verifyRoute(route){
     };
   },route);
   if(result.route!==route) throw new Error('route capture mismatch '+JSON.stringify(result));
-  if((route==='accident_injury'||route==='accident_below_real')!==result.accident) throw new Error('accident mapping mismatch '+JSON.stringify(result));
+  if((route==='accident_injury')!==result.accident) throw new Error('accident mapping mismatch '+JSON.stringify(result));
 }
 if(mode.startsWith('route:')){
   await verifyRoute(mode.slice(6));
   console.log('PASS '+mode);
 }
+if(mode==='alias:accident_below_real'){
+  const normalized=await page.evaluate(()=>window.V94CaseModel.normalizeRoute('accident_below_real'));
+  if(normalized!=='accident_injury') throw new Error('accident alias mismatch '+normalized);
+  console.log('PASS '+mode);
+}
 await run('routes',async()=>{
-  const routes=['67','10a','67+10a','shichrut','67_shichrut','10a_shichrut','67_10a_shichrut','accident_injury','accident_below_real'];
+  const routes=['67','10a','67+10a','shichrut','67_shichrut','10a_shichrut','67_10a_shichrut','accident_injury'];
   for (const route of routes) await verifyRoute(route);
   const aliases=await page.evaluate(()=>({
     a:window.V94CaseModel.normalizeRoute('67_10a'),
     b:window.V94CaseModel.normalizeRoute('67+shichrut'),
-    c:window.V94CaseModel.normalizeRoute('67shichrut')
+    c:window.V94CaseModel.normalizeRoute('67shichrut'),
+    d:window.V94CaseModel.normalizeRoute('accident_below_real')
   }));
-  if(aliases.a!=='67+10a'||aliases.b!=='67_shichrut'||aliases.c!=='67_shichrut') throw new Error('route alias normalization failed '+JSON.stringify(aliases));
+  if(aliases.a!=='67+10a'||aliases.b!=='67_shichrut'||aliases.c!=='67_shichrut'||aliases.d!=='accident_injury') throw new Error('route alias normalization failed '+JSON.stringify(aliases));
 });
 
 await run('deterministic',async()=>{
