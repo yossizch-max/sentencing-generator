@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm');
+const {mkEl,mkDoc}=require('./test-utils');
+const src=fs.readFileSync('v94/case-model-adapter.js','utf8');
+const ctx={globalThis:{},module:{exports:{}},exports:{},Date}; vm.createContext(ctx); vm.runInContext(src,ctx);
+const api=ctx.module.exports;
+const map={_mashlul:mkEl('67'),has_multiple_yes:mkEl('',true),multi_proc_type:mkEl('consol'),multi_count:mkEl('2'),m_case_1:mkEl('MAIN'),m_case_2:mkEl('')};
+const model=api.buildCaseModelFromCurrentState({_mashlul:'67'},mkDoc(map));
+const issues=api.validateCaseModel(model);
+if(!issues.some(x=>x.code==='JOINED_CASE_NUMBER_MISSING'&&x.index===2)) throw new Error('missing joined case warning not detected');
+console.log('PASS validation warning gate');
