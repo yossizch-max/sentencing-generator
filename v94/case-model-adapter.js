@@ -53,18 +53,28 @@
     return out;
   }
 
+  function normalizeRoute(route){
+    const r=String(route||'').trim();
+    const aliases={
+      '67_10a':'67+10a',
+      '67+shichrut':'67_shichrut',
+      '67shichrut':'67_shichrut'
+    };
+    return aliases[r] || r;
+  }
+
   function detectRoute(win, doc){
     try{
       if(win && win.RouteEngine && typeof win.RouteEngine.current==='function'){
         const r=String(win.RouteEngine.current()||'').trim();
-        if(r) return r;
+        if(r) return normalizeRoute(r);
       }
     }catch(e){}
     try{
       const r=String((win&&win._mashlul)||'').trim();
-      if(r) return r;
+      if(r) return normalizeRoute(r);
     }catch(e){}
-    return val(doc,'_mashlul');
+    return normalizeRoute(val(doc,'_mashlul'));
   }
 
   function buildCaseModelFromCurrentState(win, doc){
@@ -164,7 +174,7 @@
           disqualification: val(doc,'req_disq')
         }
       },
-      accident: route==='accident_injury' ? {
+      accident: (route==='accident_injury' || route==='accident_below_real') ? {
         injuryLevel: val(doc,'acc_injury_level'),
         negligence: val(doc,'acc_negligence'),
         placement: val(doc,'acc_placement'),
@@ -214,6 +224,7 @@
 
   const api={
     SCHEMA_VERSION,
+    normalizeRoute,
     buildCaseModelFromCurrentState,
     validateCaseModel,
     compareLegacyStateToCaseModel
