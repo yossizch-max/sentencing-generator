@@ -27,6 +27,9 @@ jobs:
           node --check v94/case-model-contract.test.js
           node --check v94/case-model-routes.test.js
           node --check v94/case-model-lists.test.js
+          node --check v94/case-model-parity.test.js
+          node --check v94/case-model-validation.test.js
+          node --check v94/case-model-schema.test.js
           node --check v94/legacy-architecture-scan.js
 
       - name: Gate 2 - base adapter unit test
@@ -41,5 +44,14 @@ jobs:
       - name: Gate 5 - dynamic lists and joined cases
         run: node v94/case-model-lists.test.js
 
-      - name: Gate 6 - legacy architecture scan
+      - name: Gate 6 - legacy parity core fields
+        run: node v94/case-model-parity.test.js
+
+      - name: Gate 7 - validation behavior
+        run: node v94/case-model-validation.test.js
+
+      - name: Gate 8 - schema contract
+        run: node v94/case-model-schema.test.js
+
+      - name: Gate 9 - legacy architecture scan
         run: node v94/legacy-architecture-scan.js
