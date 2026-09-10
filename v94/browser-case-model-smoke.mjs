@@ -35,28 +35,33 @@ await run('readonly',async()=>{
   if(r.schemaVersion!==1) throw new Error('bad schema version '+r.schemaVersion);
 });
 
+async function verifyRoute(route){
+  const result=await page.evaluate(async (r)=>{
+    if(typeof window.chooseMashlul==='function'){
+      window.chooseMashlul(r);
+      await new Promise(resolve=>setTimeout(resolve,500));
+    } else {
+      window._mashlul=r;
+    }
+    const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
+    return {
+      requested:r,
+      route:m.route,
+      rawMashlul:String(window._mashlul||''),
+      routeEngine:(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):'',
+      accident:!!m.accident
+    };
+  },route);
+  if(result.route!==route) throw new Error('route capture mismatch '+JSON.stringify(result));
+  if((route==='accident_injury'||route==='accident_below_real')!==result.accident) throw new Error('accident mapping mismatch '+JSON.stringify(result));
+}
+if(mode.startsWith('route:')){
+  await verifyRoute(mode.slice(6));
+  console.log('PASS '+mode);
+}
 await run('routes',async()=>{
   const routes=['67','10a','67+10a','shichrut','67_shichrut','10a_shichrut','67_10a_shichrut','accident_injury','accident_below_real'];
-  for (const route of routes){
-    const result=await page.evaluate(async (r)=>{
-      if(typeof window.chooseMashlul==='function'){
-        window.chooseMashlul(r);
-        await new Promise(resolve=>setTimeout(resolve,450));
-      } else {
-        window._mashlul=r;
-      }
-      const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
-      return {
-        requested:r,
-        route:m.route,
-        rawMashlul:String(window._mashlul||''),
-        routeEngine:(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):'',
-        accident:!!m.accident
-      };
-    },route);
-    if(result.route!==route) throw new Error('route capture mismatch '+JSON.stringify(result));
-    if((route==='accident_injury'||route==='accident_below_real')!==result.accident) throw new Error('accident mapping mismatch '+JSON.stringify(result));
-  }
+  for (const route of routes) await verifyRoute(route);
   const aliases=await page.evaluate(()=>({
     a:window.V94CaseModel.normalizeRoute('67_10a'),
     b:window.V94CaseModel.normalizeRoute('67+shichrut'),
