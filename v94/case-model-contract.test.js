@@ -1,0 +1,16 @@
+const fs=require('fs'), vm=require('vm');
+const {mkEl,mkDoc,deepClone}=require('./test-utils');
+const src=fs.readFileSync('v94/case-model-adapter.js','utf8');
+const ctx={globalThis:{},module:{exports:{}},exports:{},Date};
+vm.createContext(ctx); vm.runInContext(src,ctx);
+const api=ctx.module.exports;
+const map={_mashlul:mkEl('67'),case_num:mkEl('CASE-1'),def_name:mkEl('בדיקה'),traffic_count:mkEl('5'),traffic_detail:mkEl('עבר תעבורתי מפורט'),crim_count:mkEl('0'),m_min:mkEl('6'),m_max:mkEl('24'),pos:mkEl('center'),req_prison:mkEl('8'),req_disq:mkEl('24 חודשים')};
+const before=deepClone(map), doc=mkDoc(map);
+const m1=api.buildCaseModelFromCurrentState({_mashlul:'67'},doc);
+const m2=api.buildCaseModelFromCurrentState({_mashlul:'67'},doc);
+delete m1.metadata.capturedAt; delete m2.metadata.capturedAt;
+if(JSON.stringify(before)!==JSON.stringify(map)) throw new Error('adapter mutated source');
+if(JSON.stringify(m1)!==JSON.stringify(m2)) throw new Error('adapter nondeterministic');
+if(api.validateCaseModel(m1).some(x=>x.level==='error')) throw new Error('validation error');
+if(m1.defendant.record.criminal.count!==0) throw new Error('zero not preserved');
+console.log('PASS contract');
