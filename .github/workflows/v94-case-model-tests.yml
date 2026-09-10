@@ -91,7 +91,34 @@ jobs:
       - name: Gate 12B - browser read-only
         run: node v94/browser-case-model-smoke.mjs readonly
 
-      - name: Gate 12C - browser routes
+      - name: Gate 12C1 - route 67
+        run: node v94/browser-case-model-smoke.mjs "route:67"
+
+      - name: Gate 12C2 - route 10a
+        run: node v94/browser-case-model-smoke.mjs "route:10a"
+
+      - name: Gate 12C3 - route 67+10a
+        run: node v94/browser-case-model-smoke.mjs "route:67+10a"
+
+      - name: Gate 12C4 - route shichrut
+        run: node v94/browser-case-model-smoke.mjs "route:shichrut"
+
+      - name: Gate 12C5 - route 67_shichrut
+        run: node v94/browser-case-model-smoke.mjs "route:67_shichrut"
+
+      - name: Gate 12C6 - route 10a_shichrut
+        run: node v94/browser-case-model-smoke.mjs "route:10a_shichrut"
+
+      - name: Gate 12C7 - route 67_10a_shichrut
+        run: node v94/browser-case-model-smoke.mjs "route:67_10a_shichrut"
+
+      - name: Gate 12C8 - route accident_injury
+        run: node v94/browser-case-model-smoke.mjs "route:accident_injury"
+
+      - name: Gate 12C9 - route accident_below_real
+        run: node v94/browser-case-model-smoke.mjs "route:accident_below_real"
+
+      - name: Gate 12C10 - aggregate routes and aliases
         run: node v94/browser-case-model-smoke.mjs routes
 
       - name: Gate 12D - browser deterministic
