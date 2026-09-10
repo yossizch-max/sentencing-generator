@@ -115,8 +115,8 @@ jobs:
       - name: Gate 12C8 - route accident_injury
         run: node v94/browser-case-model-smoke.mjs "route:accident_injury"
 
-      - name: Gate 12C9 - route accident_below_real
-        run: node v94/browser-case-model-smoke.mjs "route:accident_below_real"
+      - name: Gate 12C9 - accident_below_real alias
+        run: node v94/browser-case-model-smoke.mjs "alias:accident_below_real"
 
       - name: Gate 12C10 - aggregate routes and aliases
         run: node v94/browser-case-model-smoke.mjs routes
