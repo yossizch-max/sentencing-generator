@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm');
+const {mkDoc,mkEl}=require('./test-utils');
+const spec=JSON.parse(fs.readFileSync('v94/case-model-schema.json','utf8'));
+const src=fs.readFileSync('v94/case-model-adapter.js','utf8');
+const ctx={globalThis:{},module:{exports:{}},exports:{},Date}; vm.createContext(ctx); vm.runInContext(src,ctx);
+const api=ctx.module.exports;
+const model=api.buildCaseModelFromCurrentState({_mashlul:'10a'},mkDoc({_mashlul:mkEl('10a')}));
+if(model.schemaVersion!==spec.schemaVersion) throw new Error('schema version drift');
+for(const k of spec.requiredTopLevel) if(!Object.prototype.hasOwnProperty.call(model,k)) throw new Error('missing top-level '+k);
+if(!spec.routeOrder.includes(model.route)) throw new Error('route outside schema');
+if(!spec.proceedingModes.includes(model.proceeding.mode)) throw new Error('mode outside schema');
+console.log('PASS schema contract');
