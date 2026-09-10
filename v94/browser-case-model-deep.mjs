@@ -87,10 +87,9 @@ if(mode==='viewports'){
   console.log('PASS viewports 5/5');
 }
 
-if(mode==='multi-live'){
-  const {browser,page}=await makePage();
+async function setupLiveMulti(page){
   await route(page,'67',350);
-  const prep=await page.evaluate(async ()=>{
+  return await page.evaluate(async ()=>{
     const yes=document.getElementById('has_multiple_yes');
     const proc=document.getElementById('multi_proc_type');
     const count=document.getElementById('multi_count');
@@ -104,26 +103,60 @@ if(mode==='multi-live'){
     if(typeof window.toggleMultipleUI==='function') window.toggleMultipleUI();
     if(typeof window.buildMultiCards==='function') window.buildMultiCards();
     await new Promise(r=>setTimeout(r,250));
-    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
-    set('m_case_1','MAIN-LIVE');
-    set('m_case_2','JOIN-LIVE-2');
-    set('m_case_3','JOIN-LIVE-3');
-    const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
-    return {supported:true,mode:m.proceeding.mode,cases:m.proceeding.cases.map(x=>x.caseNumber)};
+    return {
+      supported:true,
+      funcs:{toggle:typeof window.toggleMultipleUI==='function',build:typeof window.buildMultiCards==='function'},
+      ids:[1,2,3].map(i=>!!document.getElementById('m_case_'+i)),
+      procValue:proc.value,countValue:count.value,yesChecked:yes.checked
+    };
   });
-  if(!prep.supported) throw new Error('multi live controls missing '+JSON.stringify(prep));
-  if(prep.mode!=='joined') throw new Error('multi live wrong mode '+JSON.stringify(prep));
-  if(prep.cases.join('|')!=='MAIN-LIVE|JOIN-LIVE-2|JOIN-LIVE-3') throw new Error('multi live capture '+JSON.stringify(prep));
-  const shrink=await page.evaluate(async ()=>{
-    const count=document.getElementById('multi_count'); count.value='2'; count.dispatchEvent(new Event('change',{bubbles:true}));
+}
+if(mode==='multi-structure'){
+  const {browser,page}=await makePage();
+  const r=await setupLiveMulti(page);
+  if(!r.supported) throw new Error('multi controls missing '+JSON.stringify(r));
+  if(!r.funcs.build||!r.funcs.toggle) throw new Error('multi functions missing '+JSON.stringify(r));
+  if(!r.ids.every(Boolean)) throw new Error('multi card DOM missing '+JSON.stringify(r));
+  await browser.close();
+  console.log('PASS multi-structure');
+}
+if(mode==='multi-capture'){
+  const {browser,page}=await makePage();
+  const prep=await setupLiveMulti(page);
+  if(!prep.supported||!prep.ids.every(Boolean)) throw new Error('multi setup failed '+JSON.stringify(prep));
+  const r=await page.evaluate(()=>{
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+    set('m_case_1','MAIN-LIVE');set('m_case_2','JOIN-LIVE-2');set('m_case_3','JOIN-LIVE-3');
+    const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
+    return {mode:m.proceeding.mode,cases:m.proceeding.cases.map(x=>x.caseNumber),count:m.proceeding.cases.length};
+  });
+  if(r.mode!=='joined') throw new Error('wrong multi mode '+JSON.stringify(r));
+  if(r.count!==3) throw new Error('wrong multi count '+JSON.stringify(r));
+  if(r.cases.join('|')!=='MAIN-LIVE|JOIN-LIVE-2|JOIN-LIVE-3') throw new Error('multi capture failed '+JSON.stringify(r));
+  await browser.close();
+  console.log('PASS multi-capture');
+}
+if(mode==='multi-shrink'){
+  const {browser,page}=await makePage();
+  const prep=await setupLiveMulti(page);
+  if(!prep.supported||!prep.ids.every(Boolean)) throw new Error('multi setup failed '+JSON.stringify(prep));
+  const r=await page.evaluate(async ()=>{
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+    set('m_case_1','MAIN-LIVE');set('m_case_2','JOIN-LIVE-2');set('m_case_3','JOIN-LIVE-3');
+    const count=document.getElementById('multi_count');
+    count.value='2'; count.dispatchEvent(new Event('change',{bubbles:true}));
     if(typeof window.buildMultiCards==='function') window.buildMultiCards();
     await new Promise(r=>setTimeout(r,150));
     const m=window.V94CaseModel.buildCaseModelFromCurrentState(window,document);
-    return {len:m.proceeding.cases.length,cases:m.proceeding.cases.map(x=>x.caseNumber)};
+    return {len:m.proceeding.cases.length,cases:m.proceeding.cases.map(x=>x.caseNumber),thirdExists:!!document.getElementById('m_case_3')};
   });
-  if(shrink.len!==2||shrink.cases.join('|')!=='MAIN-LIVE|JOIN-LIVE-2') throw new Error('3->2 failed '+JSON.stringify(shrink));
+  if(r.len!==2||r.cases.join('|')!=='MAIN-LIVE|JOIN-LIVE-2') throw new Error('3->2 failed '+JSON.stringify(r));
+  if(r.thirdExists) throw new Error('removed third card still exists '+JSON.stringify(r));
   await browser.close();
-  console.log('PASS multi-live 3->2 capture');
+  console.log('PASS multi-shrink');
+}
+if(mode==='multi-live'){
+  console.log('Use multi-structure, multi-capture, and multi-shrink diagnostic modes');
 }
 
 if(mode==='conditional-live'){
