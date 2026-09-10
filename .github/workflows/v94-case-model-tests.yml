@@ -143,7 +143,13 @@ jobs:
       - name: Gate 13D2 - live multiple capture
         run: node v94/browser-case-model-deep.mjs multi-capture
 
-      - name: Gate 13D3 - live multiple shrink
+      - name: Gate 13D3a - live multiple shrink model
+        run: node v94/browser-case-model-deep.mjs multi-shrink-model
+
+      - name: Gate 13D3b - live multiple shrink DOM
+        run: node v94/browser-case-model-deep.mjs multi-shrink-dom
+
+      - name: Gate 13D3c - live multiple shrink combined
         run: node v94/browser-case-model-deep.mjs multi-shrink
 
       - name: Gate 13E - live conditional lists
