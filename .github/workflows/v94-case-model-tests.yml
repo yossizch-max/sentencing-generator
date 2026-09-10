@@ -34,6 +34,7 @@ jobs:
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
           node --check v94/browser-case-model-smoke.mjs
+          node --check v94/browser-case-model-deep.mjs
 
       - name: Gate 2 - all inline scripts compile
         run: node v94/index-script-syntax.test.js
@@ -126,3 +127,21 @@ jobs:
 
       - name: Gate 12E - browser parity
         run: node v94/browser-case-model-smoke.mjs parity
+
+      - name: Gate 13A - capture stress
+        run: node v94/browser-case-model-deep.mjs capture-stress
+
+      - name: Gate 13B - route stress
+        run: node v94/browser-case-model-deep.mjs route-stress
+
+      - name: Gate 13C - viewport matrix
+        run: node v94/browser-case-model-deep.mjs viewports
+
+      - name: Gate 13D - live multiple cards
+        run: node v94/browser-case-model-deep.mjs multi-live
+
+      - name: Gate 13E - live conditional lists
+        run: node v94/browser-case-model-deep.mjs conditional-live
+
+      - name: Gate 13F - legacy state roundtrip
+        run: node v94/browser-case-model-deep.mjs legacy-roundtrip
