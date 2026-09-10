@@ -1,0 +1,18 @@
+name: v94 CaseModel tests
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Syntax check adapter
+        run: node --check v94/case-model-adapter.js
+      - name: Run adapter unit test
+        run: node v94/case-model-adapter.test.js
