@@ -58,23 +58,28 @@
     const aliases={
       '67_10a':'67+10a',
       '67+shichrut':'67_shichrut',
-      '67shichrut':'67_shichrut'
+      '67shichrut':'67_shichrut',
+      'accident_below_real':'accident_injury'
     };
     return aliases[r] || r;
   }
 
-  function detectRoute(win, doc){
+  function detectRawRoute(win, doc){
     try{
       if(win && win.RouteEngine && typeof win.RouteEngine.current==='function'){
         const r=String(win.RouteEngine.current()||'').trim();
-        if(r) return normalizeRoute(r);
+        if(r) return r;
       }
     }catch(e){}
     try{
       const r=String((win&&win._mashlul)||'').trim();
-      if(r) return normalizeRoute(r);
+      if(r) return r;
     }catch(e){}
-    return normalizeRoute(val(doc,'_mashlul'));
+    return val(doc,'_mashlul');
+  }
+
+  function detectRoute(win, doc){
+    return normalizeRoute(detectRawRoute(win,doc));
   }
 
   function buildCaseModelFromCurrentState(win, doc){
@@ -82,7 +87,8 @@
     doc=doc || (win&&win.document) || (typeof document!=='undefined'?document:null);
     if(!doc) throw new Error('Document is required');
 
-    const route=detectRoute(win,doc);
+    const legacyRoute=detectRawRoute(win,doc);
+    const route=normalizeRoute(legacyRoute);
     const multipleEnabled=checked(doc,'has_multiple_yes');
     const proc=val(doc,'multi_proc_type') || 'single';
 
@@ -174,7 +180,7 @@
           disqualification: val(doc,'req_disq')
         }
       },
-      accident: (route==='accident_injury' || route==='accident_below_real') ? {
+      accident: route==='accident_injury' ? {
         injuryLevel: val(doc,'acc_injury_level'),
         negligence: val(doc,'acc_negligence'),
         placement: val(doc,'acc_placement'),
@@ -182,6 +188,7 @@
       } : null,
       metadata: {
         source: 'legacy-dom-readonly',
+        legacyRoute,
         capturedAt: new Date().toISOString()
       }
     };
@@ -224,6 +231,7 @@
 
   const api={
     SCHEMA_VERSION,
+    detectRawRoute,
     normalizeRoute,
     buildCaseModelFromCurrentState,
     validateCaseModel,
