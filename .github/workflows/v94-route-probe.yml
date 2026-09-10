@@ -1,0 +1,42 @@
+name: v94 route key probe
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Extract route keys
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, json
+          s=Path('index.html').read_text(encoding='utf-8')
+          patterns = {
+            "chooseMashlulCalls": r"chooseMashlul\s*\(\s*['\"]([^'\"]+)['\"]",
+            "mashlulAssignments": r"_mashlul\s*=\s*['\"]([^'\"]+)['\"]",
+            "routeComparisons": r"(?:===|==)\s*['\"]((?:67|10a|shichrut|accident)[^'\"]*)['\"]"
+          }
+          out={}
+          for k,p in patterns.items():
+            out[k]=sorted(set(re.findall(p,s)))
+          Path('docs').mkdir(exist_ok=True)
+          Path('docs/v94-route-keys.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+      - name: Commit probe
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/v94-route-keys.json
+          git commit -m 'Probe v94 route keys' || exit 0
+          git push origin HEAD:v94/architecture-migration
