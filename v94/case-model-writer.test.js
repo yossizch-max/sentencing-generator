@@ -39,9 +39,10 @@ const win={
   buildMultiCards(){
     const n=Number(map.multi_count.value||0);
     for(let i=1;i<=n;i++){
-      ['m_case_','m_date_','m_disq_','m_disq_details_','m_lic_year_','m_no_insurance_','m_other_'].forEach(p=>{
+      ['m_case_','m_date_','m_disq_type_','m_disq_','m_lic_exp_','m_lic_exp_year_','m_no_ins_','m_other_off_','m_aggr_'].forEach(p=>{
         const id=p+i;
-        if(!map[id]) add(id,mkEl('',false,p==='m_no_insurance_'?{type:'checkbox'}:{}));
+        const isCheck=(p==='m_lic_exp_'||p==='m_no_ins_');
+        if(!map[id]) add(id,mkEl('',false,isCheck?{type:'checkbox'}:{}));
       });
     }
   },
@@ -74,8 +75,8 @@ const model={
   proceeding:{
     leadCaseNumber:'MAIN-94',mode:'joined',
     cases:[
-      {index:1,caseNumber:'MAIN-94',date:'2026-01-01',disqualificationType:'court',disqualificationDetails:'ראשי',licenseExpiryYear:'2020',noInsurance:false,freeText:''},
-      {index:2,caseNumber:'JOIN-2',date:'2026-02-02',disqualificationType:'police',disqualificationDetails:'מצורף',licenseExpiryYear:'2019',noInsurance:true,freeText:'עבירה נוספת'}
+      {index:1,caseNumber:'MAIN-94',date:'2026-01-01',disqualificationType:'court',disqualificationDetails:'ראשי',licenseExpired:true,licenseExpiryYear:'2020',noInsurance:false,freeText:'',aggravating:'מחמיר 1'},
+      {index:2,caseNumber:'JOIN-2',date:'2026-02-02',disqualificationType:'police',disqualificationDetails:'מצורף',licenseExpired:true,licenseExpiryYear:'2019',noInsurance:true,freeText:'עבירה נוספת',aggravating:'מחמיר 2'}
     ]
   },
   currentOffense:{
