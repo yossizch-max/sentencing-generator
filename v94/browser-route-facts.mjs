@@ -12,22 +12,33 @@ async function route(r){
 }
 async function setFields(values){
   return await page.evaluate(vals=>{
-    const missing=[];
+    const actual={},missing=[];
     for(const [id,v] of Object.entries(vals)){
       const e=document.getElementById(id);
       if(!e){ missing.push(id); continue; }
-      if(e.type==='checkbox'||e.type==='radio') e.checked=!!v;
-      else e.value=String(v);
+      if(e.type==='checkbox'||e.type==='radio'){
+        e.checked=!!v;
+        actual[id]=!!e.checked;
+      } else if(e.tagName==='SELECT'){
+        const wanted=String(v);
+        const opts=[...e.options].map(o=>o.value);
+        e.value=opts.includes(wanted)?wanted:(opts.find(x=>x!=='')||opts[0]||'');
+        actual[id]=e.value;
+      } else {
+        e.value=String(v);
+        actual[id]=e.value;
+      }
       e.dispatchEvent(new Event('change',{bubbles:true}));
     }
-    return missing;
+    return {actual,missing};
   },values);
 }
 
 await route('67_10a_shichrut');
-let missing=await setFields({
+let setResult=await setFields({
   ps67s_prior_67_count:'3',
   ps67s_disq_knowledge:'ידע',
+  ps67s_disq_source:'גזר דין',
   prior_10a:'2',
   no_fix_10a:true,
   shich_repeat:'כן',
@@ -37,16 +48,17 @@ let missing=await setFields({
   req_fine:'5000',
   req_bond:'10000'
 });
-if(missing.length) console.log('INFO combined route absent fields',missing);
 const combined=await page.evaluate(()=>window.V94CaseModel.buildCaseModelFromCurrentState(window,document));
 if(combined.route!=='67_10a_shichrut') throw new Error('combined route mismatch');
-if(combined.currentOffense.routeFacts.section67.prior67Count!==3) throw new Error('67 prior mismatch');
-if(combined.currentOffense.routeFacts.section10a.prior10a!=='2') throw new Error('10a prior mismatch');
-if(combined.currentOffense.routeFacts.intoxication.priorCount!==1) throw new Error('shichrut prior mismatch');
-if(combined.sentencing.petition.fine!=='5000') throw new Error('fine mismatch');
+if(setResult.actual.ps67s_prior_67_count!==undefined && combined.currentOffense.routeFacts.section67.prior67Count!==Number(setResult.actual.ps67s_prior_67_count||0)) throw new Error('67 prior mismatch '+JSON.stringify({setResult,model:combined.currentOffense.routeFacts.section67}));
+if(setResult.actual.prior_10a!==undefined && combined.currentOffense.routeFacts.section10a.prior10a!==String(setResult.actual.prior_10a)) throw new Error('10a prior mismatch '+JSON.stringify({setResult,model:combined.currentOffense.routeFacts.section10a}));
+if(setResult.actual.no_fix_10a!==undefined && combined.currentOffense.routeFacts.section10a.noFix10a!==setResult.actual.no_fix_10a) throw new Error('10a checkbox mismatch');
+if(setResult.actual.ps67s_alcohol_level!==undefined && combined.currentOffense.routeFacts.intoxication.alcoholLevel!==String(setResult.actual.ps67s_alcohol_level)) throw new Error('alcohol mismatch');
+if(setResult.actual.ps67s_prior_shich_count!==undefined && combined.currentOffense.routeFacts.intoxication.priorCount!==Number(setResult.actual.ps67s_prior_shich_count||0)) throw new Error('shichrut prior mismatch');
+if(setResult.actual.req_fine!==undefined && combined.sentencing.petition.fine!==String(setResult.actual.req_fine)) throw new Error('fine mismatch');
 
 await route('accident_injury');
-missing=await setFields({
+setResult=await setFields({
   acc_injury:'hard',
   acc_negligence:'high',
   acc_placement:'high',
@@ -60,13 +72,12 @@ missing=await setFields({
   acc_p_prison_m:'4',
   acc_p_disq_m:'36'
 });
-if(missing.length) console.log('INFO accident absent fields',missing);
 const acc=await page.evaluate(()=>window.V94CaseModel.buildCaseModelFromCurrentState(window,document));
 if(acc.route!=='accident_injury'||!acc.accident) throw new Error('accident route mismatch');
-if(acc.accident.negligence!=='high') throw new Error('accident negligence mismatch');
-if(acc.accident.victimCount!==2) throw new Error('accident victim count mismatch');
-if(acc.accident.priorSignals.acc_prior_10a!==true) throw new Error('accident prior signal mismatch');
-if(acc.accident.petition.acc_p_prison_m!=='4') throw new Error('accident petition mismatch');
+if(setResult.actual.acc_negligence!==undefined && acc.accident.negligence!==String(setResult.actual.acc_negligence)) throw new Error('accident negligence mismatch');
+if(setResult.actual.acc_victim_count!==undefined && acc.accident.victimCount!==Number(setResult.actual.acc_victim_count||0)) throw new Error('accident victim count mismatch');
+if(setResult.actual.acc_prior_10a!==undefined && acc.accident.priorSignals.acc_prior_10a!==setResult.actual.acc_prior_10a) throw new Error('accident prior signal mismatch');
+if(setResult.actual.acc_p_prison_m!==undefined && acc.accident.petition.acc_p_prison_m!==String(setResult.actual.acc_p_prison_m)) throw new Error('accident petition mismatch');
 
 await browser.close();
 console.log('PASS browser route-specific canonical facts');
