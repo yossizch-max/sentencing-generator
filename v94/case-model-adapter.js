@@ -367,22 +367,66 @@
 
   function compareLegacyStateToCaseModel(legacyState, model){
     const report={ok:true,differences:[]};
+    function norm(v){
+      if(v===true) return 'true';
+      if(v===false) return 'false';
+      return String(v==null?'':v);
+    }
     function diff(path,a,b){
-      if(String(a==null?'':a)!==String(b==null?'':b)){
+      if(norm(a)!==norm(b)){
         report.ok=false;
         report.differences.push({path,legacy:a,model:b});
       }
     }
+    function diffIfPresent(key,path,b){
+      if(Object.prototype.hasOwnProperty.call(legacyState,key)) diff(path,legacyState[key],b);
+    }
+
     legacyState=legacyState||{};
-    diff('route', legacyState._mashlul || legacyState.route, model.route);
-    diff('case_num', legacyState.case_num, model.proceeding.leadCaseNumber);
-    diff('traffic_count', legacyState.traffic_count, model.defendant.record.traffic.count);
-    diff('crim_count', legacyState.crim_count, model.defendant.record.criminal.count);
-    diff('m_min', legacyState.m_min, model.sentencing.range.imprisonmentMin);
-    diff('m_max', legacyState.m_max, model.sentencing.range.imprisonmentMax);
-    diff('pos', legacyState.pos, model.sentencing.placement.key);
-    diff('req_prison', legacyState.req_prison, model.sentencing.petition.imprisonment);
-    diff('req_disq', legacyState.req_disq, model.sentencing.petition.disqualification);
+    diffIfPresent('_mashlul','route',model.route);
+    if(!Object.prototype.hasOwnProperty.call(legacyState,'_mashlul')) diffIfPresent('route','route',model.route);
+    diffIfPresent('case_num','case_num',model.proceeding.leadCaseNumber);
+    diffIfPresent('traffic_count','traffic_count',model.defendant.record.traffic.count);
+    diffIfPresent('crim_count','crim_count',model.defendant.record.criminal.count);
+    diffIfPresent('m_min','m_min',model.sentencing.range.imprisonmentMin);
+    diffIfPresent('m_max','m_max',model.sentencing.range.imprisonmentMax);
+    diffIfPresent('pos','pos',model.sentencing.placement.key);
+    diffIfPresent('req_prison','req_prison',model.sentencing.petition.imprisonment);
+    diffIfPresent('req_disq','req_disq',model.sentencing.petition.disqualification);
+    diffIfPresent('req_fine','req_fine',model.sentencing.petition.fine);
+    diffIfPresent('req_bond','req_bond',model.sentencing.petition.bond);
+
+    const facts=(model.currentOffense&&model.currentOffense.facts)||{};
+    const ancillary=(model.currentOffense&&model.currentOffense.ancillaryOffenses)||{};
+    const routeFacts=(model.currentOffense&&model.currentOffense.routeFacts)||{};
+    diffIfPresent('disq_type','disq_type',facts.disqualificationType);
+    diffIfPresent('disq_details','disq_details',facts.disqualificationDetails);
+    diffIfPresent('lic_year','lic_year',facts.licenseYear);
+    diffIfPresent('off_no_insurance','off_no_insurance',ancillary.noInsurance);
+    diffIfPresent('off_license_expired','off_license_expired',ancillary.licenseExpired);
+    diffIfPresent('off_license_expired_year','off_license_expired_year',ancillary.licenseExpiryYear);
+    diffIfPresent('off_other_text','off_other_text',ancillary.other);
+
+    diffIfPresent('ps67s_prior_67_count','ps67s_prior_67_count',routeFacts.section67&&routeFacts.section67.prior67Count);
+    diffIfPresent('prior_10a','prior_10a',routeFacts.section10a&&routeFacts.section10a.prior10a);
+    diffIfPresent('no_fix_10a','no_fix_10a',routeFacts.section10a&&routeFacts.section10a.noFix10a);
+    diffIfPresent('shich_finding','shich_finding',routeFacts.intoxication&&routeFacts.intoxication.finding);
+    diffIfPresent('shich_repeat','shich_repeat',routeFacts.intoxication&&routeFacts.intoxication.repeat);
+    diffIfPresent('ps67s_alcohol_level','ps67s_alcohol_level',routeFacts.intoxication&&routeFacts.intoxication.alcoholLevel);
+    diffIfPresent('ps67s_prior_shich_count','ps67s_prior_shich_count',routeFacts.intoxication&&routeFacts.intoxication.priorCount);
+
+    if(model.accident){
+      diffIfPresent('acc_injury','acc_injury',model.accident.injuryLevel);
+      diffIfPresent('acc_negligence','acc_negligence',model.accident.negligence);
+      diffIfPresent('acc_placement','acc_placement',model.accident.placement);
+      diffIfPresent('acc_prison_min','acc_prison_min',model.accident.prisonMin);
+      diffIfPresent('acc_prison_max','acc_prison_max',model.accident.prisonMax);
+      diffIfPresent('acc_disq_min','acc_disq_min',model.accident.disqualificationMin);
+      diffIfPresent('acc_disq_max','acc_disq_max',model.accident.disqualificationMax);
+      diffIfPresent('acc_victim_count','acc_victim_count',model.accident.victimCount);
+      diffIfPresent('acc_p_prison_m','acc_p_prison_m',model.accident.petition&&model.accident.petition.acc_p_prison_m);
+      diffIfPresent('acc_p_disq_m','acc_p_disq_m',model.accident.petition&&model.accident.petition.acc_p_disq_m);
+    }
     return report;
   }
 
