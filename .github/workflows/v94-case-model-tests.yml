@@ -35,6 +35,7 @@ jobs:
           node --check v94/case-model-route-facts.test.js
           node --check v94/case-model-accident.test.js
           node --check v94/browser-route-facts.mjs
+          node --check v94/browser-route-roundtrip.mjs
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
@@ -177,3 +178,6 @@ jobs:
 
       - name: Gate 14A - browser route-specific facts
         run: node v94/browser-route-facts.mjs
+
+      - name: Gate 14B - browser route-specific legacy roundtrip
+        run: node v94/browser-route-roundtrip.mjs
