@@ -28,7 +28,7 @@ const add=(id,el)=>{map[id]=el||mkEl(''); if(!ids.includes(id)) ids.push(id);};
 const doc={
   getElementById(id){return map[id]||null;},
   querySelectorAll(sel){
-    const m=String(sel).match(/^\\[id\\^="([^"]+)"\\]$/);
+    const m=String(sel).match(/^\[id\^="([^"]+)"\]$/);
     return m ? ids.filter(id=>id.startsWith(m[1])).map(id=>({id})) : [];
   }
 };
