@@ -4,6 +4,7 @@ const base='http://127.0.0.1:4173/index.html';
 const adapter='http://127.0.0.1:4173/v94/case-model-adapter.js';
 const writer='http://127.0.0.1:4173/v94/case-model-writer.js';
 
+const only=process.argv[2]||'all';
 const browser=await chromium.launch({headless:true});
 
 async function newPage(){
@@ -19,6 +20,15 @@ async function choose(page,route){
   await page.waitForTimeout(450);
 }
 function stable(v){ return JSON.stringify(v); }
+function deepDiff(a,b,path='',out=[]){
+  if(out.length>=80) return out;
+  if(typeof a!==typeof b){out.push({path,a,b});return out;}
+  if(a&&typeof a==='object'){
+    const keys=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
+    for(const k of keys) deepDiff(a?.[k],b?.[k],path?path+'.'+k:k,out);
+  } else if(String(a??'')!==String(b??'')) out.push({path,a,b});
+  return out;
+}
 
 async function build67Source(){
   const page=await newPage();
@@ -87,14 +97,19 @@ async function roundtripModel(model,label){
       conditions:[a.defendant?.record?.pendingConditions,b.defendant?.record?.pendingConditions],
       petition:[a.sentencing?.petition,b.sentencing?.petition]
     };
-    throw new Error(label+' writer roundtrip drift '+JSON.stringify(summary));
+    summary.diffs=deepDiff(a,b);
+    console.error(JSON.stringify({label,summary},null,2));
+    throw new Error(label+' writer roundtrip drift');
   }
   console.log('PASS '+label+' clean-form writer roundtrip');
 }
 
-const model67=await build67Source();
-await roundtripModel(model67,'67 joined+sparse');
+if(only==='all'||only==='67'){
+  const model67=await build67Source();
+  await roundtripModel(model67,'67 joined+sparse');
+}
 
+if(only==='all'||only==='combined'){
 const combinedPage=await newPage();
 await choose(combinedPage,'67_10a_shichrut');
 const combined=await combinedPage.evaluate(()=>{
@@ -107,7 +122,9 @@ const combined=await combinedPage.evaluate(()=>{
 });
 await combinedPage.close();
 await roundtripModel(combined,'combined');
+}
 
+if(only==='all'||only==='accident'){
 const accidentPage=await newPage();
 await choose(accidentPage,'accident_injury');
 const accident=await accidentPage.evaluate(()=>{
@@ -122,5 +139,6 @@ const accident=await accidentPage.evaluate(()=>{
 });
 await accidentPage.close();
 await roundtripModel(accident,'accident');
+}
 
 await browser.close();
