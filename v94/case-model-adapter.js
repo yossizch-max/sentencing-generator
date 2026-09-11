@@ -31,6 +31,16 @@
     });
   }
 
+  function readFieldMap(doc, ids){
+    const out={};
+    ids.forEach(id=>{
+      const e=el(doc,id);
+      if(!e) return;
+      out[id]=(e.type==='checkbox'||e.type==='radio') ? !!e.checked : String(e.value||'');
+    });
+    return out;
+  }
+
   function readMultipleCases(doc){
     const enabled=checked(doc,'has_multiple_yes');
     const proc=val(doc,'multi_proc_type') || 'same';
@@ -161,9 +171,36 @@
         facts: {
           disqualificationType: val(doc,'disq_type'),
           disqualificationDetails: val(doc,'disq_details'),
+          disqualificationOrigin: val(doc,'disq_origin_gmr'),
           licenseYear: val(doc,'lic_year'),
           aggravatingExtraEnabled: checked(doc,'aggravating_extra_enabled'),
           aggravatingExtraText: val(doc,'aggravating_extra_text')
+        },
+        routeFacts: {
+          section67: {
+            prior67Count: intOrNull(val(doc,'ps67s_prior_67_count')),
+            disqualificationKnowledge: val(doc,'ps67s_disq_knowledge'),
+            disqualificationSource: val(doc,'ps67s_disq_source')
+          },
+          section10a: {
+            prior10a: val(doc,'prior_10a'),
+            noFix10a: checked(doc,'no_fix_10a'),
+            relatedDetail: val(doc,'ps67s_10a_detail'),
+            related: val(doc,'ps67s_10a_related')
+          },
+          intoxication: {
+            finding: val(doc,'shich_finding'),
+            circumstances: val(doc,'shich_circ'),
+            repeat: val(doc,'shich_repeat'),
+            repeatYear: val(doc,'shich_repeat_year'),
+            accident: val(doc,'shich_accident'),
+            accidentResult: val(doc,'shich_accident_result'),
+            section40a: val(doc,'shich_40a'),
+            section40aDetail: val(doc,'shich_40a_detail'),
+            alcoholLevel: val(doc,'ps67s_alcohol_level'),
+            type: val(doc,'ps67s_shich_type'),
+            priorCount: intOrNull(val(doc,'ps67s_prior_shich_count'))
+          }
         }
       },
       sentencing: {
@@ -177,14 +214,66 @@
         },
         petition: {
           imprisonment: val(doc,'req_prison'),
-          disqualification: val(doc,'req_disq')
+          disqualification: val(doc,'req_disq'),
+          fine: val(doc,'req_fine'),
+          bond: val(doc,'req_bond'),
+          disqualificationCondition: val(doc,'req_disq_cond'),
+          disqualificationConditionYears: val(doc,'req_disq_cond_years')
+        },
+        specialRequests: {
+          section40a: readFieldMap(doc,[
+            'request_40a','request_40a_b_10a','request_40a_b_10a_before_disq',
+            'request_40a_b_10a_detail','request_40a_life','request_40a_life_detail',
+            'v75_40a_10y','v75_40a_10y_detail','v75_40a_life','v75_40a_life_detail',
+            'ps67s_life_40a','ps67s_life_40a_detail'
+          ]),
+          conditionalPetition: readFieldMap(doc,[
+            'req_cond_enabled','req_cond_months','req_cond_years','req_cond_off_10a',
+            'req_cond_off_67','req_cond_off_other','req_cond_off_other_text',
+            'req_cond2_months','req_cond2_years','req_cond2_off_10a',
+            'req_cond2_off_67','req_cond2_off_other','req_cond2_off_other_text'
+          ])
         }
       },
       accident: route==='accident_injury' ? {
-        injuryLevel: val(doc,'acc_injury_level'),
+        injuryLevel: val(doc,'acc_injury_level') || val(doc,'acc_injury'),
+        injuryType: val(doc,'acc_injury_type'),
         negligence: val(doc,'acc_negligence'),
+        negligenceReason: val(doc,'acc_negligence_reason'),
         placement: val(doc,'acc_placement'),
-        placementManual: val(doc,'acc_placement_manual')==='1'
+        placementManual: val(doc,'acc_placement_manual')==='1',
+        placementManualReason: val(doc,'acc_placement_manual_reason'),
+        prisonMin: val(doc,'acc_prison_min'),
+        prisonMax: val(doc,'acc_prison_max'),
+        disqualificationMin: val(doc,'acc_disq_min'),
+        disqualificationMax: val(doc,'acc_disq_max'),
+        victimCount: intOrNull(val(doc,'acc_victim_count')),
+        victimStatus: val(doc,'acc_victim_status'),
+        victimType: val(doc,'acc_victim_type'),
+        description: val(doc,'acc_description'),
+        relevantHistoryDetail: val(doc,'acc_relevant_history_detail'),
+        priorSignals: readFieldMap(doc,[
+          'acc_prior_10a','acc_prior_accident','acc_prior_disq','acc_prior_shichrut',
+          'acc_prior_traffic_prison','acc_similar_conv','acc_safety_conv','acc_criminal',
+          'acc_criminal_prison','acc_traffic_count'
+        ]),
+        aggravating: readFieldMap(doc,[
+          'acc_agg_conditions','acc_agg_crosswalk','acc_agg_divider','acc_agg_flee',
+          'acc_agg_opposite','acc_agg_red_light','acc_agg_sensitive_area','acc_agg_speed'
+        ]),
+        mitigating: readFieldMap(doc,[
+          'acc_mit_comp','acc_mit_contrib','acc_mit_invest','acc_mit_report',
+          'acc_mit_self','acc_mit_time','acc_personal','acc_personal_mitigating'
+        ]),
+        petition: readFieldMap(doc,[
+          'acc_p_prison','acc_p_prison_m','acc_p_sw','acc_p_sw_m','acc_p_sw_super',
+          'acc_p_disq','acc_p_disq_m','acc_p_disq_admin','acc_p_disqcond',
+          'acc_p_disqcond_m','acc_p_disqcond_y','acc_p_fine','acc_p_fine_a',
+          'acc_p_comp','acc_p_comp_a','acc_p_comp_to','acc_p_undertake',
+          'acc_p_undertake_a','acc_p_undertake_y','acc_p_probation','acc_p_probation_m',
+          'acc_p_cond','acc_p_cond_m','acc_p_cond_y','acc_p_activate_disq',
+          'acc_p_activate_disq_case','acc_p_activate_disq_m','acc_p_activate_disq_mode'
+        ])
       } : null,
       metadata: {
         source: 'legacy-dom-readonly',
