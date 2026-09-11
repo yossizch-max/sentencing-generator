@@ -193,6 +193,11 @@
     setValue(doc,'ps67s_shich_type',sh.type);
     setValue(doc,'ps67s_prior_shich_count',sh.priorCount==null?'':sh.priorCount);
 
+    const defense=cur.defenseArguments||{};
+    eachMap(doc,defense.standard);
+    eachMap(doc,defense.response);
+    eachMap(doc,defense.prosecutorResponse);
+
     const sent=model.sentencing||{}, range=sent.range||{}, placement=sent.placement||{}, petition=sent.petition||{};
     setValue(doc,'m_min',range.imprisonmentMin);
     setValue(doc,'m_max',range.imprisonmentMax);
@@ -207,6 +212,13 @@
     const special=sent.specialRequests||{};
     eachMap(doc,special.section40a);
     eachMap(doc,special.conditionalPetition);
+    const ctx=sent.context||{};
+    eachMap(doc,ctx.probation);
+    eachMap(doc,ctx.policy);
+    eachMap(doc,ctx.conviction);
+
+    const caseContext=proceeding.caseContext||{};
+    eachMap(doc,caseContext);
 
     if(model.accident){
       const a=model.accident;
