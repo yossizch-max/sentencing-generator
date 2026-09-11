@@ -162,7 +162,8 @@
           pendingConditions: {
             imprisonment: condImprisonment,
             disqualification: condDisq,
-            bonds
+            bonds,
+            flags: readFieldMap(doc,['has_multiple_cond','has_multiple_disq','has_multiple_bond'])
           }
         }
       },
