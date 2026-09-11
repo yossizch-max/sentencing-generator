@@ -1,7 +1,5 @@
 {
-  "equal": true,
-  "diffs": [],
-  "m1": {
+  "sourceModel": {
     "schemaVersion": 1,
     "route": "67",
     "defendant": {
@@ -70,9 +68,9 @@
           "caseNumber": "WRITER-MAIN-94",
           "date": "2026-01-01",
           "disqualificationType": "",
-          "disqualificationDetails": "",
-          "licenseExpired": false,
-          "licenseExpiryYear": "",
+          "disqualificationDetails": "ראשי",
+          "licenseExpired": true,
+          "licenseExpiryYear": "2020",
           "noInsurance": false,
           "freeText": "",
           "aggravating": ""
@@ -82,23 +80,23 @@
           "caseNumber": "WRITER-JOIN-2",
           "date": "2026-02-02",
           "disqualificationType": "",
-          "disqualificationDetails": "",
+          "disqualificationDetails": "מצורף 2",
           "licenseExpired": false,
           "licenseExpiryYear": "",
-          "noInsurance": false,
+          "noInsurance": true,
           "freeText": "",
-          "aggravating": ""
+          "aggravating": "מחמיר 2"
         },
         {
           "index": 3,
           "caseNumber": "WRITER-JOIN-3",
           "date": "2026-03-03",
           "disqualificationType": "",
-          "disqualificationDetails": "",
+          "disqualificationDetails": "מצורף 3",
           "licenseExpired": false,
           "licenseExpiryYear": "",
           "noInsurance": false,
-          "freeText": "",
+          "freeText": "אחר 3",
           "aggravating": ""
         }
       ],
@@ -250,253 +248,335 @@
       "legacyRoute": "67"
     }
   },
-  "m2": {
-    "schemaVersion": 1,
-    "route": "67",
-    "defendant": {
-      "name": "נאשם QA",
-      "id": "",
-      "record": {
-        "traffic": {
-          "count": 7,
-          "detail": "עבר תעבורתי QA",
-          "heavy": false
+  "reports": [
+    {
+      "label": "initial",
+      "route": "67",
+      "diff": [
+        {
+          "path": "currentOffense.ancillaryOffenses.noInsurance",
+          "before": true,
+          "after": false
         },
-        "criminal": {
-          "count": 0,
-          "detail": "",
-          "heavy": false
+        {
+          "path": "defendant.name",
+          "before": "נאשם QA",
+          "after": ""
         },
-        "priorPrison": {
-          "traffic": false,
-          "criminal": false
+        {
+          "path": "defendant.record.criminal.count",
+          "before": 0,
+          "after": null
         },
-        "pendingConditions": {
-          "imprisonment": [
-            {
-              "index": 3,
-              "sourceCase": "COND-3",
-              "court": "",
-              "date": "",
-              "months": "6",
-              "activation": ""
-            }
-          ],
-          "disqualification": [
-            {
-              "index": 2,
-              "sourceCase": "DISQ-2",
-              "court": "",
-              "date": "",
-              "months": "",
-              "activation": ""
-            }
-          ],
-          "bonds": [
-            {
-              "index": 4,
-              "sourceCase": "BOND-4",
-              "court": "",
-              "date": "",
-              "amount": "9000",
-              "activation": ""
-            }
-          ],
-          "flags": {
-            "has_multiple_cond": "no",
-            "has_multiple_disq": "no",
-            "has_multiple_bond": "no"
+        {
+          "path": "defendant.record.pendingConditions.bonds.0",
+          "before": {
+            "index": 4,
+            "sourceCase": "BOND-4",
+            "court": "",
+            "date": "",
+            "amount": "9000",
+            "activation": ""
           }
-        }
-      }
-    },
-    "proceeding": {
-      "leadCaseNumber": "WRITER-MAIN-94",
-      "mode": "joined",
-      "cases": [
-        {
-          "index": 1,
-          "caseNumber": "WRITER-MAIN-94",
-          "date": "2026-01-01",
-          "disqualificationType": "",
-          "disqualificationDetails": "",
-          "licenseExpired": false,
-          "licenseExpiryYear": "",
-          "noInsurance": false,
-          "freeText": "",
-          "aggravating": ""
         },
         {
-          "index": 2,
-          "caseNumber": "WRITER-JOIN-2",
-          "date": "2026-02-02",
-          "disqualificationType": "",
-          "disqualificationDetails": "",
-          "licenseExpired": false,
-          "licenseExpiryYear": "",
-          "noInsurance": false,
-          "freeText": "",
-          "aggravating": ""
+          "path": "defendant.record.pendingConditions.disqualification.0",
+          "before": {
+            "index": 2,
+            "sourceCase": "DISQ-2",
+            "court": "",
+            "date": "",
+            "months": "",
+            "activation": ""
+          }
         },
         {
-          "index": 3,
-          "caseNumber": "WRITER-JOIN-3",
-          "date": "2026-03-03",
-          "disqualificationType": "",
-          "disqualificationDetails": "",
-          "licenseExpired": false,
-          "licenseExpiryYear": "",
-          "noInsurance": false,
-          "freeText": "",
-          "aggravating": ""
+          "path": "defendant.record.pendingConditions.imprisonment.0",
+          "before": {
+            "index": 3,
+            "sourceCase": "COND-3",
+            "court": "",
+            "date": "",
+            "months": "6",
+            "activation": ""
+          }
+        },
+        {
+          "path": "defendant.record.traffic.count",
+          "before": 7,
+          "after": null
+        },
+        {
+          "path": "defendant.record.traffic.detail",
+          "before": "עבר תעבורתי QA",
+          "after": ""
+        },
+        {
+          "path": "proceeding.caseContext.v91_basic_case",
+          "before": "WRITER-MAIN-94"
+        },
+        {
+          "path": "proceeding.caseContext.v91_basic_def",
+          "before": "נאשם QA"
+        },
+        {
+          "path": "proceeding.caseContext.v91_basic_judge",
+          "before": ""
+        },
+        {
+          "path": "proceeding.cases.0",
+          "before": {
+            "index": 1,
+            "caseNumber": "WRITER-MAIN-94",
+            "date": "2026-01-01",
+            "disqualificationType": "",
+            "disqualificationDetails": "ראשי",
+            "licenseExpired": true,
+            "licenseExpiryYear": "2020",
+            "noInsurance": false,
+            "freeText": "",
+            "aggravating": ""
+          }
+        },
+        {
+          "path": "proceeding.cases.1",
+          "before": {
+            "index": 2,
+            "caseNumber": "WRITER-JOIN-2",
+            "date": "2026-02-02",
+            "disqualificationType": "",
+            "disqualificationDetails": "מצורף 2",
+            "licenseExpired": false,
+            "licenseExpiryYear": "",
+            "noInsurance": true,
+            "freeText": "",
+            "aggravating": "מחמיר 2"
+          }
+        },
+        {
+          "path": "proceeding.cases.2",
+          "before": {
+            "index": 3,
+            "caseNumber": "WRITER-JOIN-3",
+            "date": "2026-03-03",
+            "disqualificationType": "",
+            "disqualificationDetails": "מצורף 3",
+            "licenseExpired": false,
+            "licenseExpiryYear": "",
+            "noInsurance": false,
+            "freeText": "אחר 3",
+            "aggravating": ""
+          }
+        },
+        {
+          "path": "proceeding.leadCaseNumber",
+          "before": "WRITER-MAIN-94",
+          "after": ""
+        },
+        {
+          "path": "proceeding.mode",
+          "before": "joined",
+          "after": "single"
+        },
+        {
+          "path": "sentencing.petition.disqualification",
+          "before": "36",
+          "after": "24 חודשים"
+        },
+        {
+          "path": "sentencing.petition.fine",
+          "before": "5000",
+          "after": ""
+        },
+        {
+          "path": "sentencing.petition.imprisonment",
+          "before": "10",
+          "after": ""
         }
       ],
-      "caseContext": {
-        "court_name": "ירושלים",
-        "judge": "",
-        "lawyer_name": "",
-        "lawyer_office": "שלוחת תביעות תעבורה ירושלים",
-        "v91_basic_case": "WRITER-MAIN-94",
-        "v91_basic_court": "ירושלים",
-        "v91_basic_def": "נאשם QA",
-        "v91_basic_judge": ""
+      "keyIds": {
+        "case_num": [
+          "WRITER-MAIN-94",
+          ""
+        ],
+        "has_multiple_yes": [
+          true,
+          false
+        ],
+        "multi_proc_type": [
+          "consol",
+          "same"
+        ],
+        "multi_count": [
+          "3",
+          "2"
+        ],
+        "m_case_1": [
+          "WRITER-MAIN-94",
+          null
+        ],
+        "m_case_2": [
+          "WRITER-JOIN-2",
+          null
+        ],
+        "m_case_3": [
+          "WRITER-JOIN-3",
+          null
+        ],
+        "cond_case_3": [
+          "COND-3",
+          null
+        ],
+        "disq_case_2": [
+          "DISQ-2",
+          null
+        ],
+        "bond_case_4": [
+          "BOND-4",
+          null
+        ]
       }
     },
-    "currentOffense": {
-      "ancillaryOffenses": {
-        "noInsurance": true,
-        "licenseExpired": false,
-        "licenseExpiryYear": "",
-        "other": ""
-      },
-      "facts": {
-        "disqualificationType": "court",
-        "disqualificationDetails": "",
-        "disqualificationOrigin": "on",
-        "licenseYear": "",
-        "aggravatingExtraEnabled": false,
-        "aggravatingExtraText": ""
-      },
-      "routeFacts": {
-        "section67": {
-          "prior67Count": null,
-          "disqualificationKnowledge": "",
-          "disqualificationSource": ""
-        },
-        "section10a": {
-          "prior10a": false,
-          "noFix10a": false,
-          "relatedDetail": "",
-          "related": "on"
-        },
-        "intoxication": {
-          "finding": "",
-          "circumstances": "",
-          "repeat": false,
-          "repeatYear": "",
-          "accident": false,
-          "accidentResult": "damage",
-          "section40a": false,
-          "section40aDetail": "",
-          "alcoholLevel": "",
-          "type": "",
-          "priorCount": null
-        }
-      },
-      "defenseArguments": {
-        "standard": {
-          "defarg_admission": false,
-          "defarg_clean_record": false,
-          "defarg_custom": false,
-          "defarg_delay": false,
-          "defarg_livelihood": false,
-          "defarg_old_disqualification": false,
-          "defarg_personal": false,
-          "defarg_probation": false,
-          "defarg_rehabilitation": false
-        },
-        "response": {
-          "defense_custom_response": "",
-          "defense_custom_text": "",
-          "defense_delay_due_defendant": false,
-          "defense_probation_normative": false,
-          "defense_probation_treatment": false,
-          "defense_rehab_alcohol_drugs": false,
-          "defense_rehab_direct_risk": false,
-          "defense_rehab_initial_only": false,
-          "defense_rehab_meaningful": false
-        },
-        "prosecutorResponse": {}
+    {
+      "label": "after-writer",
+      "route": "67",
+      "diff": [],
+      "keyIds": {
+        "case_num": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "has_multiple_yes": [
+          true,
+          true
+        ],
+        "multi_proc_type": [
+          "consol",
+          "consol"
+        ],
+        "multi_count": [
+          "3",
+          "3"
+        ],
+        "m_case_1": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "m_case_2": [
+          "WRITER-JOIN-2",
+          "WRITER-JOIN-2"
+        ],
+        "m_case_3": [
+          "WRITER-JOIN-3",
+          "WRITER-JOIN-3"
+        ],
+        "cond_case_3": [
+          "COND-3",
+          "COND-3"
+        ],
+        "disq_case_2": [
+          "DISQ-2",
+          "DISQ-2"
+        ],
+        "bond_case_4": [
+          "BOND-4",
+          "BOND-4"
+        ]
       }
     },
-    "sentencing": {
-      "range": {
-        "imprisonmentMin": "6",
-        "imprisonmentMax": "24"
-      },
-      "placement": {
-        "key": "CENTER",
-        "heavyCase": false
-      },
-      "petition": {
-        "imprisonment": "10",
-        "disqualification": "36",
-        "fine": "5000",
-        "bond": "",
-        "disqualificationCondition": "",
-        "disqualificationConditionYears": ""
-      },
-      "specialRequests": {
-        "section40a": {
-          "request_40a": false,
-          "request_40a_b_10a": "",
-          "request_40a_b_10a_before_disq": "",
-          "request_40a_b_10a_detail": "",
-          "request_40a_life": false,
-          "request_40a_life_detail": "",
-          "v75_40a_10y": false,
-          "v75_40a_10y_detail": "",
-          "v75_40a_life": false,
-          "v75_40a_life_detail": "",
-          "ps67s_life_40a": false,
-          "ps67s_life_40a_detail": ""
-        },
-        "conditionalPetition": {
-          "req_cond_enabled": false,
-          "req_cond_months": "",
-          "req_cond_years": "",
-          "req_cond_off_10a": false,
-          "req_cond_off_67": false,
-          "req_cond_off_other": false,
-          "req_cond_off_other_text": "",
-          "req_cond2_months": "",
-          "req_cond2_years": "",
-          "req_cond2_off_10a": false,
-          "req_cond2_off_67": false,
-          "req_cond2_off_other": false,
-          "req_cond2_off_other_text": ""
-        }
-      },
-      "context": {
-        "probation": {
-          "has_probation": "no",
-          "probation_details": "",
-          "probation_findings": "negative"
-        },
-        "policy": {
-          "include_policy": true,
-          "policy_text": "סקירת פסיקה נוהגת — נהיגה בזמן פסילה\n\nרע\"פ 1076/16 חיים כהן נ' מדינת ישראל, 11.02.2016 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 8 שנים וללא ביטוח. התוצאה העונשית: מתחם ממספר חודשי מאסר ועד 20 חודשי מאסר; גזר הדין כלל 18 חודשי מאסר, לרבות הפעלת תנאי, וענישה נלווית.\n\nרע\"פ 8013/13 אמיר מסעוד נ' מדינת ישראל, 18.12.2013 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 13 שנה וללא ביטוח. התוצאה העונשית: נקבע מתחם 7-20 חודשי מאסר; נגזרו 12 חודשי מאסר בפועל וענישה נלווית.\n\nרע\"פ 5244/17 גבריאל תורג'מן נ' מדינת ישראל, 12.09.2017 - נהיגה ללא רישיון, בזמן פסילה, ללא ביטוח וללא רישיון רכב. התוצאה העונשית: ערעור המדינה התקבל; המאסר הוחמר ל-10 חודשים, ובסך הכל 20 חודשי מאסר לאחר הפעלת תנאים במצטבר.\n\nפל\"א 7532-03-18 מדינת ישראל נ' שמעון סיסו, 16.05.2018 - נהיגה בזמן פסילה, נהיגה ללא רישיון נהיגה תקף לסוג הרכב וללא ביטוח. התוצאה העונשית: מתחם ממאסר קצר בעבודות שירות ועד 20 חודשי מאסר; הוטלו 8 חודשי מאסר בפועל.\n\nרע\"פ 225/09 ריאן סרסור נ' מדינת ישראל - נהיגה בזמן פסילה. התוצאה העונשית: אושרו 24 חודשי מאסר בפועל ופסילה בפועל בת שנתיים.\n\nפסיקה כללית כגון רע\"פ 6115/06 מדינת ישראל נ' אבו-לבן, רע\"פ 3878/05 בנגוזי נ' מדינת ישראל ורע\"פ 5300/18 אוסאמה סלאמה תשמש, ככל שנדרש, בפרק חומרת העבירה והערכים המוגנים בלבד, ולא כתחליף לסקירת פסיקה נוהגת.",
-          "include_bombastic": true
-        },
-        "conviction": {
-          "conviction_type": ""
-        }
+    {
+      "label": "after-300",
+      "route": "67",
+      "diff": [],
+      "keyIds": {
+        "case_num": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "has_multiple_yes": [
+          true,
+          true
+        ],
+        "multi_proc_type": [
+          "consol",
+          "consol"
+        ],
+        "multi_count": [
+          "3",
+          "3"
+        ],
+        "m_case_1": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "m_case_2": [
+          "WRITER-JOIN-2",
+          "WRITER-JOIN-2"
+        ],
+        "m_case_3": [
+          "WRITER-JOIN-3",
+          "WRITER-JOIN-3"
+        ],
+        "cond_case_3": [
+          "COND-3",
+          "COND-3"
+        ],
+        "disq_case_2": [
+          "DISQ-2",
+          "DISQ-2"
+        ],
+        "bond_case_4": [
+          "BOND-4",
+          "BOND-4"
+        ]
       }
     },
-    "accident": null,
-    "metadata": {
-      "source": "legacy-dom-readonly",
-      "legacyRoute": "67"
+    {
+      "label": "after-1000",
+      "route": "67",
+      "diff": [],
+      "keyIds": {
+        "case_num": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "has_multiple_yes": [
+          true,
+          true
+        ],
+        "multi_proc_type": [
+          "consol",
+          "consol"
+        ],
+        "multi_count": [
+          "3",
+          "3"
+        ],
+        "m_case_1": [
+          "WRITER-MAIN-94",
+          "WRITER-MAIN-94"
+        ],
+        "m_case_2": [
+          "WRITER-JOIN-2",
+          "WRITER-JOIN-2"
+        ],
+        "m_case_3": [
+          "WRITER-JOIN-3",
+          "WRITER-JOIN-3"
+        ],
+        "cond_case_3": [
+          "COND-3",
+          "COND-3"
+        ],
+        "disq_case_2": [
+          "DISQ-2",
+          "DISQ-2"
+        ],
+        "bond_case_4": [
+          "BOND-4",
+          "BOND-4"
+        ]
+      }
     }
-  }
+  ]
 }
