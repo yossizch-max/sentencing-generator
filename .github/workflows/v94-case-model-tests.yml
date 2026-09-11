@@ -34,6 +34,7 @@ jobs:
           node --check v94/case-model-schema.test.js
           node --check v94/case-model-serialization.test.js
           node --check v94/case-model-route-facts.test.js
+          node --check v94/case-model-defense-context.test.js
           node --check v94/case-model-accident.test.js
           node --check v94/browser-route-facts.mjs
           node --check v94/browser-route-facts-combined.mjs
@@ -98,6 +99,9 @@ jobs:
 
       - name: Gate 12 - route-specific canonical facts
         run: node v94/case-model-route-facts.test.js
+
+      - name: Gate 12B - defense policy probation context
+        run: node v94/case-model-defense-context.test.js
 
       - name: Gate 13 - accident canonical facts
         run: node v94/case-model-accident.test.js
