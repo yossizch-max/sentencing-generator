@@ -1,14 +1,14 @@
 {
   "total": 253,
   "effectiveTotal": 251,
-  "mapped": 235,
-  "unmapped": 16,
+  "mapped": 251,
+  "unmapped": 0,
   "ignored": 2,
   "ignoredKeys": [
     "_v",
     "caseDraftSelect"
   ],
-  "mappedPercent": 93.6,
+  "mappedPercent": 100,
   "mappedFamilies": {
     "(none)": [
       "_mashlul",
@@ -193,8 +193,24 @@
       "lic_year"
     ],
     "m_": [
+      "m_aggr_1",
+      "m_aggr_2",
+      "m_date_1",
+      "m_date_2",
+      "m_disq_1",
+      "m_disq_2",
+      "m_disq_type_1",
+      "m_disq_type_2",
+      "m_lic_exp_1",
+      "m_lic_exp_2",
+      "m_lic_exp_year_1",
+      "m_lic_exp_year_2",
       "m_max",
-      "m_min"
+      "m_min",
+      "m_no_ins_1",
+      "m_no_ins_2",
+      "m_other_off_1",
+      "m_other_off_2"
     ],
     "multi_": [
       "multi_count",
@@ -312,24 +328,5 @@
       "v91_basic_judge"
     ]
   },
-  "unmappedFamilies": {
-    "m_": [
-      "m_aggr_1",
-      "m_aggr_2",
-      "m_date_1",
-      "m_date_2",
-      "m_disq_1",
-      "m_disq_2",
-      "m_disq_type_1",
-      "m_disq_type_2",
-      "m_lic_exp_1",
-      "m_lic_exp_2",
-      "m_lic_exp_year_1",
-      "m_lic_exp_year_2",
-      "m_no_ins_1",
-      "m_no_ins_2",
-      "m_other_off_1",
-      "m_other_off_2"
-    ]
-  }
+  "unmappedFamilies": {}
 }
