@@ -36,6 +36,7 @@ jobs:
           node --check v94/case-model-route-facts.test.js
           node --check v94/case-model-defense-context.test.js
           node --check v94/case-model-accident.test.js
+          node --check v94/case-model-accident-legacy.test.js
           node --check v94/browser-route-facts.mjs
           node --check v94/browser-route-facts-combined.mjs
           node --check v94/browser-route-facts-accident.mjs
@@ -105,6 +106,9 @@ jobs:
 
       - name: Gate 13 - accident canonical facts
         run: node v94/case-model-accident.test.js
+
+      - name: Gate 13B - accident legacy detail coverage
+        run: node v94/case-model-accident-legacy.test.js
 
       - name: Gate 14 - legacy architecture scan
         run: node v94/legacy-architecture-scan.js
