@@ -1,11 +1,12 @@
 {
   "total": 253,
-  "mapped": 147,
-  "unmapped": 106,
-  "mappedPercent": 58.1,
+  "mapped": 164,
+  "unmapped": 89,
+  "mappedPercent": 64.8,
   "mappedFamilies": {
     "(none)": [
       "_mashlul",
+      "judge",
       "pos"
     ],
     "acc_": [
@@ -87,9 +88,18 @@
     "case_": [
       "case_num"
     ],
+    "conviction_": [
+      "conviction_type"
+    ],
+    "court_": [
+      "court_name"
+    ],
     "crim_": [
       "crim_count",
       "crim_detail"
+    ],
+    "criminal_": [
+      "criminal_prison_type"
     ],
     "def_": [
       "def_name"
@@ -104,10 +114,19 @@
       "has_heavy_traffic",
       "has_multiple",
       "has_prior_criminal_prison",
-      "has_prior_prison"
+      "has_prior_prison",
+      "has_probation"
     ],
     "heavy_": [
       "heavy_case"
+    ],
+    "include_": [
+      "include_bombastic",
+      "include_policy"
+    ],
+    "lawyer_": [
+      "lawyer_name",
+      "lawyer_office"
     ],
     "lic_": [
       "lic_year"
@@ -129,8 +148,18 @@
       "off_no_insurance",
       "off_other_text"
     ],
+    "policy_": [
+      "policy_text"
+    ],
     "prior_": [
       "prior_10a"
+    ],
+    "prison_": [
+      "prison_type"
+    ],
+    "probation_": [
+      "probation_details",
+      "probation_findings"
     ],
     "ps67s_": [
       "ps67s_10a_detail",
@@ -192,13 +221,18 @@
       "v75_40a_10y_detail",
       "v75_40a_life",
       "v75_40a_life_detail"
+    ],
+    "v91_": [
+      "v91_basic_case",
+      "v91_basic_court",
+      "v91_basic_def",
+      "v91_basic_judge"
     ]
   },
   "unmappedFamilies": {
     "(none)": [
       "_v",
-      "caseDraftSelect",
-      "judge"
+      "caseDraftSelect"
     ],
     "acc_": [
       "acc_38b2_manual",
@@ -223,15 +257,6 @@
       "acc_review_depth",
       "acc_shichrut_basis",
       "acc_shichrut_finding"
-    ],
-    "conviction_": [
-      "conviction_type"
-    ],
-    "court_": [
-      "court_name"
-    ],
-    "criminal_": [
-      "criminal_prison_type"
     ],
     "defarg_": [
       "defarg_admission",
@@ -266,16 +291,7 @@
     "has_": [
       "has_multiple_bond",
       "has_multiple_cond",
-      "has_multiple_disq",
-      "has_probation"
-    ],
-    "include_": [
-      "include_bombastic",
-      "include_policy"
-    ],
-    "lawyer_": [
-      "lawyer_name",
-      "lawyer_office"
+      "has_multiple_disq"
     ],
     "m_": [
       "m_aggr_1",
@@ -294,16 +310,6 @@
       "m_no_ins_2",
       "m_other_off_1",
       "m_other_off_2"
-    ],
-    "policy_": [
-      "policy_text"
-    ],
-    "prison_": [
-      "prison_type"
-    ],
-    "probation_": [
-      "probation_details",
-      "probation_findings"
     ],
     "psdef_": [
       "psdef_admission",
@@ -326,12 +332,6 @@
       "psdef_rehab_meaningful",
       "psdef_rehabilitation",
       "psdef_treatment"
-    ],
-    "v91_": [
-      "v91_basic_case",
-      "v91_basic_court",
-      "v91_basic_def",
-      "v91_basic_judge"
     ]
   }
 }
