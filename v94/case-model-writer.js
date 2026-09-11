@@ -175,7 +175,7 @@
     setValue(doc,'ps67s_prior_67_count',s67.prior67Count==null?'':s67.prior67Count);
     setValue(doc,'ps67s_disq_knowledge',s67.disqualificationKnowledge);
     setValue(doc,'ps67s_disq_source',s67.disqualificationSource);
-    setValue(doc,'prior_10a',s10.prior10a);
+    setChecked(doc,'prior_10a',s10.prior10a);
     setChecked(doc,'no_fix_10a',s10.noFix10a);
     setValue(doc,'ps67s_10a_detail',s10.relatedDetail);
     setValue(doc,'ps67s_10a_related',s10.related);
