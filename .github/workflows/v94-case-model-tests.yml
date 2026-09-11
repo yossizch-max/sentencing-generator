@@ -30,6 +30,7 @@ jobs:
           node --check v94/case-model-parity.test.js
           node --check v94/case-model-validation.test.js
           node --check v94/case-model-schema.test.js
+          node --check v94/case-model-serialization.test.js
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
@@ -63,7 +64,10 @@ jobs:
       - name: Gate 10 - schema contract
         run: node v94/case-model-schema.test.js
 
-      - name: Gate 11 - legacy architecture scan
+      - name: Gate 11 - portable serialization
+        run: node v94/case-model-serialization.test.js
+
+      - name: Gate 12 - legacy architecture scan
         run: node v94/legacy-architecture-scan.js
 
   browser:
