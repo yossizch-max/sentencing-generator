@@ -138,7 +138,7 @@
           "prior10a": false,
           "noFix10a": false,
           "relatedDetail": "",
-          "related": "on"
+          "related": false
         },
         "intoxication": {
           "finding": "",
@@ -387,7 +387,7 @@
           "prior10a": false,
           "noFix10a": false,
           "relatedDetail": "",
-          "related": "on"
+          "related": false
         },
         "intoxication": {
           "finding": "",
