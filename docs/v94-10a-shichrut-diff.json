@@ -1,6 +1,12 @@
 {
-  "modelEqual": true,
-  "modelDiff": [],
+  "modelEqual": false,
+  "modelDiff": [
+    {
+      "path": "currentOffense.routeFacts.section10a.related",
+      "a": true,
+      "b": false
+    }
+  ],
   "idDiff": [
     {
       "id": "ps67s_10a_related",
