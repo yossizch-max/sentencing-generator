@@ -1,0 +1,27 @@
+name: v94 field coverage report
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Build field coverage report
+        run: node v94/field-coverage-report.js
+      - name: Commit report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/v94-field-coverage.json docs/v94-field-coverage.md
+          git commit -m 'Capture v94 field coverage report' || exit 0
+          git push origin HEAD:v94/architecture-migration
