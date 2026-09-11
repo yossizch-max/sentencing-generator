@@ -209,5 +209,32 @@ jobs:
       - name: Gate 15 - clean-form writer roundtrip
         run: node v94/browser-writer-roundtrip.mjs
 
-      - name: Gate 16 - dual-engine migration harness
+      - name: Gate 16A - migration diag 67 basic
+        run: node v94/browser-migration-diag.mjs "67-basic"
+
+      - name: Gate 16B - migration diag 67 joined
+        run: node v94/browser-migration-diag.mjs "67-joined"
+
+      - name: Gate 16C - migration diag 10a
+        run: node v94/browser-migration-diag.mjs "10a"
+
+      - name: Gate 16D - migration diag 67+10a
+        run: node v94/browser-migration-diag.mjs "67+10a"
+
+      - name: Gate 16E - migration diag shichrut
+        run: node v94/browser-migration-diag.mjs "shichrut"
+
+      - name: Gate 16F - migration diag 67_shichrut
+        run: node v94/browser-migration-diag.mjs "67_shichrut"
+
+      - name: Gate 16G - migration diag 10a_shichrut
+        run: node v94/browser-migration-diag.mjs "10a_shichrut"
+
+      - name: Gate 16H - migration diag 67_10a_shichrut
+        run: node v94/browser-migration-diag.mjs "67_10a_shichrut"
+
+      - name: Gate 16I - migration diag accident
+        run: node v94/browser-migration-diag.mjs "accident"
+
+      - name: Gate 16J - full dual-engine migration harness
         run: node v94/browser-migration-harness.mjs
