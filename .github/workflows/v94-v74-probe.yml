@@ -1,0 +1,45 @@
+name: v94 v74 source probe
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Probe V74 code
+        shell: python
+        run: |
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          qs=['function generateV74Route','generateV74Route','10a_shichrut','policy_text','שכרות','סירוב','השפעה']
+          out=[]
+          for q in qs:
+              out.append('\n===== '+q+' =====\n')
+              start=0
+              count=0
+              while True:
+                  i=s.find(q,start)
+                  if i<0 or count>=12: break
+                  out.append('POS '+str(i)+'\n')
+                  out.append(s[max(0,i-2500):i+7000]+'\n')
+                  start=i+len(q); count+=1
+          Path('docs').mkdir(exist_ok=True)
+          Path('docs/v94-v74-source-probe.txt').write_text(''.join(out),encoding='utf-8')
+      - name: Commit probe
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/v94-v74-source-probe.txt
+          git commit -m 'Capture V74 source probe' || exit 0
+          git pull --rebase origin v94/architecture-migration
+          git push origin HEAD:v94/architecture-migration
