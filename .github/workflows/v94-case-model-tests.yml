@@ -22,10 +22,8 @@ jobs:
       - name: Gate 1 - syntax
         run: |
           node --check v94/case-model-adapter.js
-          node --check v94/case-model-writer.js
           node --check v94/test-utils.js
           node --check v94/case-model-adapter.test.js
-          node --check v94/case-model-writer.test.js
           node --check v94/case-model-contract.test.js
           node --check v94/case-model-routes.test.js
           node --check v94/case-model-lists.test.js
@@ -41,12 +39,20 @@ jobs:
           node --check v94/browser-route-facts-combined.mjs
           node --check v94/browser-route-facts-accident.mjs
           node --check v94/browser-route-roundtrip.mjs
-          node --check v94/browser-writer-roundtrip.mjs
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
           node --check v94/browser-case-model-smoke.mjs
           node --check v94/browser-case-model-deep.mjs
+
+      - name: Gate 1A - writer syntax
+        run: node --check v94/case-model-writer.js
+
+      - name: Gate 1B - writer unit syntax
+        run: node --check v94/case-model-writer.test.js
+
+      - name: Gate 1C - writer browser syntax
+        run: node --check v94/browser-writer-roundtrip.mjs
 
       - name: Gate 2 - all inline scripts compile
         run: node v94/index-script-syntax.test.js
