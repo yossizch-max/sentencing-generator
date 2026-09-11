@@ -36,6 +36,8 @@ jobs:
           node --check v94/case-model-route-facts.test.js
           node --check v94/case-model-accident.test.js
           node --check v94/browser-route-facts.mjs
+          node --check v94/browser-route-facts-combined.mjs
+          node --check v94/browser-route-facts-accident.mjs
           node --check v94/browser-route-roundtrip.mjs
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
@@ -180,8 +182,11 @@ jobs:
       - name: Gate 13F - legacy state roundtrip
         run: node v94/browser-case-model-deep.mjs legacy-roundtrip
 
-      - name: Gate 14A - browser route-specific facts
-        run: node v94/browser-route-facts.mjs
+      - name: Gate 14A - combined live-DOM mapping
+        run: node v94/browser-route-facts-combined.mjs
 
-      - name: Gate 14B - browser route-specific legacy roundtrip
+      - name: Gate 14B - accident live-DOM mapping
+        run: node v94/browser-route-facts-accident.mjs
+
+      - name: Gate 14C - browser route-specific legacy roundtrip
         run: node v94/browser-route-roundtrip.mjs
