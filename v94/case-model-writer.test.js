@@ -3,7 +3,7 @@ const {mkEl,mkDoc}=require('./test-utils');
 
 function load(path){
   const src=fs.readFileSync(path,'utf8');
-  const ctx={globalThis:{},module:{exports:{}},exports:{},Date};
+  const ctx={globalThis:{},module:{exports:{}},exports:{},Date,setTimeout,clearTimeout};
   vm.createContext(ctx); vm.runInContext(src,ctx); return ctx.module.exports;
 }
 const adapter=load('v94/case-model-adapter.js');
