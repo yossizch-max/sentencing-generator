@@ -221,6 +221,9 @@ jobs:
       - name: Gate 15 - clean-form writer roundtrip
         run: node v94/browser-writer-roundtrip.mjs
 
+      - name: Gate 15B - full multi-card fidelity
+        run: node v94/browser-multi-card-fidelity.mjs
+
       - name: Gate 16A - migration diag 67 basic
         run: node v94/browser-migration-diag.mjs "67-basic"
 
