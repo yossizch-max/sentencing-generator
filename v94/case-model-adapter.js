@@ -10,6 +10,14 @@
   function el(doc, id){ return doc && doc.getElementById ? doc.getElementById(id) : null; }
   function val(doc, id){ const e=el(doc,id); return e && 'value' in e ? String(e.value||'') : ''; }
   function checked(doc, id){ const e=el(doc,id); return !!(e && e.checked); }
+  function valFirst(doc, ids){
+    for(const id of ids){ const e=el(doc,id); if(e && 'value' in e) return String(e.value||''); }
+    return '';
+  }
+  function checkedFirst(doc, ids){
+    for(const id of ids){ const e=el(doc,id); if(e) return !!e.checked; }
+    return false;
+  }
   function intOrNull(v){
     const s=String(v==null?'':v).trim();
     if(!/^\d+$/.test(s)) return null;
@@ -53,11 +61,13 @@
         index:i,
         caseNumber: val(doc,'m_case_'+i),
         date: val(doc,'m_date_'+i),
-        disqualificationType: val(doc,'m_disq_'+i),
-        disqualificationDetails: val(doc,'m_disq_details_'+i),
-        licenseExpiryYear: val(doc,'m_lic_year_'+i),
-        noInsurance: checked(doc,'m_no_insurance_'+i),
-        freeText: val(doc,'m_other_'+i)
+        disqualificationType: valFirst(doc,['m_disq_type_'+i,'m_disqtype_'+i]),
+        disqualificationDetails: valFirst(doc,['m_disq_'+i,'m_disq_details_'+i]),
+        licenseExpired: checkedFirst(doc,['m_lic_exp_'+i,'m_license_expired_'+i]),
+        licenseExpiryYear: valFirst(doc,['m_lic_exp_year_'+i,'m_lic_year_'+i]),
+        noInsurance: checkedFirst(doc,['m_no_ins_'+i,'m_no_insurance_'+i]),
+        freeText: valFirst(doc,['m_other_off_'+i,'m_other_'+i]),
+        aggravating: valFirst(doc,['m_aggr_'+i])
       });
     }
     return out;
