@@ -93,6 +93,9 @@ jobs:
       - name: Gate 11 - portable serialization
         run: node v94/case-model-serialization.test.js
 
+      - name: Gate 11B - numeric boundary matrix
+        run: node v94/case-model-numeric-boundaries.test.js
+
       - name: Gate 12 - route-specific canonical facts
         run: node v94/case-model-route-facts.test.js
 
@@ -205,3 +208,6 @@ jobs:
 
       - name: Gate 15 - clean-form writer roundtrip
         run: node v94/browser-writer-roundtrip.mjs
+
+      - name: Gate 16 - dual-engine migration harness
+        run: node v94/browser-migration-harness.mjs
