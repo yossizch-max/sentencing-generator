@@ -125,6 +125,9 @@ jobs:
           sleep 2
           curl -f http://127.0.0.1:4173/index.html >/dev/null
 
+      - name: Gate DX - early diagnose 10a
+        run: node v94/browser-migration-diag.mjs "10a"
+
       - name: Gate 12A - browser load
         run: node v94/browser-case-model-smoke.mjs load
 
