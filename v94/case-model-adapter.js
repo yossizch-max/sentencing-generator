@@ -49,6 +49,20 @@
     return out;
   }
 
+  function readCaseContext(doc){
+    const out=readFieldMap(doc,[
+      'court_name','judge','lawyer_name','lawyer_office',
+      'v91_basic_case','v91_basic_court','v91_basic_def','v91_basic_judge'
+    ]);
+    const leadCase=val(doc,'case_num');
+    const defendantName=val(doc,'def_name');
+    if(String(leadCase||'').trim()) out.v91_basic_case=leadCase;
+    if(String(defendantName||'').trim()) out.v91_basic_def=defendantName;
+    if(String(out.court_name||'').trim()) out.v91_basic_court=out.court_name;
+    if(String(out.judge||'').trim()) out.v91_basic_judge=out.judge;
+    return out;
+  }
+
   function readMultipleCases(doc){
     const enabled=checked(doc,'has_multiple_yes');
     const proc=val(doc,'multi_proc_type') || 'same';
@@ -171,10 +185,7 @@
         leadCaseNumber: val(doc,'case_num'),
         mode: multipleEnabled ? (proc==='consol'?'joined':'multiple') : 'single',
         cases,
-        caseContext: readFieldMap(doc,[
-          'court_name','judge','lawyer_name','lawyer_office',
-          'v91_basic_case','v91_basic_court','v91_basic_def','v91_basic_judge'
-        ])
+        caseContext: readCaseContext(doc)
       },
       currentOffense: {
         ancillaryOffenses: {
