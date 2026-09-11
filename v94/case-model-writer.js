@@ -181,11 +181,11 @@
     setValue(doc,'ps67s_10a_related',s10.related);
     setValue(doc,'shich_finding',sh.finding);
     setValue(doc,'shich_circ',sh.circumstances);
-    setValue(doc,'shich_repeat',sh.repeat);
+    setChecked(doc,'shich_repeat',sh.repeat);
     setValue(doc,'shich_repeat_year',sh.repeatYear);
-    setValue(doc,'shich_accident',sh.accident);
+    setChecked(doc,'shich_accident',sh.accident);
     setValue(doc,'shich_accident_result',sh.accidentResult);
-    setValue(doc,'shich_40a',sh.section40a);
+    setChecked(doc,'shich_40a',sh.section40a);
     setValue(doc,'shich_40a_detail',sh.section40aDetail);
     setValue(doc,'ps67s_alcohol_level',sh.alcoholLevel);
     setValue(doc,'ps67s_shich_type',sh.type);
