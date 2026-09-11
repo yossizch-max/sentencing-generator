@@ -212,7 +212,7 @@
             prior10a: checked(doc,'prior_10a'),
             noFix10a: checked(doc,'no_fix_10a'),
             relatedDetail: val(doc,'ps67s_10a_detail'),
-            related: val(doc,'ps67s_10a_related')
+            related: checked(doc,'ps67s_10a_related')
           },
           intoxication: {
             finding: val(doc,'shich_finding'),
