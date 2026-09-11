@@ -22,8 +22,10 @@ jobs:
       - name: Gate 1 - syntax
         run: |
           node --check v94/case-model-adapter.js
+          node --check v94/case-model-writer.js
           node --check v94/test-utils.js
           node --check v94/case-model-adapter.test.js
+          node --check v94/case-model-writer.test.js
           node --check v94/case-model-contract.test.js
           node --check v94/case-model-routes.test.js
           node --check v94/case-model-lists.test.js
@@ -39,6 +41,7 @@ jobs:
           node --check v94/browser-route-facts-combined.mjs
           node --check v94/browser-route-facts-accident.mjs
           node --check v94/browser-route-roundtrip.mjs
+          node --check v94/browser-writer-roundtrip.mjs
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
@@ -53,6 +56,9 @@ jobs:
 
       - name: Gate 4 - base adapter unit test
         run: node v94/case-model-adapter.test.js
+
+      - name: Gate 4B - writer unit roundtrip
+        run: node v94/case-model-writer.test.js
 
       - name: Gate 5 - read-only contract
         run: node v94/case-model-contract.test.js
@@ -190,3 +196,6 @@ jobs:
 
       - name: Gate 14C - browser route-specific legacy roundtrip
         run: node v94/browser-route-roundtrip.mjs
+
+      - name: Gate 15 - clean-form writer roundtrip
+        run: node v94/browser-writer-roundtrip.mjs
