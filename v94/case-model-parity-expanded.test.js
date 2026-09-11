@@ -21,10 +21,10 @@ const legacy={
   off_license_expired_year:'',
   off_other_text:'',
   ps67s_prior_67_count:'3',
-  prior_10a:'2',
+  prior_10a:true,
   no_fix_10a:true,
   shich_finding:'finding',
-  shich_repeat:'yes',
+  shich_repeat:true,
   ps67s_alcohol_level:'850',
   ps67s_prior_shich_count:'1'
 };
