@@ -3,7 +3,7 @@ const inv=JSON.parse(fs.readFileSync('docs/v94-field-inventory.json','utf8'));
 const adapter=fs.readFileSync('v94/case-model-adapter.js','utf8');
 const writer=fs.readFileSync('v94/case-model-writer.js','utf8');
 const keys=inv.allStateKeys||[];
-const dynamicMatchers=[/^m_(case|date|disq_type|disq|disq_details|lic_exp|lic_exp_year|lic_year|no_ins|no_insurance|other_off|other|aggr)_\\d+$/,/^cond_(case|court|date|months|activation)_\\d+$/,/^disq_(case|court|date|months|activation)_\\d+$/,/^bond_(case|court|date|amount|activation)_\\d+$/];
+const dynamicMatchers=[/^m_(case|date|disq_type|disq|disq_details|lic_exp|lic_exp_year|lic_year|no_ins|no_insurance|other_off|other|aggr)_\d+$/,/^cond_(case|court|date|months|activation)_\d+$/,/^disq_(case|court|date|months|activation)_\d+$/,/^bond_(case|court|date|amount|activation)_\d+$/];
 function mentioned(k){if(adapter.includes("'"+k+"'")||adapter.includes('"'+k+'"')||writer.includes("'"+k+"'")||writer.includes('"'+k+'"')) return true; return dynamicMatchers.some(re=>re.test(k));}
 const ignoredKeys=new Set(['_v','caseDraftSelect']);
 const mapped=[],unmapped=[],ignored=[]; for(const k of keys){ if(ignoredKeys.has(k)) ignored.push(k); else (mentioned(k)?mapped:unmapped).push(k); }
