@@ -43,7 +43,7 @@
     const legacyRoute=(route==='accident_injury' && win && win.__v94LegacyAccidentRoute) ? win.__v94LegacyAccidentRoute : route;
     if(win && typeof win.chooseMashlul==='function'){
       win.chooseMashlul(legacyRoute);
-      await tick(350);
+      await tick(2150);
     } else {
       if(win) win._mashlul=legacyRoute;
       setValue(doc,'_mashlul',legacyRoute);
@@ -249,7 +249,7 @@
     // v94 test-writer late stabilization pass:
     // Some legacy route/UI wrappers perform delayed writes after route selection or sibling-field changes.
     // Re-apply user-owned values that must win over those derived/default writes.
-    await tick(550);
+    await tick(250);
     setValue(doc,'def_name',def.name);
     setValue(doc,'def_id',def.id);
     setValue(doc,'case_num',proceeding.leadCaseNumber);
