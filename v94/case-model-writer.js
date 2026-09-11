@@ -246,6 +246,33 @@
       eachMap(doc,a.legacyDetails);
     }
 
+    // v94 test-writer late stabilization pass:
+    // Some legacy route/UI wrappers perform delayed writes after route selection or sibling-field changes.
+    // Re-apply user-owned values that must win over those derived/default writes.
+    await tick(550);
+    setValue(doc,'def_name',def.name);
+    setValue(doc,'def_id',def.id);
+    setValue(doc,'case_num',proceeding.leadCaseNumber);
+    if((proceeding.mode==='joined'||proceeding.mode==='multiple') && Array.isArray(proceeding.cases)){
+      for(const c of proceeding.cases){
+        const i=Number(c.index)||1;
+        if(i===1 && proceeding.leadCaseNumber) setAlias(doc,['m_case_'+i],proceeding.leadCaseNumber);
+        else setAlias(doc,['m_case_'+i],c.caseNumber);
+      }
+    }
+    eachMap(doc,caseContext);
+    eachMap(doc,defense.standard);
+    eachMap(doc,defense.response);
+    eachMap(doc,defense.prosecutorResponse);
+    // These two are derived automatically by parts of the legacy UI; explicit CaseModel values are authoritative.
+    if(defense.response && Object.prototype.hasOwnProperty.call(defense.response,'defense_custom_response')){
+      setSmart(doc,'defense_custom_response',defense.response.defense_custom_response);
+    }
+    if(defense.prosecutorResponse && Object.prototype.hasOwnProperty.call(defense.prosecutorResponse,'psdef_custom_response')){
+      setSmart(doc,'psdef_custom_response',defense.prosecutorResponse.psdef_custom_response);
+    }
+    await tick(80);
+
     return true;
   }
 
