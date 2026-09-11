@@ -5,6 +5,17 @@
   'use strict';
 
   function el(doc,id){ return doc&&doc.getElementById?doc.getElementById(id):null; }
+  function setValueSilent(doc,id,value){
+    const e=el(doc,id); if(!e) return false;
+    e.value=value==null?'':String(value);
+    return true;
+  }
+  function setCheckedSilent(doc,id,value){
+    const e=el(doc,id); if(!e) return false;
+    e.checked=!!value;
+    return true;
+  }
+
   function setValue(doc,id,value){
     const e=el(doc,id); if(!e) return false;
     e.value=value==null?'':String(value);
@@ -249,15 +260,17 @@
     // v94 test-writer late stabilization pass:
     // Some legacy route/UI wrappers perform delayed writes after route selection or sibling-field changes.
     // Re-apply user-owned values that must win over those derived/default writes.
-    await tick(250);
-    setValue(doc,'def_name',def.name);
-    setValue(doc,'def_id',def.id);
-    setValue(doc,'case_num',proceeding.leadCaseNumber);
+    await tick(450);
+    // Lead identity fields are written silently here on purpose: in the legacy UI their change
+    // handlers can synchronously rebuild/synchronize the multiple-case UI and overwrite the value.
+    setValueSilent(doc,'def_name',def.name);
+    setValueSilent(doc,'def_id',def.id);
+    setValueSilent(doc,'case_num',proceeding.leadCaseNumber);
     if((proceeding.mode==='joined'||proceeding.mode==='multiple') && Array.isArray(proceeding.cases)){
       for(const c of proceeding.cases){
         const i=Number(c.index)||1;
-        if(i===1 && proceeding.leadCaseNumber) setAlias(doc,['m_case_'+i],proceeding.leadCaseNumber);
-        else setAlias(doc,['m_case_'+i],c.caseNumber);
+        if(i===1 && proceeding.leadCaseNumber) setValueSilent(doc,'m_case_'+i,proceeding.leadCaseNumber);
+        else setValueSilent(doc,'m_case_'+i,c.caseNumber);
       }
     }
     eachMap(doc,caseContext);
