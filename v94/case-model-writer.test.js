@@ -25,7 +25,13 @@ const add=(id,el)=>{map[id]=el||mkEl(''); if(!ids.includes(id)) ids.push(id);};
   'req_fine','req_bond','req_disq_cond','req_disq_cond_years'
 ].forEach(id=>add(id,mkEl('',false,(id.startsWith('has_')||id==='off_no_insurance'||id==='off_license_expired'||id==='no_fix_10a'||id==='heavy_case'||id==='aggravating_extra_enabled')?{type:'checkbox'}:{})));
 
-const doc=mkDoc(map,ids);
+const doc={
+  getElementById(id){return map[id]||null;},
+  querySelectorAll(sel){
+    const m=String(sel).match(/^\\[id\\^="([^"]+)"\\]$/);
+    return m ? ids.filter(id=>id.startsWith(m[1])).map(id=>({id})) : [];
+  }
+};
 const win={
   _mashlul:'',
   chooseMashlul(r){this._mashlul=r; map._mashlul.value=r;},
