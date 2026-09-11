@@ -291,7 +291,15 @@
           'acc_p_comp','acc_p_comp_a','acc_p_comp_to','acc_p_undertake',
           'acc_p_undertake_a','acc_p_undertake_y','acc_p_probation','acc_p_probation_m',
           'acc_p_cond','acc_p_cond_m','acc_p_cond_y','acc_p_activate_disq',
-          'acc_p_activate_disq_case','acc_p_activate_disq_m','acc_p_activate_disq_mode'
+          'acc_p_activate_disq_case','acc_p_activate_disq_m','acc_p_activate_disq_mode',
+          'acc_p_cs','acc_p_cs_h'
+        ]),
+        legacyDetails: readFieldMap(doc,[
+          'acc_38b2_manual','acc_accident_date','acc_add_10a','acc_add_67',
+          'acc_add_hitnaslut','acc_add_shichrut','acc_base_offense','acc_breach',
+          'acc_breach_citation','acc_breach_other','acc_case','acc_conviction_type',
+          'acc_court','acc_def','acc_driver_type','acc_driving_years','acc_medical',
+          'acc_review_depth','acc_shichrut_basis','acc_shichrut_finding'
         ])
       } : null,
       metadata: {
