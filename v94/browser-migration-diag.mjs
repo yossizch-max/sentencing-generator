@@ -25,7 +25,21 @@ async function open(){
 }
 async function choose(p,r){await p.evaluate(x=>window.chooseMashlul?window.chooseMashlul(x):(window._mashlul=x),r);await p.waitForTimeout(400);}
 async function seed(p,vals){await p.evaluate(v=>{for(const [id,x] of Object.entries(v)){const e=document.getElementById(id);if(!e)continue;if(e.type==='checkbox'||e.type==='radio')e.checked=!!x;else e.value=String(x);e.dispatchEvent(new Event('change',{bubbles:true}));}},vals);await p.waitForTimeout(150);}
-async function generate(p){return await p.evaluate(async()=>{try{if(window.safeGenerate)window.safeGenerate();else if(window.generate)window.generate();await new Promise(r=>setTimeout(r,800));return {err:null,text:(document.getElementById('paper')?.innerText||'').replace(/\s+/g,' ').trim()};}catch(e){return {err:String(e),text:''};}});}
+async function generate(p){return await p.evaluate(async()=>{
+      try{
+        if(window.safeGenerate)window.safeGenerate();else if(window.generate)window.generate();
+        const read=()=>String(document.getElementById('paper')?.innerText||'').replace(/\s+/g,' ').trim();
+        let prev='',stable=0,last='';
+        for(let i=0;i<20;i++){
+          await new Promise(r=>setTimeout(r,150));
+          last=read();
+          if(last===prev && last.length>0) stable++; else stable=0;
+          if(stable>=3) break;
+          prev=last;
+        }
+        return {err:null,text:last};
+      }catch(e){return {err:String(e),text:''};}
+    });}
 const p1=await open();await choose(p1,sc.route);await seed(p1,sc.vals);
 if(sc.multi){await p1.evaluate(async()=>{const set=(id,v)=>{const e=document.getElementById(id);if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=String(v);e.dispatchEvent(new Event('change',{bubbles:true}));};set('has_multiple_yes',true);set('multi_proc_type','consol');set('multi_count','3');window.toggleMultipleUI?.();window.buildMultiCards?.();await new Promise(r=>setTimeout(r,150));set('m_case_1','DJ');set('m_case_2','J2');set('m_case_3','J3');});}
 const m1=await p1.evaluate(()=>window.V94CaseModel.buildCaseModelFromCurrentState(window,document));
