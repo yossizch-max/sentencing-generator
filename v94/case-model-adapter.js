@@ -216,6 +216,28 @@
             type: val(doc,'ps67s_shich_type'),
             priorCount: intOrNull(val(doc,'ps67s_prior_shich_count'))
           }
+        },
+        defenseArguments: {
+          standard: readFieldMap(doc,[
+            'defarg_admission','defarg_clean_record','defarg_compensation','defarg_custom',
+            'defarg_delay','defarg_license_renewal_or_issuance','defarg_livelihood',
+            'defarg_low_alcohol_level','defarg_momentary_negligence','defarg_no_accident',
+            'defarg_old_disqualification','defarg_personal','defarg_probation',
+            'defarg_rehabilitation','defarg_short_drive','defarg_treatment','defarg_victim_recovered'
+          ]),
+          response: readFieldMap(doc,[
+            'defense_custom_response','defense_custom_text','defense_delay_due_defendant',
+            'defense_probation_normative','defense_probation_treatment','defense_rehab_alcohol_drugs',
+            'defense_rehab_direct_risk','defense_rehab_initial_only','defense_rehab_meaningful'
+          ]),
+          prosecutorResponse: readFieldMap(doc,[
+            'psdef_admission','psdef_clean_record','psdef_custom','psdef_custom_response',
+            'psdef_custom_text','psdef_delay','psdef_delay_due_defendant','psdef_livelihood',
+            'psdef_low_alcohol_level','psdef_no_accident','psdef_old_disqualification',
+            'psdef_personal','psdef_probation','psdef_probation_normative',
+            'psdef_probation_treatment','psdef_rehab_alcohol_drugs','psdef_rehab_initial_only',
+            'psdef_rehab_meaningful','psdef_rehabilitation','psdef_treatment'
+          ])
         }
       },
       sentencing: {
