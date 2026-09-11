@@ -183,7 +183,7 @@
             disqualificationSource: val(doc,'ps67s_disq_source')
           },
           section10a: {
-            prior10a: val(doc,'prior_10a'),
+            prior10a: checked(doc,'prior_10a'),
             noFix10a: checked(doc,'no_fix_10a'),
             relatedDetail: val(doc,'ps67s_10a_detail'),
             related: val(doc,'ps67s_10a_related')
