@@ -242,6 +242,7 @@
       eachMap(doc,a.aggravating);
       eachMap(doc,a.mitigating);
       eachMap(doc,a.petition);
+      eachMap(doc,a.legacyDetails);
     }
 
     return true;
