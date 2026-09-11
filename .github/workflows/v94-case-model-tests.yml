@@ -28,6 +28,7 @@ jobs:
           node --check v94/case-model-routes.test.js
           node --check v94/case-model-lists.test.js
           node --check v94/case-model-parity.test.js
+          node --check v94/case-model-parity-expanded.test.js
           node --check v94/case-model-validation.test.js
           node --check v94/case-model-validation-expanded.test.js
           node --check v94/case-model-schema.test.js
@@ -62,6 +63,9 @@ jobs:
 
       - name: Gate 8 - legacy parity core fields
         run: node v94/case-model-parity.test.js
+
+      - name: Gate 8B - expanded legacy parity
+        run: node v94/case-model-parity-expanded.test.js
 
       - name: Gate 9 - validation behavior
         run: node v94/case-model-validation.test.js
