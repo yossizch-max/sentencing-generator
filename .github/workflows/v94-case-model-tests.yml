@@ -29,6 +29,7 @@ jobs:
           node --check v94/case-model-lists.test.js
           node --check v94/case-model-parity.test.js
           node --check v94/case-model-validation.test.js
+          node --check v94/case-model-validation-expanded.test.js
           node --check v94/case-model-schema.test.js
           node --check v94/case-model-serialization.test.js
           node --check v94/case-model-route-facts.test.js
@@ -66,6 +67,9 @@ jobs:
 
       - name: Gate 10 - schema contract
         run: node v94/case-model-schema.test.js
+
+      - name: Gate 10B - expanded validation diagnostics
+        run: node v94/case-model-validation-expanded.test.js
 
       - name: Gate 11 - portable serialization
         run: node v94/case-model-serialization.test.js
