@@ -158,6 +158,7 @@
     rebuildSparseList(win,doc,cond.imprisonment,'imprisonment');
     rebuildSparseList(win,doc,cond.disqualification,'disqualification');
     rebuildSparseList(win,doc,cond.bonds,'bonds');
+    eachMap(doc,cond.flags);
 
     await rebuildMultiple(win,doc,proceeding);
 
