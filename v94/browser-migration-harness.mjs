@@ -25,15 +25,22 @@ async function gen(p){
     try{
       if(typeof window.safeGenerate==='function') ret=window.safeGenerate();
       else if(typeof window.generate==='function') ret=window.generate();
-      await new Promise(r=>setTimeout(r,900));
+      const read=()=>({
+        paper:String(document.getElementById('paper')?.innerHTML||''),
+        text:String(document.getElementById('paper')?.innerText||'')
+      });
+      let prev='',stable=0,snap=read();
+      for(let i=0;i<24;i++){
+        await new Promise(r=>setTimeout(r,150));
+        snap=read();
+        const key=snap.paper+'\n'+snap.text;
+        if(key===prev && key.length>0) stable++; else stable=0;
+        if(stable>=3) break;
+        prev=key;
+      }
+      return {err,ret:ret==null?null:String(ret),paper:snap.paper,text:snap.text,before};
     }catch(e){err=String(e);}
-    return {
-      err,
-      ret:ret==null?null:String(ret),
-      paper:String(document.getElementById('paper')?.innerHTML||''),
-      text:String(document.getElementById('paper')?.innerText||''),
-      before
-    };
+    return {err,ret:ret==null?null:String(ret),paper:String(document.getElementById('paper')?.innerHTML||''),text:String(document.getElementById('paper')?.innerText||''),before};
   });
 }
 async function legacyState(p){
