@@ -1,0 +1,523 @@
+{
+  "equal": false,
+  "diffs": [
+    {
+      "path": "defendant.name",
+      "a": "נאשם QA",
+      "b": ""
+    },
+    {
+      "path": "proceeding.leadCaseNumber",
+      "a": "WRITER-MAIN-94",
+      "b": ""
+    },
+    {
+      "path": "proceeding.cases.0.caseNumber",
+      "a": "WRITER-MAIN-94",
+      "b": ""
+    },
+    {
+      "path": "currentOffense.defenseArguments.response.defense_custom_response",
+      "a": "",
+      "b": "המאשימה תטען כי גם אם יש מקום להביא טענה זו בחשבון, אין בה כדי לשנות את מרכז הכובד הענישתי. הענישה צריכה להיקבע בראש ובראשונה לפי חומרת העבירה, נסיבות ביצועה, הסיכון שנוצר, עברו של הנאשם והצורך בהלימה, גמול, הרתעה והגנה על שלום הציבור."
+    }
+  ],
+  "m1": {
+    "schemaVersion": 1,
+    "route": "67",
+    "defendant": {
+      "name": "נאשם QA",
+      "id": "",
+      "record": {
+        "traffic": {
+          "count": 7,
+          "detail": "עבר תעבורתי QA",
+          "heavy": false
+        },
+        "criminal": {
+          "count": 0,
+          "detail": "",
+          "heavy": false
+        },
+        "priorPrison": {
+          "traffic": false,
+          "criminal": false
+        },
+        "pendingConditions": {
+          "imprisonment": [
+            {
+              "index": 3,
+              "sourceCase": "COND-3",
+              "court": "",
+              "date": "",
+              "months": "6",
+              "activation": ""
+            }
+          ],
+          "disqualification": [
+            {
+              "index": 2,
+              "sourceCase": "DISQ-2",
+              "court": "",
+              "date": "",
+              "months": "",
+              "activation": ""
+            }
+          ],
+          "bonds": [
+            {
+              "index": 4,
+              "sourceCase": "BOND-4",
+              "court": "",
+              "date": "",
+              "amount": "9000",
+              "activation": ""
+            }
+          ],
+          "flags": {
+            "has_multiple_cond": "no",
+            "has_multiple_disq": "no",
+            "has_multiple_bond": "no"
+          }
+        }
+      }
+    },
+    "proceeding": {
+      "leadCaseNumber": "WRITER-MAIN-94",
+      "mode": "joined",
+      "cases": [
+        {
+          "index": 1,
+          "caseNumber": "WRITER-MAIN-94",
+          "date": "2026-01-01",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        },
+        {
+          "index": 2,
+          "caseNumber": "WRITER-JOIN-2",
+          "date": "2026-02-02",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        },
+        {
+          "index": 3,
+          "caseNumber": "WRITER-JOIN-3",
+          "date": "2026-03-03",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        }
+      ],
+      "caseContext": {
+        "court_name": "ירושלים",
+        "judge": "",
+        "lawyer_name": "",
+        "lawyer_office": "שלוחת תביעות תעבורה ירושלים",
+        "v91_basic_case": "",
+        "v91_basic_court": "ירושלים",
+        "v91_basic_def": "",
+        "v91_basic_judge": ""
+      }
+    },
+    "currentOffense": {
+      "ancillaryOffenses": {
+        "noInsurance": true,
+        "licenseExpired": false,
+        "licenseExpiryYear": "",
+        "other": ""
+      },
+      "facts": {
+        "disqualificationType": "court",
+        "disqualificationDetails": "",
+        "disqualificationOrigin": "on",
+        "licenseYear": "",
+        "aggravatingExtraEnabled": false,
+        "aggravatingExtraText": ""
+      },
+      "routeFacts": {
+        "section67": {
+          "prior67Count": null,
+          "disqualificationKnowledge": "",
+          "disqualificationSource": ""
+        },
+        "section10a": {
+          "prior10a": false,
+          "noFix10a": false,
+          "relatedDetail": "",
+          "related": "on"
+        },
+        "intoxication": {
+          "finding": "",
+          "circumstances": "",
+          "repeat": false,
+          "repeatYear": "",
+          "accident": false,
+          "accidentResult": "damage",
+          "section40a": false,
+          "section40aDetail": "",
+          "alcoholLevel": "",
+          "type": "",
+          "priorCount": null
+        }
+      },
+      "defenseArguments": {
+        "standard": {
+          "defarg_admission": false,
+          "defarg_clean_record": false,
+          "defarg_custom": false,
+          "defarg_delay": false,
+          "defarg_livelihood": false,
+          "defarg_old_disqualification": false,
+          "defarg_personal": false,
+          "defarg_probation": false,
+          "defarg_rehabilitation": false
+        },
+        "response": {
+          "defense_custom_response": "",
+          "defense_custom_text": "",
+          "defense_delay_due_defendant": false,
+          "defense_probation_normative": false,
+          "defense_probation_treatment": false,
+          "defense_rehab_alcohol_drugs": false,
+          "defense_rehab_direct_risk": false,
+          "defense_rehab_initial_only": false,
+          "defense_rehab_meaningful": false
+        },
+        "prosecutorResponse": {}
+      }
+    },
+    "sentencing": {
+      "range": {
+        "imprisonmentMin": "6",
+        "imprisonmentMax": "24"
+      },
+      "placement": {
+        "key": "CENTER",
+        "heavyCase": false
+      },
+      "petition": {
+        "imprisonment": "10",
+        "disqualification": "36",
+        "fine": "5000",
+        "bond": "",
+        "disqualificationCondition": "",
+        "disqualificationConditionYears": ""
+      },
+      "specialRequests": {
+        "section40a": {
+          "request_40a": false,
+          "request_40a_b_10a": "",
+          "request_40a_b_10a_before_disq": "",
+          "request_40a_b_10a_detail": "",
+          "request_40a_life": false,
+          "request_40a_life_detail": "",
+          "v75_40a_10y": false,
+          "v75_40a_10y_detail": "",
+          "v75_40a_life": false,
+          "v75_40a_life_detail": "",
+          "ps67s_life_40a": false,
+          "ps67s_life_40a_detail": ""
+        },
+        "conditionalPetition": {
+          "req_cond_enabled": false,
+          "req_cond_months": "",
+          "req_cond_years": "",
+          "req_cond_off_10a": false,
+          "req_cond_off_67": false,
+          "req_cond_off_other": false,
+          "req_cond_off_other_text": "",
+          "req_cond2_months": "",
+          "req_cond2_years": "",
+          "req_cond2_off_10a": false,
+          "req_cond2_off_67": false,
+          "req_cond2_off_other": false,
+          "req_cond2_off_other_text": ""
+        }
+      },
+      "context": {
+        "probation": {
+          "has_probation": "no",
+          "probation_details": "",
+          "probation_findings": "negative"
+        },
+        "policy": {
+          "include_policy": true,
+          "policy_text": "סקירת פסיקה נוהגת — נהיגה בזמן פסילה\n\nרע\"פ 1076/16 חיים כהן נ' מדינת ישראל, 11.02.2016 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 8 שנים וללא ביטוח. התוצאה העונשית: מתחם ממספר חודשי מאסר ועד 20 חודשי מאסר; גזר הדין כלל 18 חודשי מאסר, לרבות הפעלת תנאי, וענישה נלווית.\n\nרע\"פ 8013/13 אמיר מסעוד נ' מדינת ישראל, 18.12.2013 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 13 שנה וללא ביטוח. התוצאה העונשית: נקבע מתחם 7-20 חודשי מאסר; נגזרו 12 חודשי מאסר בפועל וענישה נלווית.\n\nרע\"פ 5244/17 גבריאל תורג'מן נ' מדינת ישראל, 12.09.2017 - נהיגה ללא רישיון, בזמן פסילה, ללא ביטוח וללא רישיון רכב. התוצאה העונשית: ערעור המדינה התקבל; המאסר הוחמר ל-10 חודשים, ובסך הכל 20 חודשי מאסר לאחר הפעלת תנאים במצטבר.\n\nפל\"א 7532-03-18 מדינת ישראל נ' שמעון סיסו, 16.05.2018 - נהיגה בזמן פסילה, נהיגה ללא רישיון נהיגה תקף לסוג הרכב וללא ביטוח. התוצאה העונשית: מתחם ממאסר קצר בעבודות שירות ועד 20 חודשי מאסר; הוטלו 8 חודשי מאסר בפועל.\n\nרע\"פ 225/09 ריאן סרסור נ' מדינת ישראל - נהיגה בזמן פסילה. התוצאה העונשית: אושרו 24 חודשי מאסר בפועל ופסילה בפועל בת שנתיים.\n\nפסיקה כללית כגון רע\"פ 6115/06 מדינת ישראל נ' אבו-לבן, רע\"פ 3878/05 בנגוזי נ' מדינת ישראל ורע\"פ 5300/18 אוסאמה סלאמה תשמש, ככל שנדרש, בפרק חומרת העבירה והערכים המוגנים בלבד, ולא כתחליף לסקירת פסיקה נוהגת.",
+          "include_bombastic": true
+        },
+        "conviction": {
+          "conviction_type": ""
+        }
+      }
+    },
+    "accident": null,
+    "metadata": {
+      "source": "legacy-dom-readonly",
+      "legacyRoute": "67"
+    }
+  },
+  "m2": {
+    "schemaVersion": 1,
+    "route": "67",
+    "defendant": {
+      "name": "",
+      "id": "",
+      "record": {
+        "traffic": {
+          "count": 7,
+          "detail": "עבר תעבורתי QA",
+          "heavy": false
+        },
+        "criminal": {
+          "count": 0,
+          "detail": "",
+          "heavy": false
+        },
+        "priorPrison": {
+          "traffic": false,
+          "criminal": false
+        },
+        "pendingConditions": {
+          "imprisonment": [
+            {
+              "index": 3,
+              "sourceCase": "COND-3",
+              "court": "",
+              "date": "",
+              "months": "6",
+              "activation": ""
+            }
+          ],
+          "disqualification": [
+            {
+              "index": 2,
+              "sourceCase": "DISQ-2",
+              "court": "",
+              "date": "",
+              "months": "",
+              "activation": ""
+            }
+          ],
+          "bonds": [
+            {
+              "index": 4,
+              "sourceCase": "BOND-4",
+              "court": "",
+              "date": "",
+              "amount": "9000",
+              "activation": ""
+            }
+          ],
+          "flags": {
+            "has_multiple_cond": "no",
+            "has_multiple_disq": "no",
+            "has_multiple_bond": "no"
+          }
+        }
+      }
+    },
+    "proceeding": {
+      "leadCaseNumber": "",
+      "mode": "joined",
+      "cases": [
+        {
+          "index": 1,
+          "caseNumber": "",
+          "date": "2026-01-01",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        },
+        {
+          "index": 2,
+          "caseNumber": "WRITER-JOIN-2",
+          "date": "2026-02-02",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        },
+        {
+          "index": 3,
+          "caseNumber": "WRITER-JOIN-3",
+          "date": "2026-03-03",
+          "disqualificationType": "",
+          "disqualificationDetails": "",
+          "licenseExpired": false,
+          "licenseExpiryYear": "",
+          "noInsurance": false,
+          "freeText": "",
+          "aggravating": ""
+        }
+      ],
+      "caseContext": {
+        "court_name": "ירושלים",
+        "judge": "",
+        "lawyer_name": "",
+        "lawyer_office": "שלוחת תביעות תעבורה ירושלים",
+        "v91_basic_case": "",
+        "v91_basic_court": "ירושלים",
+        "v91_basic_def": "",
+        "v91_basic_judge": ""
+      }
+    },
+    "currentOffense": {
+      "ancillaryOffenses": {
+        "noInsurance": true,
+        "licenseExpired": false,
+        "licenseExpiryYear": "",
+        "other": ""
+      },
+      "facts": {
+        "disqualificationType": "court",
+        "disqualificationDetails": "",
+        "disqualificationOrigin": "on",
+        "licenseYear": "",
+        "aggravatingExtraEnabled": false,
+        "aggravatingExtraText": ""
+      },
+      "routeFacts": {
+        "section67": {
+          "prior67Count": null,
+          "disqualificationKnowledge": "",
+          "disqualificationSource": ""
+        },
+        "section10a": {
+          "prior10a": false,
+          "noFix10a": false,
+          "relatedDetail": "",
+          "related": "on"
+        },
+        "intoxication": {
+          "finding": "",
+          "circumstances": "",
+          "repeat": false,
+          "repeatYear": "",
+          "accident": false,
+          "accidentResult": "damage",
+          "section40a": false,
+          "section40aDetail": "",
+          "alcoholLevel": "",
+          "type": "",
+          "priorCount": null
+        }
+      },
+      "defenseArguments": {
+        "standard": {
+          "defarg_admission": false,
+          "defarg_clean_record": false,
+          "defarg_custom": false,
+          "defarg_delay": false,
+          "defarg_livelihood": false,
+          "defarg_old_disqualification": false,
+          "defarg_personal": false,
+          "defarg_probation": false,
+          "defarg_rehabilitation": false
+        },
+        "response": {
+          "defense_custom_response": "המאשימה תטען כי גם אם יש מקום להביא טענה זו בחשבון, אין בה כדי לשנות את מרכז הכובד הענישתי. הענישה צריכה להיקבע בראש ובראשונה לפי חומרת העבירה, נסיבות ביצועה, הסיכון שנוצר, עברו של הנאשם והצורך בהלימה, גמול, הרתעה והגנה על שלום הציבור.",
+          "defense_custom_text": "",
+          "defense_delay_due_defendant": false,
+          "defense_probation_normative": false,
+          "defense_probation_treatment": false,
+          "defense_rehab_alcohol_drugs": false,
+          "defense_rehab_direct_risk": false,
+          "defense_rehab_initial_only": false,
+          "defense_rehab_meaningful": false
+        },
+        "prosecutorResponse": {}
+      }
+    },
+    "sentencing": {
+      "range": {
+        "imprisonmentMin": "6",
+        "imprisonmentMax": "24"
+      },
+      "placement": {
+        "key": "CENTER",
+        "heavyCase": false
+      },
+      "petition": {
+        "imprisonment": "10",
+        "disqualification": "36",
+        "fine": "5000",
+        "bond": "",
+        "disqualificationCondition": "",
+        "disqualificationConditionYears": ""
+      },
+      "specialRequests": {
+        "section40a": {
+          "request_40a": false,
+          "request_40a_b_10a": "",
+          "request_40a_b_10a_before_disq": "",
+          "request_40a_b_10a_detail": "",
+          "request_40a_life": false,
+          "request_40a_life_detail": "",
+          "v75_40a_10y": false,
+          "v75_40a_10y_detail": "",
+          "v75_40a_life": false,
+          "v75_40a_life_detail": "",
+          "ps67s_life_40a": false,
+          "ps67s_life_40a_detail": ""
+        },
+        "conditionalPetition": {
+          "req_cond_enabled": false,
+          "req_cond_months": "",
+          "req_cond_years": "",
+          "req_cond_off_10a": false,
+          "req_cond_off_67": false,
+          "req_cond_off_other": false,
+          "req_cond_off_other_text": "",
+          "req_cond2_months": "",
+          "req_cond2_years": "",
+          "req_cond2_off_10a": false,
+          "req_cond2_off_67": false,
+          "req_cond2_off_other": false,
+          "req_cond2_off_other_text": ""
+        }
+      },
+      "context": {
+        "probation": {
+          "has_probation": "no",
+          "probation_details": "",
+          "probation_findings": "negative"
+        },
+        "policy": {
+          "include_policy": true,
+          "policy_text": "סקירת פסיקה נוהגת — נהיגה בזמן פסילה\n\nרע\"פ 1076/16 חיים כהן נ' מדינת ישראל, 11.02.2016 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 8 שנים וללא ביטוח. התוצאה העונשית: מתחם ממספר חודשי מאסר ועד 20 חודשי מאסר; גזר הדין כלל 18 חודשי מאסר, לרבות הפעלת תנאי, וענישה נלווית.\n\nרע\"פ 8013/13 אמיר מסעוד נ' מדינת ישראל, 18.12.2013 - נהיגה בזמן פסילה, רישיון נהיגה שפקע 13 שנה וללא ביטוח. התוצאה העונשית: נקבע מתחם 7-20 חודשי מאסר; נגזרו 12 חודשי מאסר בפועל וענישה נלווית.\n\nרע\"פ 5244/17 גבריאל תורג'מן נ' מדינת ישראל, 12.09.2017 - נהיגה ללא רישיון, בזמן פסילה, ללא ביטוח וללא רישיון רכב. התוצאה העונשית: ערעור המדינה התקבל; המאסר הוחמר ל-10 חודשים, ובסך הכל 20 חודשי מאסר לאחר הפעלת תנאים במצטבר.\n\nפל\"א 7532-03-18 מדינת ישראל נ' שמעון סיסו, 16.05.2018 - נהיגה בזמן פסילה, נהיגה ללא רישיון נהיגה תקף לסוג הרכב וללא ביטוח. התוצאה העונשית: מתחם ממאסר קצר בעבודות שירות ועד 20 חודשי מאסר; הוטלו 8 חודשי מאסר בפועל.\n\nרע\"פ 225/09 ריאן סרסור נ' מדינת ישראל - נהיגה בזמן פסילה. התוצאה העונשית: אושרו 24 חודשי מאסר בפועל ופסילה בפועל בת שנתיים.\n\nפסיקה כללית כגון רע\"פ 6115/06 מדינת ישראל נ' אבו-לבן, רע\"פ 3878/05 בנגוזי נ' מדינת ישראל ורע\"פ 5300/18 אוסאמה סלאמה תשמש, ככל שנדרש, בפרק חומרת העבירה והערכים המוגנים בלבד, ולא כתחליף לסקירת פסיקה נוהגת.",
+          "include_bombastic": true
+        },
+        "conviction": {
+          "conviction_type": ""
+        }
+      }
+    },
+    "accident": null,
+    "metadata": {
+      "source": "legacy-dom-readonly",
+      "legacyRoute": "67"
+    }
+  }
+}
