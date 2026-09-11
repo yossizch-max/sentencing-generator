@@ -271,6 +271,8 @@
     setValueSilent(doc,'def_name',def.name);
     setValueSilent(doc,'def_id',def.id);
     setValueSilent(doc,'case_num',proceeding.leadCaseNumber);
+    if(el(doc,'v91_basic_def')) setValueSilent(doc,'v91_basic_def',def.name);
+    if(el(doc,'v91_basic_case')) setValueSilent(doc,'v91_basic_case',proceeding.leadCaseNumber);
     if((proceeding.mode==='joined'||proceeding.mode==='multiple') && Array.isArray(proceeding.cases)){
       for(const c of proceeding.cases){
         const i=Number(c.index)||1;
