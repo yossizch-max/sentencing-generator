@@ -230,7 +230,12 @@
     eachMap(doc,ctx.conviction);
 
     const caseContext=proceeding.caseContext||{};
-    eachMap(doc,caseContext);
+    const normalizedCaseContext=Object.assign({},caseContext);
+    if(String(def.name||'').trim()) normalizedCaseContext.v91_basic_def=def.name;
+    if(String(proceeding.leadCaseNumber||'').trim()) normalizedCaseContext.v91_basic_case=proceeding.leadCaseNumber;
+    if(String(caseContext.court_name||'').trim()) normalizedCaseContext.v91_basic_court=caseContext.court_name;
+    if(String(caseContext.judge||'').trim()) normalizedCaseContext.v91_basic_judge=caseContext.judge;
+    eachMap(doc,normalizedCaseContext);
 
     if(model.accident){
       const a=model.accident;
@@ -273,7 +278,7 @@
         else setValueSilent(doc,'m_case_'+i,c.caseNumber);
       }
     }
-    eachMap(doc,caseContext);
+    eachMap(doc,normalizedCaseContext);
     eachMap(doc,defense.standard);
     eachMap(doc,defense.response);
     eachMap(doc,defense.prosecutorResponse);
