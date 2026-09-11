@@ -192,7 +192,7 @@
     setChecked(doc,'prior_10a',s10.prior10a);
     setChecked(doc,'no_fix_10a',s10.noFix10a);
     setValue(doc,'ps67s_10a_detail',s10.relatedDetail);
-    setValue(doc,'ps67s_10a_related',s10.related);
+    setChecked(doc,'ps67s_10a_related',s10.related);
     setValue(doc,'shich_finding',sh.finding);
     setValue(doc,'shich_circ',sh.circumstances);
     setChecked(doc,'shich_repeat',sh.repeat);
