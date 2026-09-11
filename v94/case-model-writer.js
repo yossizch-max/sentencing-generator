@@ -118,11 +118,13 @@
       if(i===1 && proceeding.leadCaseNumber) setValue(doc,'case_num',proceeding.leadCaseNumber);
       setAlias(doc,['m_case_'+i],c.caseNumber);
       setAlias(doc,['m_date_'+i],c.date);
-      setAlias(doc,['m_disq_'+i,'m_disq_type_'+i],c.disqualificationType);
-      setAlias(doc,['m_disq_details_'+i],c.disqualificationDetails);
-      setAlias(doc,['m_lic_year_'+i,'m_lic_exp_year_'+i],c.licenseExpiryYear);
-      setAlias(doc,['m_no_insurance_'+i,'m_no_ins_'+i],c.noInsurance);
-      setAlias(doc,['m_other_'+i,'m_other_off_'+i],c.freeText);
+      setAlias(doc,['m_disq_type_'+i,'m_disqtype_'+i],c.disqualificationType);
+      setAlias(doc,['m_disq_'+i,'m_disq_details_'+i],c.disqualificationDetails);
+      setAlias(doc,['m_lic_exp_'+i,'m_license_expired_'+i],c.licenseExpired);
+      setAlias(doc,['m_lic_exp_year_'+i,'m_lic_year_'+i],c.licenseExpiryYear);
+      setAlias(doc,['m_no_ins_'+i,'m_no_insurance_'+i],c.noInsurance);
+      setAlias(doc,['m_other_off_'+i,'m_other_'+i],c.freeText);
+      setAlias(doc,['m_aggr_'+i],c.aggravating);
     }
   }
 
