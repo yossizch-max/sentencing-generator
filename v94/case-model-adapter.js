@@ -194,6 +194,34 @@
     };
   }
 
+  function stableClone(value){
+    if(Array.isArray(value)) return value.map(stableClone);
+    if(value && typeof value==='object'){
+      const out={};
+      Object.keys(value).sort().forEach(k=>{ out[k]=stableClone(value[k]); });
+      return out;
+    }
+    return value;
+  }
+
+  function toPortableCaseModel(model){
+    const copy=stableClone(model||{});
+    if(copy.metadata && typeof copy.metadata==='object') delete copy.metadata.capturedAt;
+    return copy;
+  }
+
+  function serializeCaseModel(model){
+    return JSON.stringify(toPortableCaseModel(model));
+  }
+
+  function deserializeCaseModel(serialized){
+    const parsed=typeof serialized==='string' ? JSON.parse(serialized) : stableClone(serialized);
+    if(!parsed || parsed.schemaVersion!==SCHEMA_VERSION) {
+      throw new Error('Unsupported CaseModel schemaVersion');
+    }
+    return parsed;
+  }
+
   function validateCaseModel(model){
     const issues=[];
     if(!model || typeof model!=='object') return [{level:'error',code:'MODEL_MISSING'}];
@@ -234,6 +262,9 @@
     detectRawRoute,
     normalizeRoute,
     buildCaseModelFromCurrentState,
+    toPortableCaseModel,
+    serializeCaseModel,
+    deserializeCaseModel,
     validateCaseModel,
     compareLegacyStateToCaseModel
   };
