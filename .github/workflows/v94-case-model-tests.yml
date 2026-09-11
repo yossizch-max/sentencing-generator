@@ -218,10 +218,16 @@ jobs:
       - name: Gate 14C - browser route-specific legacy roundtrip
         run: node v94/browser-route-roundtrip.mjs
 
-      - name: Gate 15 - clean-form writer roundtrip
-        run: node v94/browser-writer-roundtrip.mjs
+      - name: Gate 15A - writer roundtrip 67
+        run: node v94/browser-writer-roundtrip.mjs 67
 
-      - name: Gate 15B - full multi-card fidelity
+      - name: Gate 15B - writer roundtrip combined
+        run: node v94/browser-writer-roundtrip.mjs combined
+
+      - name: Gate 15C - writer roundtrip accident
+        run: node v94/browser-writer-roundtrip.mjs accident
+
+      - name: Gate 15D - full multi-card fidelity
         run: node v94/browser-multi-card-fidelity.mjs
 
       - name: Gate 16A - migration diag 67 basic
