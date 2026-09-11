@@ -315,13 +315,53 @@
     const issues=[];
     if(!model || typeof model!=='object') return [{level:'error',code:'MODEL_MISSING'}];
     if(!model.route) issues.push({level:'warning',code:'ROUTE_MISSING'});
-    if(model.proceeding && model.proceeding.mode==='joined'){
-      (model.proceeding.cases||[]).forEach(c=>{
+
+    const proceeding=model.proceeding||{};
+    const cases=Array.isArray(proceeding.cases)?proceeding.cases:[];
+    if(proceeding.mode==='joined'){
+      cases.forEach(c=>{
         if(c.index>1 && !String(c.caseNumber||'').trim()){
           issues.push({level:'warning',code:'JOINED_CASE_NUMBER_MISSING',index:c.index});
         }
       });
     }
+    if((proceeding.mode==='joined'||proceeding.mode==='multiple') && cases.length<2){
+      issues.push({level:'warning',code:'MULTI_CASE_COUNT_TOO_LOW',count:cases.length});
+    }
+
+    const record=(model.defendant&&model.defendant.record)||{};
+    if(record.traffic && Number(record.traffic.count)>0 && !String(record.traffic.detail||'').trim()){
+      issues.push({level:'warning',code:'TRAFFIC_RECORD_DETAIL_MISSING',count:record.traffic.count});
+    }
+    if(record.criminal && Number(record.criminal.count)>0 && !String(record.criminal.detail||'').trim()){
+      issues.push({level:'warning',code:'CRIMINAL_RECORD_DETAIL_MISSING',count:record.criminal.count});
+    }
+
+    const cond=(record.pendingConditions)||{};
+    [['imprisonment',cond.imprisonment],['disqualification',cond.disqualification],['bonds',cond.bonds]].forEach(([type,list])=>{
+      (Array.isArray(list)?list:[]).forEach(item=>{
+        if(!String(item.sourceCase||'').trim()){
+          issues.push({level:'warning',code:'CONDITION_SOURCE_CASE_MISSING',type,index:item.index});
+        }
+      });
+    });
+
+    if(model.route==='67'){
+      const facts=model.currentOffense&&model.currentOffense.facts;
+      if(facts && !String(facts.disqualificationType||'').trim() && !String(facts.disqualificationDetails||'').trim()){
+        issues.push({level:'info',code:'DISQUALIFICATION_DETAIL_EMPTY'});
+      }
+    }
+
+    if(model.accident){
+      if(model.accident.placementManual && !String(model.accident.placementManualReason||'').trim()){
+        issues.push({level:'warning',code:'ACCIDENT_MANUAL_PLACEMENT_REASON_MISSING'});
+      }
+      if(Number(model.accident.victimCount)>0 && !String(model.accident.description||'').trim()){
+        issues.push({level:'info',code:'ACCIDENT_DESCRIPTION_EMPTY'});
+      }
+    }
+
     return issues;
   }
 
