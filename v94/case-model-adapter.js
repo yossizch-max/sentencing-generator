@@ -169,7 +169,11 @@
       proceeding: {
         leadCaseNumber: val(doc,'case_num'),
         mode: multipleEnabled ? (proc==='consol'?'joined':'multiple') : 'single',
-        cases
+        cases,
+        caseContext: readFieldMap(doc,[
+          'court_name','judge','lawyer_name','lawyer_office',
+          'v91_basic_case','v91_basic_court','v91_basic_def','v91_basic_judge'
+        ])
       },
       currentOffense: {
         ancillaryOffenses: {
@@ -243,6 +247,11 @@
             'req_cond2_months','req_cond2_years','req_cond2_off_10a',
             'req_cond2_off_67','req_cond2_off_other','req_cond2_off_other_text'
           ])
+        },
+        context: {
+          probation: readFieldMap(doc,['has_probation','probation_details','probation_findings']),
+          policy: readFieldMap(doc,['include_policy','policy_text','include_bombastic']),
+          conviction: readFieldMap(doc,['conviction_type','prison_type','criminal_prison_type'])
         }
       },
       accident: route==='accident_injury' ? {
