@@ -33,7 +33,17 @@ const g1=await generate(p1);await p1.close();
 const p2=await open();await p2.evaluate(async m=>window.V94CaseModelWriter.applyCaseModelToDocument(m,window,document),m1);await p2.waitForTimeout(450);
 const m2=await p2.evaluate(()=>window.V94CaseModel.buildCaseModelFromCurrentState(window,document));const g2=await generate(p2);await p2.close();await browser.close();
 for(const m of [m1,m2]){if(m.metadata){delete m.metadata.capturedAt;m.metadata.source='legacy-dom-readonly';}}
+function textDiffContext(a,b){
+  let i=0; while(i<a.length&&i<b.length&&a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i&&j<b.length-i&&a[a.length-1-j]===b[b.length-1-j]) j++;
+  return {
+    firstDiff:i,
+    a:a.slice(Math.max(0,i-220),Math.min(a.length,i+650)),
+    b:b.slice(Math.max(0,i-220),Math.min(b.length,i+650)),
+    commonSuffix:j
+  };
+}
 const modelEqual=JSON.stringify(m1)===JSON.stringify(m2),textEqual=g1.text===g2.text;
-console.log(JSON.stringify({name,modelEqual,textEqual,g1Err:g1.err,g2Err:g2.err,len1:g1.text.length,len2:g2.text.length},null,2));
+console.log(JSON.stringify({name,modelEqual,textEqual,g1Err:g1.err,g2Err:g2.err,len1:g1.text.length,len2:g2.text.length,textDiff:textEqual?null:textDiffContext(g1.text,g2.text)},null,2));
 if(!modelEqual||!textEqual||g1.err||g2.err) throw new Error('diag failed '+name);
 console.log('PASS '+name);
