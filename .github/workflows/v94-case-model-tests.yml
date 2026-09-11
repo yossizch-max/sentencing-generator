@@ -31,6 +31,9 @@ jobs:
           node --check v94/case-model-validation.test.js
           node --check v94/case-model-schema.test.js
           node --check v94/case-model-serialization.test.js
+          node --check v94/case-model-route-facts.test.js
+          node --check v94/case-model-accident.test.js
+          node --check v94/browser-route-facts.mjs
           node --check v94/legacy-architecture-scan.js
           node --check v94/index-script-syntax.test.js
           node --check v94/dom-contract.test.js
@@ -67,7 +70,13 @@ jobs:
       - name: Gate 11 - portable serialization
         run: node v94/case-model-serialization.test.js
 
-      - name: Gate 12 - legacy architecture scan
+      - name: Gate 12 - route-specific canonical facts
+        run: node v94/case-model-route-facts.test.js
+
+      - name: Gate 13 - accident canonical facts
+        run: node v94/case-model-accident.test.js
+
+      - name: Gate 14 - legacy architecture scan
         run: node v94/legacy-architecture-scan.js
 
   browser:
@@ -161,3 +170,6 @@ jobs:
 
       - name: Gate 13F - legacy state roundtrip
         run: node v94/browser-case-model-deep.mjs legacy-roundtrip
+
+      - name: Gate 14A - browser route-specific facts
+        run: node v94/browser-route-facts.mjs
