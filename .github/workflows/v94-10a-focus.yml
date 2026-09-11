@@ -1,0 +1,27 @@
+name: v94 10a focused diagnostic
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+jobs:
+  diag:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start server
+        run: |
+          python3 -m http.server 4173 >/tmp/v94-http.log 2>&1 &
+          sleep 2
+          curl -f http://127.0.0.1:4173/index.html >/dev/null
+      - name: Run focused 10a diagnostic
+        run: node v94/browser-migration-10a-focus.mjs
