@@ -2,6 +2,34 @@
   "modelEqual": true,
   "modelDiff": [],
   "idDiff": [],
+  "allIdDiff": [
+    {
+      "id": "acc_case",
+      "before": "",
+      "after": "D10S"
+    },
+    {
+      "id": "m_lic_exp_1",
+      "before": false
+    },
+    {
+      "id": "m_lic_exp_2",
+      "before": false
+    },
+    {
+      "id": "m_no_ins_1",
+      "before": false
+    },
+    {
+      "id": "m_no_ins_2",
+      "before": false
+    },
+    {
+      "id": "v91_basic_case",
+      "before": "",
+      "after": "D10S"
+    }
+  ],
   "textEqual": false,
   "g1Err": null,
   "g2Err": null,
