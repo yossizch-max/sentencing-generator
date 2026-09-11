@@ -15,11 +15,6 @@
       "path": "proceeding.cases.0.caseNumber",
       "a": "WRITER-MAIN-94",
       "b": ""
-    },
-    {
-      "path": "currentOffense.defenseArguments.response.defense_custom_response",
-      "a": "",
-      "b": "המאשימה תטען כי גם אם יש מקום להביא טענה זו בחשבון, אין בה כדי לשנות את מרכז הכובד הענישתי. הענישה צריכה להיקבע בראש ובראשונה לפי חומרת העבירה, נסיבות ביצועה, הסיכון שנוצר, עברו של הנאשם והצורך בהלימה, גמול, הרתעה והגנה על שלום הציבור."
     }
   ],
   "m1": {
@@ -437,7 +432,7 @@
           "defarg_rehabilitation": false
         },
         "response": {
-          "defense_custom_response": "המאשימה תטען כי גם אם יש מקום להביא טענה זו בחשבון, אין בה כדי לשנות את מרכז הכובד הענישתי. הענישה צריכה להיקבע בראש ובראשונה לפי חומרת העבירה, נסיבות ביצועה, הסיכון שנוצר, עברו של הנאשם והצורך בהלימה, גמול, הרתעה והגנה על שלום הציבור.",
+          "defense_custom_response": "",
           "defense_custom_text": "",
           "defense_delay_due_defendant": false,
           "defense_probation_normative": false,
