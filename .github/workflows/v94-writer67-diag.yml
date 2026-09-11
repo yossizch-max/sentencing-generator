@@ -1,0 +1,36 @@
+name: v94 writer67 diagnostic
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start server
+        run: |
+          python3 -m http.server 4173 >/tmp/v94-http.log 2>&1 &
+          sleep 2
+      - name: Run writer67 diagnostic
+        run: node v94/diagnose-writer67.mjs
+      - name: Commit diagnostic
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/v94-writer67-diff.json
+          git commit -m 'Capture writer67 diagnostic' || exit 0
+          git push origin HEAD:v94/architecture-migration
