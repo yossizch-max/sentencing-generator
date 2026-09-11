@@ -54,6 +54,9 @@ jobs:
       - name: Gate 1C - writer browser syntax
         run: node --check v94/browser-writer-roundtrip.mjs
 
+      - name: Gate PX - probe 10a source
+        run: node v94/probe-10a-source.js
+
       - name: Gate 2 - all inline scripts compile
         run: node v94/index-script-syntax.test.js
 
