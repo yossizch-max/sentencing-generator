@@ -1,0 +1,616 @@
+
+===== function buildMultiCards @ 185701 =====
+ (Object.prototype.hasOwnProperty.call(snap, k)) next[k] = snap[k];
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      caseEl.value = Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`) ? snap[`m_case_${i}`] : '';
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      const el = document.getElementById(key);
+      if (!el) return;
+      const has = Object.prototype.hasOwnProperty.call(snap, key);
+      if (el.type === 'checkbox') el.checked = has ? !!snap[key] : false;
+      else el.value = has ? snap[key] : '';
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+function buildMultiCards() {
+  const count = parseInt(document.getElementById('multi_count').value);
+  const isConsol = document.getElementById('multi_proc_type').value === 'consol';
+  const box = document.getElementById('multi_cards');
+  // v93.8.13.5 (item א): snapshot every existing card's field values BEFORE
+  // wiping innerHTML, so that increasing/decreasing multi_count, switching
+  // same<->consol, or any other trigger that re-runs this function (route
+  // switches, case restore) does not silently discard data already entered
+  // on cards that still exist after the rebuild. Cards beyond the new count
+  // are simply not rebuilt (matches the existing "not included in output"
+  // behavior); indices that did not exist before stay empty (freshly
+  // created, nothing to restore).
+  const _snapshot = snapshotMultiCardFields();
+  box.innerHTML = '';
+
+  const mainCase = (document.getElementById('case_num')?.value || '').trim();
+
+  for (let i = 1; i <= count; i++) {
+    const card = document.createElement('div');
+    card.style.cssText = 'border:2px solid #fbbf24; background:#fffbeb; padding:14px; margin:12px 0; border-radius:8px;';
+
+    let headerLabel = isConsol ? (i === 1 ? 'תיק ראשי' : `תיק מס\' ${i}`) : `אישום ${i}`;
+    let headerCase = '';
+
+    if (isConsol) {
+      if (i === 1) headerCase = mainCase;
+      else headerCase = (document.getElementById(`m_case_${i}`)?.value || '').trim();
+    }
+
+    let html = `<h4 style="margin:0 0 10px 0; color:#a0aec0; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <span>📌 ${headerLabel}${isConsol ? ` <span id="m_case_title_${i}" style="color:#0f172a; font-weight:800;">${headerCase ? `— ${escapeHtml(headerCase)}` : ''}</span>` : ''}</span>
+    </h4>`;
+
+    if (isConsol) {
+      if (i === 1) {
+        // תיק ראשי: מקבל מס' תיק אוטומטי מהחלק הכללי
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק (מהפרטים הכלליים):</label>
+                 <input type="text" id="m_case_${i}" value="${escapeAttr(mainCase)}" readonly
+                        style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; background:#f8fafc;" />`;
+      } else {
+        // תיקים מצורפים: מספר תיק בהזנה ידנית, והכותרת מתעדכנת
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק:</label>
+                 <input type="text" id="m_case_${i}" placeholder='לדוגמה: תת"ע 12345-01-24 או פ"ל 5678-02-23'
+                        oninput="updateConsolCaseTitle(${i})"
+                        style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;" />`;
+      }
+    }
+
+    html += `<label style="font-size:13px; font-weight:600;">תאריך עבירה:</label>
+             <input type="date" id="m_date_${i}" style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;" />
+
+             
+             <label style="font-size:13px; font-weight:600;">סוג הפסילה שהופרה:</label>
+             <select id="m_disq_type_${i}" style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;">
+               <option value="">בחר/י…</option>
+               <option value="פסילת בית משפט">פסילת בית משפט</option>
+               <option value="פסילה מנהלית (קצין משטרה)">פסילה מנהלית (קצין משטרה)</option>
+               <option value="פסילת משרד הרישוי">פסילת משרד הרישוי</option>
+             </select>
+<label style="font-size:13px; font-weight:600;">פרטי הפסילה שהופרה (טקסט חופשי):</label>
+             <textarea id="m_disq_${i}" placeholder="לדוגמה: פסילה שהוטלה בתיק פ&quot;ל 1234-05-22…" style="width:100%; padding:7px; margin-bottom:10px; min-height:60px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;"></textarea>
+
+             <div style="background:#fff; padding:10px; border-radius:6px; margin-bottom:10px; border:1px solid #e5e7eb;">
+               <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">עבירות נלוות:</label>
+
+               <div class="off-list">
+  <div class="off-item" data-sync="m_no_ins_${i}" role="button" tabindex="0" aria-pressed="false">
+    <span class="off-text">נהיגה ללא ביטוח</span>
+    <span class="off-check" aria-hidden="true">✓</span>
+  </div>
+  <div class="off-item" data-sync="m_lic_exp_${i}" role="button" tabindex="0" aria-pressed="false">
+    <span class="off-text">פקיעת רישיון נהיגה</span>
+    <span class="off-check" aria-hidden="true">✓</span>
+  </div>
+</div>
+
+<!-- checkboxים נשמרים עבור מנוע הפלט -->
+<input type="checkbox" id="m_no_ins_${i}" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;">
+<input type="checkbox" id="m_lic_exp_${i}" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;">
+
+<input type="number" id="m_lic_exp_year_${i}" data-year-for="m_lic_exp_${i}" class="hidden-field"
+       place
+===== function toggleMultipleUI @ 178578 =====
+ '__tayonon_storage_probe__';
+    ls.setItem(probe, '1');
+    ls.removeItem(probe);
+    window.__safeLocalStorage = ls;
+  }catch(e){
+    window.__safeLocalStorage = memoryStorage();
+    window.__storageFallbackActive = true;
+  }
+})();
+
+
+
+;
+/* ===== Original script block 3  ===== */
+
+
+
+
+// עזר: נירמול טקסט בסיסי (מניעת שבירת HTML)
+function normalizeHebText(s){
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').trim();
+}
+function formatDateHebrew(dateStr){
+  const s = String(dateStr ?? '').trim();
+  if(!s) return '';
+  if(s === '________') return '________';
+  // HTML date input returns YYYY-MM-DD
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    const [y,m,d] = s.split('-');
+    return `${d}.${m}.${y}`;
+  }
+  return s;
+}
+
+
+// ========== ריבוי אישומים ==========
+function toggleMultipleUI() {
+  const yes=document.getElementById('has_multiple_yes');
+  const ui=document.getElementById('multiple_ui');
+  if(!yes||!ui) return;
+
+  const isMulti = document.getElementById('has_multiple_yes').checked;
+  document.getElementById('multiple_ui').style.display = isMulti ? 'block' : 'none';
+  document.getElementById('single_mode_fields').style.display = isMulti ? 'none' : 'block';
+  if (isMulti) {
+    buildMultiCards();
+  } else {
+    // ניקוי כרטיסים כשעוברים למצב רגיל
+    document.getElementById('multi_cards').innerHTML = '';
+  }
+}
+
+// v93.8.13.5 (item א - multi-card data-preservation fix): the fields each
+// card actually contains, matching buildMultiCards()'s own template below.
+// m_case_i is handled separately (see MULTI_CARD_SNAPSHOT_FIELDS callers) -
+// it is readonly/mirrors case_num for card 1 in consol mode, so it is
+// snapshotted/restored everywhere EXCEPT that one readonly cell.
+const MULTI_CARD_SNAPSHOT_FIELDS = ['m_date_','m_disq_type_','m_disq_','m_no_ins_','m_lic_exp_','m_lic_exp_year_','m_other_off_','m_aggr_'];
+// Upper bound for scanning pre-existing card indices before a rebuild -
+// multi_count's own options only go up to 5, so this is a generous margin,
+// not a semantic limit.
+const MULTI_CARD_SNAPSHOT_MAX_INDEX = 20;
+// v93.8.13.5.2 (CASE C): joined-case numbers live in the DOM only while
+// multi_proc_type==='consol'. Switching to "same" rebuilds cards without
+// m_case_* inputs, so a DOM-only snapshot used to drop m_case_2+ and the
+// subsequent same→consol restore came back empty. This canonical store
+// keeps those values across the DOM gap. m_case_1 is the lead case_num
+// mirror (readonly) and is never stored here.
+window.MULTI_JOINED_CASE_STORE = window.MULTI_JOINED_CASE_STORE || {};
+function currentMultiCountForStore() {
+  var el = document.getElementById('multi_count');
+  var n = el ? parseInt(el.value, 10) : 0;
+  return (n >= 1 && n <= MULTI_CARD_SNAPSHOT_MAX_INDEX) ? n : 0;
+}
+function pruneJoinedCaseStore(count) {
+  var store = window.MULTI_JOINED_CASE_STORE || {};
+  Object.keys(store).forEach(function(k){
+    var m = /^m_case_(\d+)$/.exec(k);
+    if (!m) { delete store[k]; return; }
+    var i = parseInt(m[1], 10);
+    if (i < 2 || i > count) delete store[k];
+  });
+  window.MULTI_JOINED_CASE_STORE = store;
+}
+function rememberJoinedCaseNumber(i, value) {
+  if (i < 2) return;
+  window.MULTI_JOINED_CASE_STORE = window.MULTI_JOINED_CASE_STORE || {};
+  window.MULTI_JOINED_CASE_STORE['m_case_' + i] = value == null ? '' : String(value);
+}
+function clearJoinedCaseStore() {
+  window.MULTI_JOINED_CASE_STORE = {};
+}
+function seedJoinedCaseStoreFromData(data) {
+  var next = {};
+  data = data || {};
+  var multiOn = (data.has_multiple_yes === true || data.has_multiple === 'yes');
+  var count = parseInt(data.multi_count, 10) || 0;
+  if (multiOn) {
+    for (var i = 2; i <= MULTI_CARD_SNAPSHOT_MAX_INDEX; i++) {
+      if (count && i > count) break;
+      var k = 'm_case_' + i;
+      if (Object.prototype.hasOwnProperty.call(data, k) && data[k] != null) {
+        next[k] = String(data[k]);
+      }
+    }
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+}
+function mergeJoinedCaseNumbersIntoData(data) {
+  if (!data) return data;
+  var multiOn = (data.has_multiple_yes === true || data.has_multiple === 'yes');
+  if (!multiOn) return data;
+  var count = parseInt(data.multi_count, 10) || 0;
+  var store = window.MULTI_JOINED_CASE_STORE || {};
+  for (var i = 2; i <= count; i++) {
+    var k = 'm_case_' + i;
+    if (data[k] == null || data[k] === '') {
+      if (Object.prototype.hasOwnProperty.call(store, k)) data[k] = store[k];
+    }
+  }
+  return data;
+}
+function snapshotMultiCardFields() {
+  const snap = {};
+  const store = window.MULTI_JOINED_CASE_STORE || {};
+  const count = currentMultiCountForStore();
+  for (let i = 1; i <= MULTI_CARD_SNAPSHOT_MAX_INDEX; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      snap[`m_case_${i}`] = caseEl.value;
+      if (i >= 2) rememberJoinedCaseNumber(i, caseEl.value);
+    } else if (i >= 2 && Object.prototype.hasOwnProperty.call(store, `m_case_${i}`)) {
+      snap[`m_case_${i}`] = store[`m_case_${i}`];
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const el = document.getElementById(`${prefix}${i}`);
+      if (!el) return;
+      snap[`${prefix}${i}`] = (el.type === 'checkbox') ? el.checked : el.value;
+    });
+  }
+  pruneJoinedCaseStore(count);
+  Object.keys(snap).forEach(function(k){
+    var m = /^m_case_(\d+)$/.exec(k);
+    if (m && parseInt(m[1], 10) > count) delete snap[k];
+  });
+  return snap;
+}
+function restoreMultiCardFields(snap, count) {
+  snap = snap || {};
+  pruneJoinedCaseStore(count);
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`)) {
+      if (i >= 2) rememberJoinedCaseNumber(i, snap[`m_case_${i}`]);
+      if (caseEl && !caseEl.readOnly)
+===== function snapshotMultiCardFields @ 182229 =====
+for (var i = 2; i <= MULTI_CARD_SNAPSHOT_MAX_INDEX; i++) {
+      if (count && i > count) break;
+      var k = 'm_case_' + i;
+      if (Object.prototype.hasOwnProperty.call(data, k) && data[k] != null) {
+        next[k] = String(data[k]);
+      }
+    }
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+}
+function mergeJoinedCaseNumbersIntoData(data) {
+  if (!data) return data;
+  var multiOn = (data.has_multiple_yes === true || data.has_multiple === 'yes');
+  if (!multiOn) return data;
+  var count = parseInt(data.multi_count, 10) || 0;
+  var store = window.MULTI_JOINED_CASE_STORE || {};
+  for (var i = 2; i <= count; i++) {
+    var k = 'm_case_' + i;
+    if (data[k] == null || data[k] === '') {
+      if (Object.prototype.hasOwnProperty.call(store, k)) data[k] = store[k];
+    }
+  }
+  return data;
+}
+function snapshotMultiCardFields() {
+  const snap = {};
+  const store = window.MULTI_JOINED_CASE_STORE || {};
+  const count = currentMultiCountForStore();
+  for (let i = 1; i <= MULTI_CARD_SNAPSHOT_MAX_INDEX; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      snap[`m_case_${i}`] = caseEl.value;
+      if (i >= 2) rememberJoinedCaseNumber(i, caseEl.value);
+    } else if (i >= 2 && Object.prototype.hasOwnProperty.call(store, `m_case_${i}`)) {
+      snap[`m_case_${i}`] = store[`m_case_${i}`];
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const el = document.getElementById(`${prefix}${i}`);
+      if (!el) return;
+      snap[`${prefix}${i}`] = (el.type === 'checkbox') ? el.checked : el.value;
+    });
+  }
+  pruneJoinedCaseStore(count);
+  Object.keys(snap).forEach(function(k){
+    var m = /^m_case_(\d+)$/.exec(k);
+    if (m && parseInt(m[1], 10) > count) delete snap[k];
+  });
+  return snap;
+}
+function restoreMultiCardFields(snap, count) {
+  snap = snap || {};
+  pruneJoinedCaseStore(count);
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`)) {
+      if (i >= 2) rememberJoinedCaseNumber(i, snap[`m_case_${i}`]);
+      if (caseEl && !caseEl.readOnly) caseEl.value = snap[`m_case_${i}`];
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      if (!Object.prototype.hasOwnProperty.call(snap, key)) return;
+      const el = document.getElementById(key);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!snap[key];
+      else el.value = snap[key];
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+// v93.8.13.5 (item ג - route-switch multi-card fix): unlike
+// restoreMultiCardFields() (used internally by buildMultiCards() to
+// preserve data across its own rebuild), this ALWAYS writes every field -
+// including blanking fields absent from the snapshot - rather than skipping
+// them. Used when switching INTO a route: the live DOM may still hold the
+// PREVIOUS route's card data (buildMultiCards()'s own rebuild, triggered as
+// part of the route switch, would otherwise faithfully preserve that stale
+// data into the newly-sized cards), so restoring a route that has no
+// captured card data of its own must positively clear the fields rather
+// than silently leave the other route's values in place.
+function applyMultiCardsExact(snap, count) {
+  snap = snap || {};
+  var next = {};
+  for (var i = 2; i <= count; i++) {
+    var k = 'm_case_' + i;
+    if (Object.prototype.hasOwnProperty.call(snap, k)) next[k] = snap[k];
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      caseEl.value = Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`) ? snap[`m_case_${i}`] : '';
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      const el = document.getElementById(key);
+      if (!el) return;
+      const has = Object.prototype.hasOwnProperty.call(snap, key);
+      if (el.type === 'checkbox') el.checked = has ? !!snap[key] : false;
+      else el.value = has ? snap[key] : '';
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+function buildMultiCards() {
+  const count = parseInt(document.getElementById('multi_count').value);
+  const isConsol = document.getElementById('multi_proc_type').value === 'consol';
+  const box = document.getElementById('multi_cards');
+  // v93.8.13.5 (item א): snapshot every existing card's field values BEFORE
+  // wiping innerHTML, so that increasing/decreasing multi_count, switching
+  // same<->consol, or any other trigger that re-runs this function (route
+  // switches, case restore) does not silently discard data already entered
+  // on cards that still exist after the rebuild. Cards beyond the new count
+  // are simply not rebuilt (matches the existing "not included in output"
+  // behavior); indices that did not exist before stay empty (freshly
+  // created, nothing to restore).
+  const _snapshot = snapshotMultiCardFields();
+  box.innerHTML = '';
+
+  const mainCase = (document.getElementById('case_num')?.value || '').trim();
+
+  for (let i = 1; i <= count; i++) {
+    const card = document.createElement('div');
+    card.style.cssText = 'border:2px solid #fbbf24; background:#fffbeb; padding:14px; margin:12px 0; border-radius:8px;';
+
+    let headerLabel = isConsol ? (i === 1 ? 'תיק ראשי' : `תיק מס\' ${i}`) : `אישום ${i}`;
+    let headerCase = '';
+
+    if (isConsol) {
+      if (i === 1) headerCase = mainCase;
+      else headerCase = (document.getElementById(`m_case_${i}`)?.value || '').trim();
+    }
+
+    let html = `<h4 style="margin:0 0 10px 0; color:#a0aec0; display:flex; align-items:center; justify
+===== function restoreMultiCardFields @ 183209 =====
+LTI_CARD_SNAPSHOT_MAX_INDEX; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      snap[`m_case_${i}`] = caseEl.value;
+      if (i >= 2) rememberJoinedCaseNumber(i, caseEl.value);
+    } else if (i >= 2 && Object.prototype.hasOwnProperty.call(store, `m_case_${i}`)) {
+      snap[`m_case_${i}`] = store[`m_case_${i}`];
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const el = document.getElementById(`${prefix}${i}`);
+      if (!el) return;
+      snap[`${prefix}${i}`] = (el.type === 'checkbox') ? el.checked : el.value;
+    });
+  }
+  pruneJoinedCaseStore(count);
+  Object.keys(snap).forEach(function(k){
+    var m = /^m_case_(\d+)$/.exec(k);
+    if (m && parseInt(m[1], 10) > count) delete snap[k];
+  });
+  return snap;
+}
+function restoreMultiCardFields(snap, count) {
+  snap = snap || {};
+  pruneJoinedCaseStore(count);
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`)) {
+      if (i >= 2) rememberJoinedCaseNumber(i, snap[`m_case_${i}`]);
+      if (caseEl && !caseEl.readOnly) caseEl.value = snap[`m_case_${i}`];
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      if (!Object.prototype.hasOwnProperty.call(snap, key)) return;
+      const el = document.getElementById(key);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!snap[key];
+      else el.value = snap[key];
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+// v93.8.13.5 (item ג - route-switch multi-card fix): unlike
+// restoreMultiCardFields() (used internally by buildMultiCards() to
+// preserve data across its own rebuild), this ALWAYS writes every field -
+// including blanking fields absent from the snapshot - rather than skipping
+// them. Used when switching INTO a route: the live DOM may still hold the
+// PREVIOUS route's card data (buildMultiCards()'s own rebuild, triggered as
+// part of the route switch, would otherwise faithfully preserve that stale
+// data into the newly-sized cards), so restoring a route that has no
+// captured card data of its own must positively clear the fields rather
+// than silently leave the other route's values in place.
+function applyMultiCardsExact(snap, count) {
+  snap = snap || {};
+  var next = {};
+  for (var i = 2; i <= count; i++) {
+    var k = 'm_case_' + i;
+    if (Object.prototype.hasOwnProperty.call(snap, k)) next[k] = snap[k];
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      caseEl.value = Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`) ? snap[`m_case_${i}`] : '';
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      const el = document.getElementById(key);
+      if (!el) return;
+      const has = Object.prototype.hasOwnProperty.call(snap, key);
+      if (el.type === 'checkbox') el.checked = has ? !!snap[key] : false;
+      else el.value = has ? snap[key] : '';
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+function buildMultiCards() {
+  const count = parseInt(document.getElementById('multi_count').value);
+  const isConsol = document.getElementById('multi_proc_type').value === 'consol';
+  const box = document.getElementById('multi_cards');
+  // v93.8.13.5 (item א): snapshot every existing card's field values BEFORE
+  // wiping innerHTML, so that increasing/decreasing multi_count, switching
+  // same<->consol, or any other trigger that re-runs this function (route
+  // switches, case restore) does not silently discard data already entered
+  // on cards that still exist after the rebuild. Cards beyond the new count
+  // are simply not rebuilt (matches the existing "not included in output"
+  // behavior); indices that did not exist before stay empty (freshly
+  // created, nothing to restore).
+  const _snapshot = snapshotMultiCardFields();
+  box.innerHTML = '';
+
+  const mainCase = (document.getElementById('case_num')?.value || '').trim();
+
+  for (let i = 1; i <= count; i++) {
+    const card = document.createElement('div');
+    card.style.cssText = 'border:2px solid #fbbf24; background:#fffbeb; padding:14px; margin:12px 0; border-radius:8px;';
+
+    let headerLabel = isConsol ? (i === 1 ? 'תיק ראשי' : `תיק מס\' ${i}`) : `אישום ${i}`;
+    let headerCase = '';
+
+    if (isConsol) {
+      if (i === 1) headerCase = mainCase;
+      else headerCase = (document.getElementById(`m_case_${i}`)?.value || '').trim();
+    }
+
+    let html = `<h4 style="margin:0 0 10px 0; color:#a0aec0; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <span>📌 ${headerLabel}${isConsol ? ` <span id="m_case_title_${i}" style="color:#0f172a; font-weight:800;">${headerCase ? `— ${escapeHtml(headerCase)}` : ''}</span>` : ''}</span>
+    </h4>`;
+
+    if (isConsol) {
+      if (i === 1) {
+        // תיק ראשי: מקבל מס' תיק אוטומטי מהחלק הכללי
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק (מהפרטים הכלליים):</label>
+                 <input type="text" id="m_case_${i}" value="${escapeAttr(mainCase)}" readonly
+                        style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; background:#f8fafc;" />`;
+      } else {
+        // תיקים מצורפים: מספר תיק בהזנה ידנית, והכותרת מתעדכנת
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק:</label>
+                 <input type="text" id="m_case_${i}" placeholder='לדוגמה: תת"ע 12345-01-24 או פ"ל 5678-02-23'
+                 
+===== function applyMultiCardsExact @ 184748 =====
+});
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+// v93.8.13.5 (item ג - route-switch multi-card fix): unlike
+// restoreMultiCardFields() (used internally by buildMultiCards() to
+// preserve data across its own rebuild), this ALWAYS writes every field -
+// including blanking fields absent from the snapshot - rather than skipping
+// them. Used when switching INTO a route: the live DOM may still hold the
+// PREVIOUS route's card data (buildMultiCards()'s own rebuild, triggered as
+// part of the route switch, would otherwise faithfully preserve that stale
+// data into the newly-sized cards), so restoring a route that has no
+// captured card data of its own must positively clear the fields rather
+// than silently leave the other route's values in place.
+function applyMultiCardsExact(snap, count) {
+  snap = snap || {};
+  var next = {};
+  for (var i = 2; i <= count; i++) {
+    var k = 'm_case_' + i;
+    if (Object.prototype.hasOwnProperty.call(snap, k)) next[k] = snap[k];
+  }
+  window.MULTI_JOINED_CASE_STORE = next;
+  for (let i = 1; i <= count; i++) {
+    const caseEl = document.getElementById(`m_case_${i}`);
+    if (caseEl && !caseEl.readOnly) {
+      caseEl.value = Object.prototype.hasOwnProperty.call(snap, `m_case_${i}`) ? snap[`m_case_${i}`] : '';
+    }
+    MULTI_CARD_SNAPSHOT_FIELDS.forEach(function(prefix){
+      const key = `${prefix}${i}`;
+      const el = document.getElementById(key);
+      if (!el) return;
+      const has = Object.prototype.hasOwnProperty.call(snap, key);
+      if (el.type === 'checkbox') el.checked = has ? !!snap[key] : false;
+      else el.value = has ? snap[key] : '';
+    });
+    if (typeof updateConsolCaseTitle === 'function') updateConsolCaseTitle(i);
+  }
+}
+function buildMultiCards() {
+  const count = parseInt(document.getElementById('multi_count').value);
+  const isConsol = document.getElementById('multi_proc_type').value === 'consol';
+  const box = document.getElementById('multi_cards');
+  // v93.8.13.5 (item א): snapshot every existing card's field values BEFORE
+  // wiping innerHTML, so that increasing/decreasing multi_count, switching
+  // same<->consol, or any other trigger that re-runs this function (route
+  // switches, case restore) does not silently discard data already entered
+  // on cards that still exist after the rebuild. Cards beyond the new count
+  // are simply not rebuilt (matches the existing "not included in output"
+  // behavior); indices that did not exist before stay empty (freshly
+  // created, nothing to restore).
+  const _snapshot = snapshotMultiCardFields();
+  box.innerHTML = '';
+
+  const mainCase = (document.getElementById('case_num')?.value || '').trim();
+
+  for (let i = 1; i <= count; i++) {
+    const card = document.createElement('div');
+    card.style.cssText = 'border:2px solid #fbbf24; background:#fffbeb; padding:14px; margin:12px 0; border-radius:8px;';
+
+    let headerLabel = isConsol ? (i === 1 ? 'תיק ראשי' : `תיק מס\' ${i}`) : `אישום ${i}`;
+    let headerCase = '';
+
+    if (isConsol) {
+      if (i === 1) headerCase = mainCase;
+      else headerCase = (document.getElementById(`m_case_${i}`)?.value || '').trim();
+    }
+
+    let html = `<h4 style="margin:0 0 10px 0; color:#a0aec0; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <span>📌 ${headerLabel}${isConsol ? ` <span id="m_case_title_${i}" style="color:#0f172a; font-weight:800;">${headerCase ? `— ${escapeHtml(headerCase)}` : ''}</span>` : ''}</span>
+    </h4>`;
+
+    if (isConsol) {
+      if (i === 1) {
+        // תיק ראשי: מקבל מס' תיק אוטומטי מהחלק הכללי
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק (מהפרטים הכלליים):</label>
+                 <input type="text" id="m_case_${i}" value="${escapeAttr(mainCase)}" readonly
+                        style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; background:#f8fafc;" />`;
+      } else {
+        // תיקים מצורפים: מספר תיק בהזנה ידנית, והכותרת מתעדכנת
+        html += `<label style="font-size:13px; font-weight:600;">מספר תיק:</label>
+                 <input type="text" id="m_case_${i}" placeholder='לדוגמה: תת"ע 12345-01-24 או פ"ל 5678-02-23'
+                        oninput="updateConsolCaseTitle(${i})"
+                        style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;" />`;
+      }
+    }
+
+    html += `<label style="font-size:13px; font-weight:600;">תאריך עבירה:</label>
+             <input type="date" id="m_date_${i}" style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;" />
+
+             
+             <label style="font-size:13px; font-weight:600;">סוג הפסילה שהופרה:</label>
+             <select id="m_disq_type_${i}" style="width:100%; padding:7px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;">
+               <option value="">בחר/י…</option>
+               <option value="פסילת בית משפט">פסילת בית משפט</option>
+               <option value="פסילה מנהלית (קצין משטרה)">פסילה מנהלית (קצין משטרה)</option>
+               <option value="פסילת משרד הרישוי">פסילת משרד הרישוי</option>
+             </select>
+<label style="font-size:13px; font-weight:600;">פרטי הפסילה שהופרה (טקסט חופשי):</label>
+             <textarea id="m_disq_${i}" placeholder="לדוגמה: פסילה שהוטלה בתיק פ&quot;ל 1234-05-22…" style="width:100%; padding:7px; margin-bottom:10px; min-height:60px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit;"></textarea>
+
+             <div style="background:#fff; padding:10px; border-radius:6px; margin-bottom:10px; border:1px solid #e5e7eb;">
+               <label style="font-size:13
