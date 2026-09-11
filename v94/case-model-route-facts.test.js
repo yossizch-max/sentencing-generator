@@ -9,17 +9,17 @@ const map={
   ps67s_prior_67_count:mkEl('3'),
   ps67s_disq_knowledge:mkEl('ידע מלא'),
   ps67s_disq_source:mkEl('גזר דין'),
-  prior_10a:mkEl('2'),
-  no_fix_10a:mkEl('',true),
+  prior_10a:mkEl('',true,{type:'checkbox'}),
+  no_fix_10a:mkEl('',true,{type:'checkbox'}),
   ps67s_10a_detail:mkEl('פרט 10א'),
   ps67s_10a_related:mkEl('כן'),
   shich_finding:mkEl('שכרות'),
   shich_circ:mkEl('נסיבות'),
-  shich_repeat:mkEl('כן'),
+  shich_repeat:mkEl('',true,{type:'checkbox'}),
   shich_repeat_year:mkEl('2024'),
-  shich_accident:mkEl('כן'),
+  shich_accident:mkEl('',true,{type:'checkbox'}),
   shich_accident_result:mkEl('נזק'),
-  shich_40a:mkEl('כן'),
+  shich_40a:mkEl('',true,{type:'checkbox'}),
   shich_40a_detail:mkEl('פרט'),
   ps67s_alcohol_level:mkEl('850'),
   ps67s_shich_type:mkEl('אלכוהול'),
@@ -33,8 +33,9 @@ const map={
 };
 const m=api.buildCaseModelFromCurrentState({_mashlul:'67_10a_shichrut'},mkDoc(map));
 if(m.currentOffense.routeFacts.section67.prior67Count!==3) throw new Error('67 facts');
-if(m.currentOffense.routeFacts.section10a.prior10a!=='2') throw new Error('10a facts');
+if(m.currentOffense.routeFacts.section10a.prior10a!==true) throw new Error('10a facts');
 if(m.currentOffense.routeFacts.section10a.noFix10a!==true) throw new Error('10a checkbox');
+if(m.currentOffense.routeFacts.intoxication.repeat!==true) throw new Error('shichrut repeat checkbox');
 if(m.currentOffense.routeFacts.intoxication.priorCount!==1) throw new Error('shichrut prior count');
 if(m.currentOffense.routeFacts.intoxication.alcoholLevel!=='850') throw new Error('alcohol level');
 if(m.sentencing.petition.fine!=='5000') throw new Error('fine');
