@@ -18875,7 +18875,16 @@ document.addEventListener('DOMContentLoaded', function(){
   function activeElement(route){var def=RouteRegistry.get(route);return document.getElementById(def&&def.outputId||'paper');}
   function commit(html,context,source){
     if(!valid(html)||!window.GenerationOutput||typeof GenerationOutput.write!=='function')return '';
-    var processed=runProcessors(html,context||{});if(!valid(processed))return '';
+    var processed=runProcessors(html,context||{});
+    /* v93.8.14: finalize accident policy normalization synchronously in the
+       canonical commit path so repeated generations remain idempotent. */
+    try{
+      var commitRoute=String(context&&context.route||RouteRegistry.current()||'').replace(/-/g,'_');
+      if(commitRoute==='accident_injury'&&typeof window.__v92527NormalizeHtml==='function'){
+        processed=window.__v92527NormalizeHtml(processed,commitRoute);
+      }
+    }catch(_accidentPolicyNormalizeError){}
+    if(!valid(processed))return '';
     committing=true;
     try{
       /* Application revision is diagnostic only. The canonical GenerationOutput
