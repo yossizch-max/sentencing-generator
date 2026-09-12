@@ -1,0 +1,63 @@
+name: v94 complex case gates
+
+on:
+  push:
+    branches: [fix/v94-complex-case-gates]
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test v94/*.test.js
+      - name: Preserve production source
+        run: |
+          git fetch origin main
+          git diff --exit-code origin/main -- index.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        scenario: [67-basic, 67-joined, 10a, 67+10a, shichrut, 67_shichrut, 10a_shichrut, 67_10a_shichrut, accident]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local test server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/v94-http.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html > /dev/null; then exit 0; fi
+            sleep 0.2
+          done
+          exit 1
+      - name: Route diagnostic
+        if: always()
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+        run: node v94/browser-migration-diag.mjs "$SCENARIO"
+      - name: Exact model and generated output
+        if: always()
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+        run: node v94/browser-migration-harness.mjs "$SCENARIO"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-${{ matrix.scenario }}
+          path: test-results/

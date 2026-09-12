@@ -1,10 +1,13 @@
 import { chromium } from 'playwright';
+import fs from 'node:fs';
+import checks from './migration-assertions.js';
+const { selectScenarios, diffModels, compareOutput } = checks;
 
 const base='http://127.0.0.1:4173/index.html';
 const adapter='http://127.0.0.1:4173/v94/case-model-adapter.js';
 const writer='http://127.0.0.1:4173/v94/case-model-writer.js';
 
-const browser=await chromium.launch({headless:true});
+let browser;
 
 async function page(){
   const p=await browser.newPage({viewport:{width:1366,height:768}});
@@ -66,12 +69,6 @@ function stripVolatile(model){
   if(m.metadata) delete m.metadata.capturedAt;
   return m;
 }
-function normalizeHtml(s){
-  return String(s||'')
-    .replace(/s+/g,' ')
-    .replace(/>s+</g,'><')
-    .trim();
-}
 async function seed(p,vals){
   await p.evaluate(values=>{
     for(const [id,v] of Object.entries(values)){
@@ -131,7 +128,11 @@ const scenarios=[
 
 const reports=[];
 
-for(const sc of scenarios){
+const selected=selectScenarios(scenarios,process.argv[2]||'all');
+browser=await chromium.launch({headless:true});
+
+try {
+for(const sc of selected){
   const p1=await page();
   await choose(p1,sc.route);
   await seed(p1,sc.vals);
@@ -185,15 +186,17 @@ for(const sc of scenarios){
   }
 
   const modelEqual=stable(m1)===stable(m2);
-  const htmlEqual=normalizeHtml(gen1.paper)===normalizeHtml(gen2.paper);
-  const textEqual=String(gen1.text||'').replace(/s+/g,' ').trim()===String(gen2.text||'').replace(/s+/g,' ').trim();
+  const { htmlEqual, textEqual, nonEmpty, errorFree }=compareOutput(gen1,gen2);
+  const modelDiff=diffModels(m1,m2);
 
-  reports.push({name:sc.name,route:sc.route,modelEqual,stateDiffCount:stateDiff.length,stateDiff,htmlEqual,textEqual,gen1Err:gen1.err,gen2Err:gen2.err,len1:gen1.paper.length,len2:gen2.paper.length});
+  reports.push({name:sc.name,route:sc.route,modelEqual,modelDiff,nonEmpty,errorFree,stateDiffCount:stateDiff.length,stateDiff,htmlEqual,textEqual,gen1Err:gen1.err,gen2Err:gen2.err,len1:gen1.paper.length,len2:gen2.paper.length});
 }
 
-await browser.close();
+} finally { await browser.close(); }
 
-const failed=reports.filter(r=>!r.modelEqual||r.stateDiffCount||!r.textEqual||r.gen1Err||r.gen2Err);
+const failed=reports.filter(r=>!r.modelEqual||r.stateDiffCount||!r.htmlEqual||!r.textEqual||!r.nonEmpty||!r.errorFree);
+fs.mkdirSync('test-results',{recursive:true});
+fs.writeFileSync('test-results/migration-'+(process.argv[2]||'all')+'.json',JSON.stringify(reports,null,2));
 console.log(JSON.stringify(reports,null,2));
 if(failed.length) throw new Error('migration harness failures: '+failed.map(x=>x.name).join(', '));
 console.log('PASS migration harness '+reports.length+'/'+reports.length+' scenarios');

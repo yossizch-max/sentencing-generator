@@ -1,4 +1,6 @@
 import { chromium } from 'playwright';
+import fs from 'node:fs';
+import checks from './migration-assertions.js';
 const name=process.argv[2];
 if(!name) throw new Error('scenario name required');
 const defs={
@@ -73,6 +75,9 @@ function textDiffContext(a,b){
   };
 }
 const modelEqual=JSON.stringify(m1)===JSON.stringify(m2),textEqual=g1.text===g2.text;
-console.log(JSON.stringify({name,modelEqual,textEqual,g1Err:g1.err,g2Err:g2.err,len1:g1.text.length,len2:g2.text.length,textDiff:textEqual?null:textDiffContext(g1.text,g2.text)},null,2));
-if(!modelEqual||!textEqual||g1.err||g2.err) throw new Error('diag failed '+name);
+const report={name,modelEqual,modelDiff:checks.diffModels(m1,m2),textEqual,g1Err:g1.err,g2Err:g2.err,len1:g1.text.length,len2:g2.text.length,textDiff:textEqual?null:textDiffContext(g1.text,g2.text)};
+fs.mkdirSync('test-results',{recursive:true});
+fs.writeFileSync('test-results/diag-'+name+'.json',JSON.stringify(report,null,2));
+console.log(JSON.stringify(report,null,2));
+if(!modelEqual||!textEqual||!g1.text.trim()||!g2.text.trim()||g1.err||g2.err) throw new Error('diag failed '+name);
 console.log('PASS '+name);
