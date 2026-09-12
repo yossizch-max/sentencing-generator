@@ -1,0 +1,41 @@
+name: v94 migration tail gates
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+jobs:
+  tail:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start server
+        run: |
+          python3 -m http.server 4173 >/tmp/v94-http.log 2>&1 &
+          sleep 2
+          curl -f http://127.0.0.1:4173/index.html >/dev/null
+      - name: Triple combined route
+        run: node v94/browser-migration-diag.mjs "67_10a_shichrut"
+      - name: Accident route
+        run: node v94/browser-migration-diag.mjs "accident"
+      - name: Non-blocked matrix 67 basic
+        run: node v94/browser-migration-harness.mjs "67-basic"
+      - name: Non-blocked matrix 67 joined
+        run: node v94/browser-migration-harness.mjs "67-joined"
+      - name: Non-blocked matrix 10a
+        run: node v94/browser-migration-harness.mjs "10a"
+      - name: Non-blocked matrix 67+10a
+        run: node v94/browser-migration-harness.mjs "67+10a"
+      - name: Non-blocked matrix shichrut
+        run: node v94/browser-migration-harness.mjs "shichrut"
+      - name: Non-blocked matrix accident
+        run: node v94/browser-migration-harness.mjs "accident"
