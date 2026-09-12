@@ -1760,7 +1760,14 @@ body.mode-accident #v75_40a_panel{display:none!important;}
 </div>
 <div id="fshichrut">
 <div class="section-title">נהיגה בשכרות — פרטים</div>
-<label for="shich_finding">ממצאי הבדיקה:</label>
+<label for="shich_proof_type">אופן הוכחת השכרות:</label>
+<select class="autoselect" id="shich_proof_type">
+<option selected="" value="alcohol">אלכוהול</option>
+<option value="drug">סם</option>
+<option value="characteristics">מבחני מאפיינים</option>
+<option value="refusal">סירוב לבדיקה</option>
+</select>
+<label for="shich_finding">ממצאי הבדיקה או פרטי הסירוב:</label>
 <input class="autoselect" id="shich_finding" placeholder="לדוגמה: 644 מיקרוגרם אלכוהול בליטר אוויר נשוף / תוצר THC בדגימת שתן / סירב לבדיקת נשיפה" type="text" value=""/>
 <label for="shich_circ">נסיבות האירוע (אופציונלי):</label>
 <input class="autoselect" id="shich_circ" placeholder="לדוגמה: כביש עירוני הומה, שעת צהריים, כשל במבחן המאפיינים" type="text" value=""/>
@@ -9395,8 +9402,19 @@ function generateShichrut(){
   var judge    = v('judge')||'________';
   var name     = esc(v('def_name')||'________');
   var caseN    = esc(v('case_num')||'________');
+  var proofType = v('shich_proof_type') || 'alcohol';
   var finding  = esc(v('shich_finding'));
   var circ     = esc(v('shich_circ'));
+  var convictionText = '1. הנאשם הורשע בעבירה של <b>נהיגה בשכרות</b>, עבירה לפי סעיף 62(3) לפקודת התעבורה [נוסח חדש], בצירוף סעיף 39א לפקודה.';
+  var findingLead = 'על פי ממצאי הבדיקה';
+  if(proofType === 'refusal'){
+    convictionText = '1. הנאשם הורשע בעבירה של <b>נהיגה בשכרות</b> לפי סעיף 62(3) לפקודת התעבורה [נוסח חדש], מכוח חזקת הסירוב הקבועה בסעיף 64ד לפקודה, ובצירוף סעיף 39א לפקודה.';
+    findingLead = 'פרטי הסירוב';
+  } else if(proofType === 'drug'){
+    findingLead = 'על פי ממצאי בדיקת הסם';
+  } else if(proofType === 'characteristics'){
+    findingLead = 'על פי ממצאי מבחני המאפיינים';
+  }
   var isRepeat = cb('shich_repeat');
   var isAccident = cb('shich_accident');
   var accResult = isAccident ? (v('shich_accident_result') || 'real_injury') : '';
@@ -9440,15 +9458,15 @@ function generateShichrut(){
   // ── א. פתיח ורקע עובדתי ──
   o += SEC(heb[si++],'פתיח ורקע עובדתי');
   o += 'בהתאם לתיקון 113 לחוק העונשין, העיקרון המנחה לצורך קביעת עונשו של הנאשם הינו "עיקרון ההלימה" — קיומו של יחס הולם בין חומרת המעשה ונסיבותיו לבין העונש המוטל על הנאשם.<br><br>';
-  o += '1. הנאשם הורשע בעבירה של <b>נהיגה בשכרות</b> — עבירה לפי סעיף 62(3) לפקודת התעבורה [נוסח חדש], יחד עם סעיף 39א לפקודה.';
-  if(finding){ o += ' על פי ממצאי הבדיקה, '+finding+'.'; }
+  o += convictionText;
+  if(finding){ o += ' '+findingLead+', '+finding+'.'; }
   o += '<br>';
   if(circ){ o += '2. '+circ+'.<br>'; }
   o += '</div>';
 
   // ── ב. חומרת העבירה והערכים המוגנים ──
   o += SEC(heb[si++],'חומרת העבירה והערכים המוגנים שנפגעו');
-  o += 'העבירה של נהיגה בשכרות היא מן החמורות בפקודת התעבורה. מאחר ושימוש בחומר משנה תודעה שביכולתו להשפיע על תפיסת המציאות במוחו של הנהג, מעמיד הנוהג בשכרות בסכנה ממשית הן את עצמו והן את ציבור משתמשי הדרך:';
+  o += 'עבירת הנהיגה בשכרות היא מן החמורות שבפקודת התעבורה. נהיגה בשכרות פוגעת בשיקול הדעת, בזמן התגובה וביכולת השליטה ברכב, ומעמידה בסיכון ממשי את הנהג ואת ציבור משתמשי הדרך:';
   o += Q('"הנוהג בשכרות, כפי שנאמר בבית משפט זה במספר רב של מקרים, הוא בגדר \u05f4פצצה מתקתקת\u05f4 העלולה להפיל חללים בציבור המשתמש בדרכים, בקרב הנוסעים ברכב, ואף לפגוע בנוהג עצמו" (ע"פ 5456/11 יונתן שנור נ\u05f3 מדינת ישראל (פורסם בנבו, 25.07.11)).');
   o += 'על הצורך בהחמרת מדיניות הענישה כלפי הנוהגים בשכרות עמד בית המשפט העליון ברע"פ 5355/22 עמוס נ\u05f3 מדינת ישראל (28.8.2022):';
   o += Q('"טרם סיום — לא ניתן שלא לעמוד, פעם נוספת, על חומרת עבירת נהיגה בשכרות, אשר מעמידה בסיכון את שלום הציבור וביטחונו… תחילתה של נהיגה תחת השפעת משקאות משכרים או סמים — ידועה; אולם סופה ולאלו נזקים הייתה גורמת בדרכה, לגוף או לרכוש — מי ידע. משכך, יש לשוב ולהזכיר כי יש לנקוט ביד קשה כלפי אלו הנוהגים בשכרות למען יירתעו ויתרחקו פורעי חוק מהדרכים" (וראו גם רע"פ 4766/19 יחיה נ\u05f3 מדינת ישראל (15.7.2019))).');
@@ -12171,7 +12189,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   var ids67Only = ['disq_details','request_40a','request_40a_life','request_40a_life_detail'];
   var ids10aOnly = ['prior_10a','no_fix_10a'];
-  var idsShichOnly = ['shich_40a','shich_40a_detail','shich_circ','shich_finding','shich_repeat','shich_repeat_year'];
+  var idsShichOnly = ['shich_proof_type','shich_40a','shich_40a_detail','shich_circ','shich_finding','shich_repeat','shich_repeat_year'];
   var ids67ShichOnly = ['ps67s_disq_source','ps67s_disq_knowledge','ps67s_shich_type','ps67s_alcohol_level','ps67s_life_40a','ps67s_life_40a_detail','ps67s_10a_related','ps67s_10a_detail','psdef_custom_text','psdef_custom_response'];
 
   function cleanupForRoute(type){
@@ -20495,7 +20513,7 @@ window.__v9260Architecture=true;</script>
     'disq_type','disq_details','disq_origin_gmr','prior_10a','no_fix_10a',
     'ps67s_disq_source','ps67s_disq_knowledge','ps67s_shich_type','ps67s_alcohol_level','ps67s_prior_67_count','ps67s_prior_shich_count',
     'v75_40a_10y','v75_40a_10y_detail','v75_40a_life','v75_40a_life_detail',
-    'shich_finding','shich_circ','shich_accident','shich_accident_result','shich_repeat','shich_repeat_year','shich_40a','shich_40a_detail',
+    'shich_proof_type','shich_finding','shich_circ','shich_accident','shich_accident_result','shich_repeat','shich_repeat_year','shich_40a','shich_40a_detail',
     'ps67s_life_40a','ps67s_life_40a_detail','ps67s_10a_related','ps67s_10a_detail',
     'off_no_insurance','off_license_expired','off_license_expired_year','off_other_text',
     'aggravating_extra_enabled','aggravating_extra_text','lic_year','traffic_count','traffic_detail','has_heavy_traffic',
