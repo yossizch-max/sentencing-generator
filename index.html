@@ -10373,6 +10373,8 @@ function schedulePreview(){
 
 function runLivePreview(){
   if(!isDesktop()) return;
+  var splash = document.getElementById('splash');
+  if(splash && getComputedStyle(splash).display !== 'none') return;
   var desktop = document.getElementById('paperDesktop');
   if(!desktop) return;
   var mashlul = window._currentMashlul || window._mashlul || '67';
@@ -10408,8 +10410,6 @@ document.addEventListener('change', function(e){
 // הפעל preview כשמחליפים מסלול
 var _origChoose = null;
 document.addEventListener('DOMContentLoaded', function(){
-  // הפעל preview ראשוני אחרי טעינה
-  setTimeout(runLivePreview, 800);
   // גם patch chooseMashlul
   var _oc = window.chooseMashlul;
   if(_oc) {
@@ -13981,6 +13981,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function q(id){ return document.getElementById(id); }
   function isDesktop(){ return window.innerWidth >= 820; }
+  function homeVisible(){
+    var splash=q('splash');
+    return !!(splash && getComputedStyle(splash).display !== 'none');
+  }
   function normRoute(r){
     r = String(r || '').trim().replace(/-/g, '_');
     if (!r) return '67';
@@ -14108,6 +14112,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   function livePreviewNow(){
     if (!isDesktop()) return '';
+    if (homeVisible()) return '';
     if (window.__manualGenerationActive) return '';
     try{var __cs=window.GenerationOutput&&GenerationOutput.snapshot?GenerationOutput.snapshot():null;if(completedCombinedSnapshot()&&Number(combinedLastUserEditAt||0)<=Number(__cs&&__cs.contextCompletedAt||0))return '';}catch(_e){}
     if (running) { pending = true; return ''; }
@@ -14133,6 +14138,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function schedulePreview(){
     if (!isDesktop()) return;
+    if (homeVisible()) {
+      clearTimeout(previewTimer);
+      previewTimer = null;
+      pending = false;
+      hideIndicator();
+      return;
+    }
     if (window.__manualGenerationActive) {
       clearTimeout(previewTimer);
       previewTimer = null;
