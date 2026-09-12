@@ -20748,6 +20748,121 @@ window.__v93619Diagnostics=function(){
   else settleBurst();
 })();
 </script>
+
+<!-- v93.8.13.5.7 — native browser back navigation for wizard and accident steps -->
+<script id="v9357NativeBrowserBack">
+(function(){
+  'use strict';
+  if(window.__v9357NativeBrowserBack) return;
+  window.__v9357NativeBrowserBack = true;
+
+  var applying = false;
+  var last = null;
+
+  function homeVisible(){
+    var el=document.getElementById('splash');
+    return !!(el && getComputedStyle(el).display !== 'none');
+  }
+  function route(){
+    return String(window._mashlul || (document.getElementById('_mashlul')||{}).value || '');
+  }
+  function accident(){
+    return document.body.classList.contains('mode-accident');
+  }
+  function page(){
+    if(accident()) return Math.max(1, Math.min(4, parseInt(window._accPage,10)||1));
+    var el=document.querySelector('.wizard-page.active');
+    return Math.max(1, Math.min(5, parseInt(el && el.getAttribute('data-page'),10)||1));
+  }
+  function key(r,p){ return String(r||'')+'|'+String(p||1); }
+  function state(r,p){ return {__generatorNav:true, route:String(r||''), page:Number(p)||1}; }
+  function replaceHome(){
+    try{ history.replaceState({__generatorHome:true},'',location.href); }catch(e){}
+  }
+  function pushCurrent(){
+    if(applying || homeVisible()) return;
+    var r=route(), p=page(), k=key(r,p);
+    if(!r) return;
+    if(last===k && history.state && history.state.__generatorNav) return;
+    try{ history.pushState(state(r,p),'',location.href); last=k; }catch(e){}
+  }
+  function setPage(r,p){
+    applying=true;
+    try{
+      if(r && r!==route() && typeof window.chooseMashlul==='function'){
+        window.chooseMashlul(r);
+      }
+      if(accident() || r==='accident_injury'){
+        if(typeof window.accGoToPage==='function') window.accGoToPage(p);
+      }else{
+        var step=document.querySelector('.wizard-step[data-step="'+p+'"], .step[data-step="'+p+'"]');
+        if(step) step.click();
+        else{
+          var active=page(), guard=0;
+          while(active!==p && guard++<6){
+            var id=active<p?'wizNext':'wizPrev', b=document.getElementById(id);
+            if(!b) break;
+            b.click();
+            active=page();
+          }
+        }
+      }
+    }catch(e){}
+    setTimeout(function(){ applying=false; last=key(route(),page()); },0);
+  }
+  function beginRoute(){
+    setTimeout(function(){
+      var r=route();
+      if(!r || homeVisible()) return;
+      replaceHome();
+      try{ history.pushState(state(r,page()),'',location.href); last=key(r,page()); }catch(e){}
+    },0);
+  }
+  var oldChoose=window.chooseMashlul;
+  if(typeof oldChoose==='function'){
+    window.chooseMashlul=function(){
+      var ret=oldChoose.apply(this,arguments);
+      beginRoute();
+      return ret;
+    };
+  }
+  var oldShow=window.showSplash;
+  if(typeof oldShow==='function'){
+    window.showSplash=function(){
+      replaceHome();
+      last=null;
+      return oldShow.apply(this,arguments);
+    };
+  }
+  document.addEventListener('click',function(ev){
+    var t=ev&&ev.target;
+    if(!t || !t.closest) return;
+    if(t.closest('#wizPrev,#wizNext,.wizard-stepper .step,#accPrev,#accNext,.acc-step,#mbnPrev,#mbnNext')){
+      setTimeout(pushCurrent,40);
+    }
+    if(t.closest('[onclick*="showSplash"]')){
+      replaceHome();
+      last=null;
+    }
+  },true);
+  window.addEventListener('popstate',function(ev){
+    var s=ev.state;
+    if(s && s.__generatorNav){
+      if(homeVisible() || s.route!==route()){
+        setPage(s.route,s.page);
+      }else{
+        setPage(s.route,s.page);
+      }
+      return;
+    }
+    if(s && s.__generatorHome){
+      last=null;
+      if(!homeVisible() && typeof window.showSplash==='function') window.showSplash();
+    }
+  });
+})();
+</script>
+
 </body></html>
 
 <!-- v93.7.8 Print P0: deep-QA fixes for route isolation, synchronous exports, atomic route reset, range validation, and complete blocking of stale DOM/canonical output while inputs are invalid. -->
