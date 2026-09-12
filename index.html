@@ -1610,7 +1610,7 @@ body.mode-accident #v75_40a_panel{display:none!important;}
         <div class="route-group-head"><i class="launch-group-icon" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="3"/><circle cx="15" cy="16" r="4"/><path d="M9 29v-2c0-7 12-7 12 0v2zM25 13h5M25 19h5M25 25h5"/></svg></i><h3>עבירות רישוי ופסילה</h3><span class="launch-count">3 מסלולים</span></div>
         <div class="route-list">
           <button class="route-card" onclick="chooseMashlul('67')" type="button"><span class="route-code"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="6" width="26" height="28" rx="2"/><circle cx="15" cy="16" r="3"/><path d="M11 25c2-4 8-4 10 0M24 14h5M24 19h5M24 24h5"/></svg></span><span class="route-copy"><strong>נהיגה בזמן פסילה</strong><small>מסלול לפי סעיף 67 לפקודת התעבורה</small></span><span class="route-arrow" aria-hidden="true"><svg viewBox="0 0 16 24"><path d="m11 4-6 8 6 8"/></svg></span></button>
-          <button class="route-card" onclick="chooseMashlul('10a')" type="button"><span class="route-code"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14"/><circle cx="20" cy="20" r="4"/><path d="M20 6v10M8 17l8 3M32 17l-8 3M13 30l5-7M27 30l-5-7"/></svg></span><span class="route-copy"><strong>נהיגה בלא רישיון נהיגה</strong><small>למי שמעולם לא הוציא רישיון נהיגה</small></span><span class="route-arrow" aria-hidden="true"><svg viewBox="0 0 16 24"><path d="m11 4-6 8 6 8"/></svg></span></button>
+          <button class="route-card" onclick="chooseMashlul('10a')" type="button"><span class="route-code"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14"/><circle cx="20" cy="20" r="4"/><path d="M20 6v10M8 17l8 3M32 17l-8 3M13 30l5-7M27 30l-5-7"/></svg></span><span class="route-copy"><strong>נהיגה בלא רישיון נהיגה</strong><small>למי שמעולם לא הוציא רישיון או שרישיונו פקע</small></span><span class="route-arrow" aria-hidden="true"><svg viewBox="0 0 16 24"><path d="m11 4-6 8 6 8"/></svg></span></button>
           <button class="route-card" onclick="chooseMashlul('67+10a')" type="button"><span class="route-code"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 5h16l5 5v25H10z"/><path d="M26 5v7h7M15 18h11M15 23h8"/><circle cx="29" cy="29" r="7"/><path d="M26 26l6 6M32 26l-6 6"/></svg></span><span class="route-copy"><strong>נהיגה בזמן פסילה ובלא רישיון נהיגה</strong><small>מסלול משולב לשתי העבירות</small></span><span class="route-arrow" aria-hidden="true"><svg viewBox="0 0 16 24"><path d="m11 4-6 8 6 8"/></svg></span></button>
         </div>
       </section>
@@ -1745,6 +1745,15 @@ body.mode-accident #v75_40a_panel{display:none!important;}
 </div>
 <div id="f10a">
 <div class="section-title">נהיגה בלא רישיון נהיגה — פרטים</div>
+<label for="license_status_10a">סוג היעדר הרישיון:</label>
+<select class="autoselect" id="license_status_10a">
+<option selected="" value="never">בלתי מורשה מעולם</option>
+<option value="expired_long">רישיון נהיגה שפקע לתקופה ממושכת</option>
+</select>
+<div id="license_expiry_10a_wrap" style="display:none;margin-top:8px;">
+<label for="license_expiry_year_10a">שנת פקיעת הרישיון:</label>
+<input class="autoselect" id="license_expiry_year_10a" inputmode="numeric" max="2100" min="1900" placeholder="לדוגמה: 2012" type="number"/>
+</div>
 <div class="off-list">
 <div aria-pressed="false" class="off-item" data-sync="prior_10a" role="button" tabindex="0">
 <span class="off-text">הרשעה קודמת בנהיגה בלא רישיון נהיגה — כשל חוזר</span>
@@ -2602,10 +2611,30 @@ body.mode-67-10a-shichrut #off_license_expired_year{ display:none !important; }
 var _mashlul = '67';
 var _policy67 = null;
 var _policy10a = 'בחינת מדיניות הענישה הנוהגת בעבירה של נהיגה ללא רישיון נהיגה – בלתי מורשה מעולם – מלמדת על מגמה עקבית של החמרה, נוכח המסוכנות המובנית הגלומה בעצם הנהיגה בהיעדר הכשרה בסיסית.\n\nברע׳פ 11892/05 כולי נ׳ מדינת ישראל (09.03.06) נדחתה בקשת רשות ערעור של נאשם שהורשע בשני אישומים של נהיגה ללא רישיון נהיגה תקף, ללא רישיון רכב וללא ביטוח, ואשר הושתו עליו 3 חודשי מאסר בפועל, 8 חודשי מאסר על תנאי, פסילה בת שנתיים וקנס.\n\nברע׳פ 5125/16 דמיטרי לוינטן נ׳ מדינת ישראל (07.08.16) נדחתה בקשת רשות ערעור של נאשם שהורשע בנהיגה ללא רישיון, ללא ביטוח וללא רישיון רכב תקף. נגזרו עליו 10 חודשי מאסר בפועל, 6 חודשי מאסר על תנאי, פסילה לשנה וקנס – והעונש אושר.\n\nברע׳פ 2895/19 גמיל אבו סווי נ׳ מדינת ישראל (30.04.19), לחובת הנאשם עשרות הרשעות קודמות ובהן עבירות זהות. הוטלו עליו 8 חודשי מאסר בפועל בצירוף הפעלת מאסר מותנה בחלקו במצטבר, פסילה של 24 חודשים ורכיבים נלווים. ערעוריו נדחו.\n\nברע׳פ 2312/20 אביחי מלקו נ׳ מדינת ישראל (19.02.20), על נאשם בעל עבר תעבורתי ופלילי מכביד נגזרו 7 חודשי מאסר בפועל לרבות הפעלת מאסר מותנה, פסילה בת 3 שנים ועונשים נלווים. בקשת רשות הערעור נדחתה.\n\nבעפ׳ת (חי׳) 10489-01-22 סוסאן נ׳ מדינת ישראל (31.05.22) אושר עונש של 12 חודשי מאסר בפועל (לאחר הפעלת מותנה), פסילה ל-20 חודשים ורכיבים נלווים, בגין נהיגה בלתי מורשית בצירוף עבירות נוספות.\n\nבעפ׳ת (י-ם) 78802-07-24 אבו סביח נ׳ מדינת ישראל (03.11.24), בגין נהיגה בלתי מורשית בפעם הרביעית וללא ביטוח, הוטלו 10 חודשי מאסר בפועל והפעלת מותנה, פסילה מצטברת ל-30 חודשים. הערעור נדחה תוך קביעה כי העונש אינו חמור.\n\nמן הפסיקה עולה כי במקרים של כשל חוזר, עבר תעבורתי מכביד, ביצוע העבירה בעת שתלוי ועומד מאסר או פסילה מותנים, או בצירוף עבירות נלוות – נוטים בתי המשפט להטיל מאסר בפועל ממש ולהפעיל מותנים, לעיתים במצטבר.\nמנגד, בפסיקה נקבע כי בנסיבות חריגות לקולא – ובהיעדר עבר ובהיעדר נסיבות מחמירות – הרף התחתון של הענישה עשוי להתחיל במאסר מותנה (ראו עפ׳ת 22585-11-12 אושורוב), ואולם אין מדובר ברף שכיח אלא בחריג שבחריגים.';
+var _policy10aExpired = 'בחינת מדיניות הענישה הנוהגת בעבירה של נהיגה כשתוקף רישיון הנהיגה פקע לתקופה ממושכת מלמדת כי משך הפקיעה הוא נתון מרכזי, אך אינו עומד לבדו. הענישה נקבעת גם לפי מספר אירועי הנהיגה, עבר דומה, קיומם של תנאים בני הפעלה, הסדרת הרישיון והעבירות הנלוות.\n\nבתת״ע (תעבורה י-ם) 7275-10-21 מדינת ישראל נ׳ שוויקי (3.12.2025), הורשע הנאשם בנהיגה כשרישיונו פקע משנת 2012. היה זה אירוע שלישי דומה, ולחובתו עבר תעבורתי ופלילי מכביד, הכולל הרשעות קודמות בנהיגה בזמן פסילה, בשכרות ובעבירות חמורות נוספות. נגזרו עליו 6 חודשי מאסר בפועל מאחורי סורג ובריח, 11 חודשי פסילה ורכיבים נלווים.\n\nבתת״ע (תעבורה עכו) 13367-02-19 מדינת ישראל נ׳ זערורה (28.11.2021), נדון אירוע שלישי של נהיגה בתקופת פקיעה שנמשכה כ-17 שנים. באירועים קודמים הוטלו על הנאשם 30 ימי מאסר בעבודות שירות. באירוע הנדון, שלא נלוותה אליו עבירה חמורה נוספת, נגזרו 11 חודשי פסילה, 5 חודשי מאסר על תנאי ורכיבים נלווים, ללא מאסר נוסף.\n\nבתת״ע (תעבורה עכו) 5126-01-17 מדינת ישראל נ׳ זאמל (16.5.2019), הורשע הנאשם בנהיגה כשרישיונו פקע כ-8 שנים, לצד פקיעת רישיון הרכב ונהיגה ללא ביטוח. לחובתו עבר תעבורתי מכביד, שכלל נהיגה בזמן פסילה ועבירות דומות. נגזרו חודש מאסר על תנאי ו-6 חודשי פסילה, בניכוי הפסילה שרוצתה עד תום ההליכים.\n\nבפל״א (תעבורה עכו) 10460-11-18 מדינת ישראל נ׳ עאסלה (3.11.2020), הורשע הנאשם בנהיגה כשרישיונו פקע 11 שנים, באי ציות לשוטר, בנהיגה בקלות ראש ובנהיגה ללא ביטוח. לחובתו 53 הרשעות קודמות. בשל חלוף הזמן מן ההרשעה האחרונה והיעדר מאסר מותנה בר הפעלה, לא הוטל מאסר בפועל; נגזרו 15 חודשי פסילה, חודשיים מאסר על תנאי ורכיבים נלווים.\n\nבעפ״ת 11890-05-14 בליה נ׳ מדינת ישראל (7.9.2014), שעניינו פקיעה של כעשור ללא עבירת תעבורה נלווית, בוטל מאסר בן חודשיים ונקבע כי הענישה הראויה מתמקדת בפסילה בפועל, שמשכה ייקבע לפי העבר התעבורתי ומשך הפקיעה. יתר רכיבי הענישה, ובהם 24 חודשי פסילה ומאסר מותנה, נותרו על כנם.\n\nברע״פ 9286/12 דדון נ׳ מדינת ישראל (27.12.2012), שעניינו פקיעה של תשע שנים ואירוע נהיגה שלישי בתקופת הפקיעה, אושרו 15 חודשי פסילה, של״צ ורכיבים מותנים, ללא מאסר בפועל.\n\nמן הפסיקה עולה כי פקיעה ממושכת אינה מחייבת כשלעצמה מאסר בפועל. המנעד נע ממאסר מותנה ופסילה ועד מאסר בפועל, בהתאם למשך הפקיעה, לחזרתיות, לעבר הדומה, לתנאים בני הפעלה, להסדרת הרישיון ולעבירות הנלוות.';
 var _policy67_10a = 'עבירות של נהיגה ללא רישיון נהיגה ונהיגה בפסילה מגלמות בתוכן סכנה ממשית לפגיעה בעוברי אורח תמימים ובמשתמשי הדרך. במקרה זה מדובר בנאשם שמעולם לא הוכשר לנהיגה ונהג בפסילה שהוטלה עליו על ידי בית המשפט. בהיות עבירת נהיגה בפסילה בעלת יסוד נפשי, בניגוד למרבית עבירות התעבורה, היא מגלמת בתוכה חומרה יתרה שכן היא מעידה על זלזול מופגן ברשויות החוק שהטילו את הפסילה וכן סכנה לשלום הציבור. כאשר מדובר בנאשם שנוהג ללא רישיון ובזמן פסילה, הסיכון שבו מעמיד הנאשם את הציבור גדל באופן משמעותי. בהתאם לפסיקה, בשל חומרת העבירות ושילובן, מתחם הענישה ההולם נע בין 7 חודשי מאסר בפועל לבין 24 חודשי מאסר בפועל, בצד פסילה ממושכת וענישה נלווית.';
 var _policyShichrutAccident = 'בחינת מדיניות הענישה הנוהגת בעבירות של נהיגה בשכרות בצירוף תאונת דרכים — ובפרט כאשר מצטרפת אליהן נהיגה ללא רישיון או נהיגה בזמן פסילה — מלמדת כי מתחם הענישה ההולם מתחיל במאסר בפועל, לכל הפחות בדרך של עבודות שירות, ומגיע עד מאסר מאחורי סורג ובריח של חודשים ספורים ואף מעבר לכך בנסיבות מחמירות, תלוי בתוצאות התאונה, בעברו של הנאשם ובנסיבות הביצוע.\n\nבעפ\u05f4ת (מרכז) 46564-02-15 דבח נ\u05f3 מדינת ישראל (20.9.15), הורשע נאשם בנהיגה בשכרות מכוח סירוב ובגרם תאונת דרכים — הרשעה שנייה בשכרות, ללא מאסר על תנאי בר הפעלה. נגזרו 9 חודשי מאסר בפועל, פסילה ל-6 שנים ומאסר על תנאי. בית המשפט קבע: \u05f4נקבע לא אחת כי העונש הראוי למבצע עבירה של נהיגה בשכרות בפעם השנייה הוא מאסר בפועל.\u05f4\n\nברע\u05f4פ 2508/11 סמולנסקי נ\u05f3 מדינת ישראל (31.3.11), הורשע נאשם בנהיגה בשכרות (1145 מק\u05f4ג) — הרשעה שנייה בנסיבות דומות. בית המשפט המחוזי החמיר ל-4 חודשי מאסר בפועל לצד 40 חודשי פסילה. הערעור לעליון נדחה, תוך שנקבע: \u05f4המבקש לא הפנים את החומרה במעשיו ולא נרתע מלחזור ולנהוג בשכרות אף לאחר שנתפס והורשע.\u05f4\n\nברע\u05f4פ 444/08 משה יוסף נ\u05f3 מדינת ישראל (21.1.08), הורשע נאשם בנהיגה בשכרות פעמיים בפרק זמן קצר (940 מק\u05f4ג), ללא מאסר על תנאי תלוי. הועמד העונש על 9 חודשי מאסר בפועל ו-18 חודשי פסילה. הערעור נדחה.\n\nברע\u05f4פ 782/14 אלמלח נ\u05f3 מדינת ישראל (30.1.14), הורשע נאשם בנהיגה בשכרות, נהיגה בקלות ראש וגרימת תאונת דרכים עם פגיעה בגוף. נגזרו שנת מאסר בפועל ו-6 שנות פסילה. הערעור לעליון נדחה.\n\nברע\u05f4פ 7002/13 פשקוב נ\u05f3 מדינת ישראל (8.12.13), הורשע נאשם בנהיגה בשכרות גבוהה ובגרימת תאונה עצמית, כשתסקיר שירות המבחן שלילי. הוטלו 12 חודשי מאסר בפועל ו-24 חודשי פסילה. הערעור נדחה.\n\nברע\u05f4פ 4766/19 מוחמד יחיה נ\u05f3 מדינת ישראל (15.7.19), הורשע נאשם בנהיגה בשכרות, נהיגה ללא רישיון נהיגה (בלתי מורשה), נהיגה בקלות ראש וגרימת תאונת דרכים בה נחבל נהג הרכב המעורב חבלות של ממש. בית המשפט העליון אישר עונש של 8 חודשי מאסר בפועל ו-40 חודשי פסילת רישיון בפועל.\n\nבנב\u05f4א 490-05-21 מדינת ישראל נ\u05f3 מחאמיד, הורשע נאשם בגרם תאונת דרכים ונזק, נהיגה בקלות ראש, נהיגה בשכרות, נהיגה בזמן פסילה, נהיגה ללא רישיון נהיגה וללא ביטוח. במסגרת הסדר טיעון נגזרו 15 חודשי מאסר בפועל ופסילה בפועל למשך 24 חודשים.\n\nברע\u05f4פ 8654/14 מיכאל בחתה נ\u05f3 מדינת ישראל (10.2.16), הורשע נאשם בנהיגה בשכרות, נהיגה בזמן פסילה, נהיגה ללא רישיון נהיגה תקף, נהיגה ללא ביטוח, נהיגה בקלות ראש וגרימת תאונת דרכים. נגזרו 3 חודשי מאסר בפועל תוך הפעלת מאסר מותנה בן 6 חודשים במצטבר (סה\u05f4כ 9 חודשי מאסר בפועל) ופסילת רישיון למשך 6 שנים. ערעור ובקשת רשות ערעור נדחו.\n\nברע\u05f4פ 3120/07 דרעי נ\u05f3 מדינת ישראל (11.4.07), הורשע נאשם בנהיגה בזמן פסילה, נהיגה בשכרות, נהיגה ברשלנות, נהיגה ללא רישיון וללא ביטוח, בעל עבר פלילי מכביד. נגזרו 10 חודשי מאסר בפועל ו-4 שנות פסילה. הערעורים נדחו.\n\nמן הפסיקה עולה כי כאשר עבירת השכרות מלווה בתאונת דרכים, הסיכון הגלום בנהיגה בשכרות הפך ממשי — ובנסיבות אלה, ובפרט כאשר מדובר בהרשעה חוזרת או בנסיבות מחמירות נוספות כגון נהיגה ללא רישיון, אין הצדקה לסטות ממתחם הענישה המתחיל במאסר בפועל. מתחם הפסילה נע בין 24 חודשים (מינימום חוקי לפי סעיף 39א לפקודה) ועד 72 חודשים ויותר, בהתאם לחומרת התאונה ועברו של הנאשם.';
 
 var _policyShichrut = 'בחינת מדיניות הענישה הנוהגת מעלה כי על נאשמים שהורשעו בנהיגה בשכרות הוטלו עונשים במנעד רחב — מפסילת המינימום הקבועה בסעיף 39א לפקודה, בת 24 חודשים, ומאסר על תנאי, ועד פסילה ממושכת ומאסר בפועל — תוך שבתי המשפט החמירו מקום בו בעברו של המורשע הרשעה בעבירה דומה או נסיבות ביצוע חמורות.\n\nברע\u05f4פ 3343/04 נפתז\u05f3י נ\u05f3 מדינת ישראל (16.05.04) אושרו, בגין שכרות (585 מק\u05f4ג), פסילת מינימום בת שנתיים, מאסר מותנה, פסילה על תנאי וקנס.\n\nברע\u05f4פ 3032/22 נוביק נ\u05f3 מדינת ישראל (30.5.22), בגין שכרות חמורה (1320 מק\u05f4ג) לנאשם נורמטיבי, נקבע מתחם הנע בין מאסר שירוצה בעבודות שירות ל-12 חודשי מאסר ופסילה בין 24 ל-50 חודשים; נגזרו 3 חודשי עבודות שירות ו-36 חודשי פסילה. ערעוריו נדחו.\n\nברע\u05f4פ 444/08 משה יוסף נ\u05f3 מדינת ישראל (21.1.08), בגין שכרות שנייה תוך זמן קצר (940 מק\u05f4ג), הועמד העונש על 9 חודשי מאסר בפועל לצד פסילה וענישה נלווית.\n\nברע\u05f4פ 2508/11 סמולנסקי נ\u05f3 מדינת ישראל (31.3.11), בגין שכרות חוזרת (1145 מק\u05f4ג), הוחמר העונש ל-4 חודשי מאסר בפועל לצד 40 חודשי פסילה, תוך שצוין כי המבקש \u05f4לא הפנים את החומרה במעשיו ולא נרתע מלחזור ולנהוג בשכרות\u05f4.\n\nברע\u05f4פ 16878-10-24 אלבז נ\u05f3 מדינת ישראל (14.10.24), בגין שכרות (שרידי קוקאין) — הרשעה שנייה, נגזרו 3 חודשי מאסר בפועל ו-15 יום מאחורי סורג ובריח, 3 שנות פסילה וענישה נלווית. ערעוריו נדחו.\n\nבעפ\u05f4ת (ת\u05f4א) 8026-07-14 יריב נ\u05f3 מדינת ישראל (15.7.14), בגין שכרות שנייה תוך 3 שנים, נדחה ערעור על 4 חודשי עבודות שירות ו-36 חודשי פסילה: \u05f4קשה לי לקבל את הטענה שמי שנוהג פעם שנייה תוך שלוש שנים בשכרות הוא אדם נורמטיבי\u05f4.\n\nבפ\u05f4ל (י-ם) 9724-01-23 מדינת ישראל נ\u05f3 אבו סנינה (14.12.25), בגין שכרות (תוצר קנאביס) לנאשם בעל עבר מכביד הכולל הרשעות נהיגה בפסילה, נקבע מתחם הנע בין 24 חודשי פסילה ומאסר על תנאי ועד פסילה של מספר שנים ו-12 חודשי מאסר; נגזרו 6 חודשי מאסר מאחורי סורג ובריח ופסילה בת 10 שנים מכוח סעיף 40א(א)(1).\n\nאשר לרכיב הפסילה — בתי המשפט שבו והדגישו כי פסילה בת 24 חודשים היא עונש מינימום שקבע המחוקק: \u05f4המדובר על פי חוק בעונש המינימום… ההחמרה היא גישת המחוקק, וסטייה ממנה היא חריג, והמחמיר אינו מפסיד\u05f4 (רע\u05f4פ 3638/12 ווקנין); \u05f4לא בכדי בחר המחוקק להגביל את שיקול דעתו של בית-המשפט, בקובעו בסעיף 39א לפקודת התעבורה עונש פסילה מינימלי\u05f4 (רע\u05f4פ 2829/13 מוריאל; וראו גם רע\u05f4פ 5911/13 חסון). בנסיבות מחמירות נפסקו פסילות ממושכות של 30, 36, 40 ואף 60 חודשים ומעלה.';
+
+function update10aLicenseStatusUI(){
+  var status = document.getElementById('license_status_10a');
+  var wrap = document.getElementById('license_expiry_10a_wrap');
+  if(!status || !wrap) return;
+  var expired = status.value === 'expired_long';
+  wrap.style.display = expired ? 'block' : 'none';
+  var policy = document.getElementById('policy_text');
+  if(policy && typeof _mashlul !== 'undefined' && _mashlul === '10a'){
+    policy.value = expired ? _policy10aExpired : _policy10a;
+    delete policy.dataset.e;
+  }
+}
+
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'license_status_10a') update10aLicenseStatusUI();
+});
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', update10aLicenseStatusUI);
+else update10aLicenseStatusUI();
 
 // v93.7.9 cleanup: body.className = '...' (used at route-selection time and
 // again inside several route-specific generator functions) wiped out
@@ -2721,7 +2750,9 @@ function chooseMashlul(type) {
     }
 
     var _shichAccidentChecked = !!(document.getElementById('shich_accident') && document.getElementById('shich_accident').checked);
-    var defVal = isCombined ? _policy67_10a : (isShichrut ? (_shichAccidentChecked && _policyShichrutAccident ? _policyShichrutAccident : _policyShichrut) : (is10a ? _policy10a : _policy67));
+    var _10aStatus = document.getElementById('license_status_10a');
+    var _10aPolicy = (_10aStatus && _10aStatus.value === 'expired_long') ? _policy10aExpired : _policy10a;
+    var defVal = isCombined ? _policy67_10a : (isShichrut ? (_shichAccidentChecked && _policyShichrutAccident ? _policyShichrutAccident : _policyShichrut) : (is10a ? _10aPolicy : _policy67));
     var nextVal = window.__policyByMashlul[type];
     pt.value = (typeof nextVal === 'string' && nextVal.length) ? nextVal : defVal;
   }
@@ -6509,7 +6540,7 @@ function buildPastRecordSection(track){
   const P = [];
 
   // ===== עבר תעבורתי — מצבים מוציאים זה את זה =====
-  if (tNum===0) {
+  if (tNum===0 && !prior10a) {
     // v93.8.13.2 (range/placement ownership fix): removed the compensating
     // offense-severity clause that used to follow ("אין בו כדי לאיין את
     // חומרת העבירה... שכן חומרת המעשה, הפגיעה בערכים המוגנים והצורך
@@ -9203,6 +9234,9 @@ function generate10a(){
   var heavyCase   = cb('heavy_case');
   var prior10a    = cb('prior_10a');
   var noFix       = cb('no_fix_10a');
+  var licenseStatus = v('license_status_10a') || 'never';
+  var isExpiredLong = licenseStatus === 'expired_long';
+  var licenseExpiryYear = v('license_expiry_year_10a');
   var aggExtra    = cb('aggravating_extra_enabled');
   var aggTxt      = esc(v('aggravating_extra_text'));
   var hasProbation= v('has_probation')==='yes';
@@ -9264,20 +9298,31 @@ function generate10a(){
   o += '<div style="font-size:15px;font-weight:bold;text-decoration:underline;color:#1a2a4a;margin:12px 0;text-align:center;">טיעונים לעונש מטעם המאשימה</div>';
   o += '</div>';
   o+=SEC(heb[si++],'פתיח ורקע עובדתי');
-  o+='הנאשם, '+name+', הורשע על פי הודאתו בעבירה של <b>נהיגה ללא רישיון נהיגה</b> בניגוד לסעיף 10(א) לפקודת התעבורה [נוסח חדש], תשכ"א-1961'+ancStr+'.<br><br>';
-  o+='הנאשם נהג ברכב פרטי שעה שמעולם לא הוציא רישיון נהיגה ולא עבר כל הכשרה לנהיגה. ';
-  o+=(caseSeverity()==='heavy')
-    ? 'נהיגה ללא רישיון נהיגה כדין מבטאת התעלמות מחובת היסוד שלא לנהוג ברכב מנועי ללא הכשרה והסמכה כדין. בנסיבות המקרה, מדובר בהתנהלות המלמדת על אי-ציות לדרישת הרישוי ועל סיכון ממשי שהנאשם יוצר לציבור משתמשי הדרך, המצדיק תגובה עונשית מוחשית ומרתיעה.</div>'
-    : 'אין מדובר בפגם טכני בלבד. הנאשם נעדר הסמכה ומיומנות נהיגה בסיסית, ובכך יצר סיכון ממשי לכלל משתמשי הדרך.</div>';
+  o+='הנאשם, '+name+', הורשע על פי הודאתו בעבירה של <b>נהיגה ללא רישיון נהיגה תקף</b> בניגוד לסעיף 10(א) לפקודת התעבורה [נוסח חדש], תשכ"א-1961'+ancStr+'.<br><br>';
+  if(isExpiredLong){
+    o+='הנאשם נהג ברכב פרטי לאחר שתוקף רישיון הנהיגה שלו פקע'+(licenseExpiryYear?' בשנת '+esc(licenseExpiryYear):' לתקופה ממושכת')+'. ככל שמתארכת תקופת הפקיעה, גובר הצורך לבחון מחדש את כשירות הנהג ואת זיקתו המתמשכת לחובות הרישוי. ';
+    o+=(caseSeverity()==='heavy')
+      ? 'בנסיבות המקרה, משך הפקיעה ונתוני העבר מחייבים תגובה עונשית מוחשית ומרתיעה.</div>'
+      : 'אין מדובר בנהג שמעולם לא הוכשר לנהיגה, אך גם אין לראות בפקיעה ממושכת פגם טכני בלבד.</div>';
+  } else {
+    o+='הנאשם נהג ברכב פרטי שעה שמעולם לא הוציא רישיון נהיגה ולא עבר כל הכשרה לנהיגה. ';
+    o+=(caseSeverity()==='heavy')
+      ? 'נהיגה ללא רישיון נהיגה כדין מבטאת התעלמות מחובת היסוד שלא לנהוג ברכב מנועי ללא הכשרה והסמכה כדין. בנסיבות המקרה, מדובר בהתנהלות המלמדת על אי-ציות לדרישת הרישוי ועל סיכון ממשי שהנאשם יוצר לציבור משתמשי הדרך, המצדיק תגובה עונשית מוחשית ומרתיעה.</div>'
+      : 'אין מדובר בפגם טכני בלבד. הנאשם נעדר הסמכה ומיומנות נהיגה בסיסית, ובכך יצר סיכון ממשי לכלל משתמשי הדרך.</div>';
+  }
 
   // === ב. ערך חברתי ===
   o+=SEC(heb[si++],'הערך החברתי המוגן וחומרת העבירה');
   {
     var _hasNoIns10 = !!document.getElementById('off_no_insurance')?.checked;
     var _s10 = '';
-    _s10 += '<b>(1) בטיחות הציבור בדרכים —</b> נהיגה ללא רישיון אינה פגם פורמלי או טכני בלבד; מדובר בנהיגה בידי מי שלא עבר את מנגנוני ההכשרה, הרישוי והפיקוח הקבועים בדין, ושלא הוכשר לכך כדין. '
-           + 'כפי שנקבע ברע"פ 2666/12 עטאללה נ\' מדינת ישראל: <b>"ברי, כי נהיגה בלי רישיון משמעה הסטטוטורי נהיגה ללא כישורי נהיגה, וממילא סיכון הזולת"</b>. '
-           + 'נהיגה כזו חושפת את כלל משתמשי הדרך לסיכון ממשי ומובנה שאינו ניתן לכימות מראש.<br><br>';
+    if(isExpiredLong){
+      _s10 += '<b>(1) בטיחות הציבור בדרכים —</b> נהיגה לאחר פקיעת רישיון לתקופה ממושכת פוגעת במנגנון שנועד להבטיח את כשירותם המתמשכת של הנהגים. ככל שחולף זמן רב יותר ממועד הפקיעה, גובר משקלו של הספק בדבר כשירות הנהג לשוב ולנהוג ללא הסדרה כדין.<br><br>';
+    } else {
+      _s10 += '<b>(1) בטיחות הציבור בדרכים —</b> נהיגה ללא רישיון אינה פגם פורמלי או טכני בלבד; מדובר בנהיגה בידי מי שלא עבר את מנגנוני ההכשרה, הרישוי והפיקוח הקבועים בדין, ושלא הוכשר לכך כדין. '
+             + 'כפי שנקבע ברע"פ 2666/12 עטאללה נ\' מדינת ישראל: <b>"ברי, כי נהיגה בלי רישיון משמעה הסטטוטורי נהיגה ללא כישורי נהיגה, וממילא סיכון הזולת"</b>. '
+             + 'נהיגה כזו חושפת את כלל משתמשי הדרך לסיכון ממשי ומובנה שאינו ניתן לכימות מראש.<br><br>';
+    }
     _s10 += '<b>(2) פגיעה בסדר הציבורי ובמנגנון הרישוי —</b> דרישת הרישוי אינה פורמליזם; היא מהווה את מנגנון הסינון הציבורי שנועד להבטיח כי רק מי שהוכח כשיר לנהיגה בטוחה ישתתף במרחב התעבורתי. '
            + 'הנאשם כשל בקיום חובה בסיסית זו, ובכך ערער את מנגנון ההכשרה והאישור הקבועים בחוק.<br><br>';
     if(_hasNoIns10){
@@ -9310,7 +9355,7 @@ function generate10a(){
 
   // === ה. מתחם ===
   o+=SEC(heb[si++],'קביעת מתחם העונש ההולם');
-  o+='בהתאם להוראות תיקון 113 לחוק העונשין, לאחר שקילת הערך החברתי המוגן שנפגע ולאור מדיניות הענישה הנוהגת — סבורה המאשימה כי יש לקבוע מתחם עונש הולם לעבירה של נהיגה ללא רישיון נהיגה הנע:<br>';
+  o+='בהתאם להוראות תיקון 113 לחוק העונשין, לאחר שקילת הערך החברתי המוגן שנפגע ולאור מדיניות הענישה הנוהגת — סבורה המאשימה כי יש לקבוע מתחם עונש הולם לעבירה של '+(isExpiredLong?'נהיגה כשתוקף רישיון הנהיגה פקע לתקופה ממושכת':'נהיגה ללא רישיון נהיגה')+' הנע:<br>';
   o+='<ul style="margin-right:20px;margin-top:8px;">';
   o+='<li style="margin-bottom:6px;">ממאסר מותנה ברף התחתון, במקרים חריגים ויוצאי דופן לקולא,</li>';
   o+='<li>ועד מאסר בפועל לתקופה של <b>'+mMax+' חודשים</b> ברף העליון, במקרים של כשל חוזר, עבר תעבורתי מכביד, ביצוע העבירה בתקופת תנאי או בצירוף עבירות נלוות.</li>';
@@ -11697,11 +11742,15 @@ document.addEventListener('DOMContentLoaded', function(){
   function installPolicy(route, force){
     var pt = $('policy_text');
     if(!pt || !policies[route]) return;
+    var policyValue = policies[route];
+    if(route === '10a' && $('license_status_10a')?.value === 'expired_long' && typeof _policy10aExpired === 'string'){
+      policyValue = _policy10aExpired;
+    }
     var oldDefault = /__legacy_policy_default__/.test(pt.value || '');
     if(force || oldDefault || !pt.dataset.v66UserEdited){
-      pt.value = policies[route];
+      pt.value = policyValue;
       window.__policyByMashlul = window.__policyByMashlul || {};
-      window.__policyByMashlul[route] = policies[route];
+      window.__policyByMashlul[route] = policyValue;
       pt.dataset.v66Route = route;
     }
   }
@@ -12188,7 +12237,7 @@ document.addEventListener('DOMContentLoaded', function(){
   function clearIds(ids){ ids.forEach(clearId); }
 
   var ids67Only = ['disq_details','request_40a','request_40a_life','request_40a_life_detail'];
-  var ids10aOnly = ['prior_10a','no_fix_10a'];
+  var ids10aOnly = ['license_status_10a','license_expiry_year_10a','prior_10a','no_fix_10a'];
   var idsShichOnly = ['shich_proof_type','shich_40a','shich_40a_detail','shich_circ','shich_finding','shich_repeat','shich_repeat_year'];
   var ids67ShichOnly = ['ps67s_disq_source','ps67s_disq_knowledge','ps67s_shich_type','ps67s_alcohol_level','ps67s_life_40a','ps67s_life_40a_detail','ps67s_10a_related','ps67s_10a_detail','psdef_custom_text','psdef_custom_response'];
 
@@ -20510,7 +20559,7 @@ window.__v9260Architecture=true;</script>
   }
   var ROUTE_IDS=[
     'conviction_type','has_multiple_no','has_multiple_yes','multi_proc_type','multi_count',
-    'disq_type','disq_details','disq_origin_gmr','prior_10a','no_fix_10a',
+    'disq_type','disq_details','disq_origin_gmr','license_status_10a','license_expiry_year_10a','prior_10a','no_fix_10a',
     'ps67s_disq_source','ps67s_disq_knowledge','ps67s_shich_type','ps67s_alcohol_level','ps67s_prior_67_count','ps67s_prior_shich_count',
     'v75_40a_10y','v75_40a_10y_detail','v75_40a_life','v75_40a_life_detail',
     'shich_proof_type','shich_finding','shich_circ','shich_accident','shich_accident_result','shich_repeat','shich_repeat_year','shich_40a','shich_40a_detail',
@@ -20580,7 +20629,7 @@ window.__v9260Architecture=true;</script>
     }finally{restoring=false;}
   }
   function refreshUI(route,state){
-    var calls=['toggleMultipleUI','buildMultiCards','toggleAggravatingExtra','togglePrisonType','toggleCriminalPrisonType','toggle40aUI','toggle40aLifeUI','toggleProbation','toggleMultipleConditional','toggleMultipleDisqualification','toggleMultipleBond','toggleDefenseDependentFields','updatePasilaShichrutDefenseDependent'];
+    var calls=['toggleMultipleUI','buildMultiCards','toggleAggravatingExtra','togglePrisonType','toggleCriminalPrisonType','toggle40aUI','toggle40aLifeUI','toggleProbation','toggleMultipleConditional','toggleMultipleDisqualification','toggleMultipleBond','toggleDefenseDependentFields','updatePasilaShichrutDefenseDependent','update10aLicenseStatusUI'];
     calls.forEach(function(name){try{if(typeof window[name]==='function')window[name]();}catch(e){}});
     // v93.8.13.5 (item ג - route-switch multi-card fix): ROUTE_IDS only
     // covers the multi-mode CONTROL flags (has_multiple_yes/multi_proc_type/
@@ -21083,6 +21132,62 @@ window.__v93619Diagnostics=function(){
   dialog.addEventListener('keydown',function(event){
     if(event.key==='Escape'){event.preventDefault();hide();}
     if(event.key==='Tab'){event.preventDefault();close.focus();}
+  });
+})();
+</script>
+<script id="output-quality-audit">
+/* v93.8.13.5.3: non-invasive output QA. Never changes the generated document. */
+(function(){
+  'use strict';
+  function el(id){return document.getElementById(id);}
+  function route(){
+    var r=el('mashlul');
+    return r&&r.value?r.value:(document.body.className.match(/mode-([a-z0-9_-]+)/)||[])[1]||'';
+  }
+  function textOf(node){
+    var d=document.createElement('div');
+    d.innerHTML=String(node&&node.innerHTML||'');
+    return String(d.textContent||'').replace(/\s+/g,' ').trim();
+  }
+  function audit(){
+    var paper=el(route()==='accident_injury'?'acc_paper':'paper');
+    var text=textOf(paper), issues=[], r=route();
+    if(!text) return {ok:true,route:r,issues:[],checkedAt:new Date().toISOString()};
+    function issue(code,severity,message){issues.push({code:code,severity:severity,message:message});}
+    ['משטרת ישראל','חטיבת התביעות','installPolicy','policy_text','__legacy_policy_default__'].forEach(function(token){
+      if(text.indexOf(token)!==-1) issue('internal-or-branding-token','high','נמצא בפלט טקסט פנימי או מיתוג שאינו אמור להופיע במסמך: '+token);
+    });
+    var prior10a=!!(el('prior_10a')&&el('prior_10a').checked);
+    if(text.indexOf('בהיעדר עבר תעבורתי קודם')!==-1 && prior10a)
+      issue('contradictory-traffic-history','high','הפלט כולל היעדר עבר תעבורתי לצד הרשעה קודמת ב־10(א).');
+    var status=el('license_status_10a');
+    if(r==='10a' && status && status.value==='expired_long'){
+      if(text.indexOf('כולי')!==-1 || text.indexOf('לוינטן')!==-1)
+        issue('expired-policy-leak','high','פסיקה ממסלול בלתי מורשה מעולם דלפה למסלול הפקיעה.');
+      if(text.indexOf('מעולם לא הוציא רישיון נהיגה')!==-1)
+        issue('expired-never-licensed-language','medium','נוסח של בלתי מורשה מעולם מופיע במסלול רישיון שפקע.');
+    }
+    if(r==='10a' && status && status.value==='never' && text.indexOf('רישיון שפג')!==-1)
+      issue('never-expired-language','medium','נוסח של רישיון שפקע מופיע במסלול בלתי מורשה מעולם.');
+    var report={ok:issues.length===0,route:r,issues:issues,checkedAt:new Date().toISOString()};
+    window.__lastOutputQualityReport=report;
+    return report;
+  }
+  window.getOutputQualityReport=audit;
+  function schedule(){setTimeout(audit,60);}
+  document.addEventListener('DOMContentLoaded',function(){
+    ['paper','paperDesktop','acc_paper'].forEach(function(id){
+      var target=el(id);
+      if(target&&typeof MutationObserver==='function') new MutationObserver(schedule).observe(target,{subtree:true,childList:true,characterData:true});
+    });
+    ['safeGenerate','generate'].forEach(function(name){
+      var fn=window[name];
+      if(typeof fn!=='function'||fn.__outputQualityWrapped)return;
+      var wrapped=function(){var result=fn.apply(this,arguments);schedule();return result;};
+      wrapped.__outputQualityWrapped=true;
+      wrapped.__outputQualityPrevious=fn;
+      window[name]=wrapped;
+    });
   });
 })();
 </script>
