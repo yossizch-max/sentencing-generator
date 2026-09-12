@@ -1,0 +1,50 @@
+name: v94 shichrut wording probe
+
+on:
+  push:
+    branches:
+      - v94/architecture-migration
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v94/architecture-migration
+      - name: Extract wording contexts
+        shell: python
+        run: |
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          needles=[
+            'הפסיקה במסלול זה מתמקדת בצירוף של נהיגה ללא רישיון ושכרות',
+            'הפסיקה במסלול זה מתמקדת בצירוף של נהיגה ללא רישיון והשפעה או סירוב',
+            'שכרות מכוח סירוב',
+            'סירוב לבדיקה'
+          ]
+          out=[]
+          for n in needles:
+            out.append('\n===== '+n+' =====\n')
+            start=0
+            found=False
+            while True:
+              i=s.find(n,start)
+              if i<0: break
+              found=True
+              out.append(s[max(0,i-2500):i+4500])
+              out.append('\n---\n')
+              start=i+len(n)
+            if not found: out.append('NOT FOUND\n')
+          Path('docs/v94-shichrut-wording-probe.txt').write_text(''.join(out),encoding='utf-8')
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/v94-shichrut-wording-probe.txt
+          git commit -m 'Probe shichrut wording branches' || exit 0
+          git push origin HEAD:v94/architecture-migration
