@@ -23,7 +23,20 @@ async function open(){
   await p.addScriptTag({url:'http://127.0.0.1:4173/v94/case-model-writer.js'});
   return p;
 }
-async function choose(p,r){await p.evaluate(x=>window.chooseMashlul?window.chooseMashlul(x):(window._mashlul=x),r);await p.waitForTimeout(400);}
+async function waitRouteReady(p,r){
+  await p.waitForFunction((route)=>{
+    const cur=(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):String(window._mashlul||'');
+    if(cur!==route) return false;
+    if(['67_shichrut','10a_shichrut','67_10a_shichrut'].includes(route)){
+      const pt=document.getElementById('policy_text');
+      const tag=String(pt?.dataset?.v9367Route||pt?.dataset?.v66Route||'');
+      return !!pt && tag===route && String(pt.value||'').trim().length>0;
+    }
+    return true;
+  },r,{timeout:6000}).catch(()=>{});
+  await p.waitForTimeout(250);
+}
+async function choose(p,r){await p.evaluate(x=>window.chooseMashlul?window.chooseMashlul(x):(window._mashlul=x),r);await p.waitForTimeout(400);await waitRouteReady(p,r);}
 async function seed(p,vals){await p.evaluate(v=>{for(const [id,x] of Object.entries(v)){const e=document.getElementById(id);if(!e)continue;if(e.type==='checkbox'||e.type==='radio')e.checked=!!x;else e.value=String(x);e.dispatchEvent(new Event('change',{bubbles:true}));}},vals);await p.waitForTimeout(150);}
 async function generate(p){return await p.evaluate(async()=>{
       try{
