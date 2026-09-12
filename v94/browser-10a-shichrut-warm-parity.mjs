@@ -14,3 +14,4 @@ const report={modelEqual,textEqual,len1:t1.length,len2:t2.length,text1:t1,text2:
 fs.mkdirSync('docs',{recursive:true});
 fs.writeFileSync('docs/v94-10a-shichrut-warm-parity.json',JSON.stringify(report,null,2));
 console.log(JSON.stringify({modelEqual,textEqual,len1:t1.length,len2:t2.length},null,2));
+if(!modelEqual||!textEqual) process.exit(1);
