@@ -14,9 +14,23 @@ async function page(){
   await p.addScriptTag({url:writer});
   return p;
 }
+async function waitRouteReady(p,route){
+  await p.waitForFunction((r)=>{
+    const cur=(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):String(window._mashlul||'');
+    if(cur!==r) return false;
+    if(['67_shichrut','10a_shichrut','67_10a_shichrut'].includes(r)){
+      const pt=document.getElementById('policy_text');
+      const tag=String(pt?.dataset?.v9367Route||pt?.dataset?.v66Route||'');
+      return !!pt && tag===r && String(pt.value||'').trim().length>0;
+    }
+    return true;
+  },route,{timeout:6000}).catch(()=>{});
+  await p.waitForTimeout(250);
+}
 async function choose(p,route){
   await p.evaluate(r=>{ if(typeof window.chooseMashlul==='function') window.chooseMashlul(r); else window._mashlul=r; },route);
   await p.waitForTimeout(450);
+  await waitRouteReady(p,route);
 }
 async function gen(p){
   return await p.evaluate(async ()=>{
@@ -148,6 +162,7 @@ for(const sc of scenarios){
   const p2=await page();
   await p2.evaluate(async m=>{ await window.V94CaseModelWriter.applyCaseModelToDocument(m,window,document); },model1);
   await p2.waitForTimeout(550);
+  await waitRouteReady(p2,sc.route);
 
   const model2=await p2.evaluate(()=>window.V94CaseModel.buildCaseModelFromCurrentState(window,document));
   const state2=await legacyState(p2);
