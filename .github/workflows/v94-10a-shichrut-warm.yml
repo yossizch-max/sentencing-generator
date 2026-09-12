@@ -25,6 +25,12 @@ jobs:
           curl -f http://127.0.0.1:4173/index.html >/dev/null
       - name: Warm parity
         run: node v94/browser-10a-shichrut-warm-parity.mjs
+      - name: Upload parity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v94-10a-shichrut-warm-parity
+          path: docs/v94-10a-shichrut-warm-parity.json
       - name: Commit report
         if: always()
         run: |
