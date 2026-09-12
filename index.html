@@ -4918,6 +4918,25 @@ function buildDefenseArgumentParagraph(track, key){
   if(track === '67+10a') return buildDefenseCombinedParagraph(key);
   if(track === 'shichrut') return buildDefenseShichrutParagraph(key);
   if(track === 'accident_injury') return buildDefenseAccidentParagraph(key);
+
+  /* Composite tracks must answer each selected defense argument with the
+     language belonging to every offense actually present in that track.
+     Previously these routes fell through to the empty branch. */
+  if(track === '67_shichrut'){
+    var p67s = buildDefense67Paragraph(key);
+    var pSh = buildDefenseShichrutParagraph(key);
+    return [p67s,pSh].filter(function(x){ return !!x; }).join('');
+  }
+  if(track === '10a_shichrut'){
+    var p10s = buildDefense10aParagraph(key);
+    var pSh10 = buildDefenseShichrutParagraph(key);
+    return [p10s,pSh10].filter(function(x){ return !!x; }).join('');
+  }
+  if(track === '67_10a_shichrut'){
+    var p67_10 = buildDefenseCombinedParagraph(key);
+    var pSh67_10 = buildDefenseShichrutParagraph(key);
+    return [p67_10,pSh67_10].filter(function(x){ return !!x; }).join('');
+  }
   return '';
 }
 
