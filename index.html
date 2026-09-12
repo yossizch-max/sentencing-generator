@@ -3176,7 +3176,7 @@ function normalizeSpaces(s){
 
 
 // בניית פרק "מיקום במתחם" – מותאם לתיקון 113 ולנתוני חומרה/קולה
-function buildPlacementClosing(posVal) {
+function buildPlacementClosing(posVal, hasReasons) {
   // v93.8.13.2 (range/placement ownership fix): the four branches used to
   // re-anchor the closing sentence in the offense's own severity ("חומרת
   // המעשים", "מידת הפגיעה בערכים המוגנים", "חומרת ההתנהלות") - the very
@@ -3194,6 +3194,20 @@ function buildPlacementClosing(posVal) {
   if (posVal === 'TOP')
     return '<p>בשים לב למכלול הנתונים הנוגעים לנאשם ולעברו, ולמשקלם המצטבר של השיקולים המחמירים הנוגעים לו, סבורה המאשימה כי יש למקם את העונש <b>ברף העליון של מתחם הענישה</b>.</p>';
   // CENTER (ברירת מחדל)
+  // v93.8.13.5.5 (item 3 - no auto-center without data): this used to
+  // unconditionally assert "עברו, נסיבותיו האישיות והצורך בהרתעה אפקטיבית"
+  // as the basis for a center placement, even when posVal is only 'CENTER'
+  // because #pos defaults to it and nothing else was ever entered (no
+  // reasons rendered above this closing paragraph). Asserting a record/
+  // personal-circumstances basis that was never actually established in
+  // the document fabricates a justification. When buildPlacementSection()
+  // reports hasReasons===false (its reasons list - buildPlacementReasons()
+  // plus the multiple/heavy additions - came back empty), fall back to a
+  // neutral sentence that states the governing principle without claiming
+  // any specific fact was weighed. When real reasons WERE rendered above
+  // (hasReasons===true), the original grounded sentence is unchanged.
+  if (hasReasons === false)
+    return '<p>מיקום העונש בתוך המתחם ייקבע בהתאם לנתוני הנאשם, לנסיבותיו האישיות ולמשקלם המצטבר של השיקולים המחמירים והממתנים.</p>';
   return '<p>לאחר שקלול מכלול הנתונים הנוגעים לנאשם, ובהם עברו, נסיבותיו האישיות והצורך בהרתעה אפקטיבית, סבורה המאשימה כי האיזון הראוי מוביל למיקום העונש <b>במרכז מתחם הענישה</b>.</p>';
 }
 
@@ -3323,7 +3337,12 @@ function buildPlacementSection(opts) {
   // הכלליים בלבד.
 
   // ו. closing
-  const closing = buildPlacementClosing(posVal);
+  // v93.8.13.5.5 (item 3): posParts now reflects every reason actually
+  // rendered above (buildPlacementReasons() plus the multiple/heavy
+  // additions at ג/ד) - pass whether it's non-empty so a CENTER default
+  // with nothing else entered gets the neutral fallback, not a fabricated
+  // "his record, personal circumstances" justification.
+  const closing = buildPlacementClosing(posVal, posParts.length > 0);
 
   // ז. הרכב HTML: <p> פתיחה + <ul> נימוקים (אם יש) + <p> סיום
   let out = opening;
@@ -8079,7 +8098,7 @@ function showCopyError() {
       const paper = document.getElementById('paper');
       paper.innerHTML = `
           <div style="text-align: center; padding: 52px 22px; color: #4a5568;">
-              <h2 style="color: var(--navy); margin-bottom: 18px;">מערכת טיעונים לעונש - יחידת תביעות תעבורה ירושלים</h2>
+              <h2 style="color: var(--navy); margin-bottom: 18px;">מחולל טיעונים לעונש</h2>
               <div style="max-width: 720px; margin: 0 auto; text-align: right;">
                   <div style="background: #ebf8ff; padding: 14px; border-radius: 12px; border: 2px dashed #4299e1;">
                       <strong>💡 טיפ:</strong> אם חסום לך Clipboard בדפדפן – עדיין תוכל להשתמש ב"הורד ל-Word".
@@ -12506,7 +12525,7 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     return body;
   }
-  function placementText(route){
+  function placementText(route, hasSignal){
     var pos=val('pos')||'CENTER';
     var t='';
     if(pos==='LOW') t='ברף התחתון של המתחם';
@@ -12521,6 +12540,17 @@ document.addEventListener('DOMContentLoaded', function(){
     // explicitly with "שילוב זה מצדיק מיקום מחמיר יותר". What remains
     // (עברו, חזרתיות העבירות, מאסרים או תנאים תלויים) is defendant-record
     // data, which is what placement should be anchored in.
+    // v93.8.13.5.5 (item 3 - no auto-center without data): pos defaults to
+    // 'CENTER' when #pos was never actively set, and this sentence used to
+    // cite "לעברו, לשאלת חזרתיות העבירות ולמאסרים או תנאים תלויים" even when
+    // none of those were ever entered (the trailing "ככל שקיימים" hedges but
+    // does not remove the implication that something was weighed). When the
+    // caller reports no real signal (no heavy/repeat/prior_10a/no_fix_10a/
+    // record-analysis text) AND the position is only the CENTER default,
+    // use the neutral fallback instead of naming unentered factors.
+    if ((pos!=='LOW' && pos!=='HIGH' && pos!=='TOP') && hasSignal===false) {
+      return p('מיקום העונש בתוך המתחם ייקבע בהתאם לנתוני הנאשם, לנסיבותיו האישיות ולמשקלם המצטבר של השיקולים המחמירים והממתנים.');
+    }
     var s=p('בנסיבות העניין, המאשימה תטען כי יש למקם את הנאשם '+t+', בשים לב לעברו, לשאלת חזרתיות העבירות ולמאסרים או תנאים תלויים ככל שקיימים.');
     return s;
   }
@@ -12634,7 +12664,13 @@ document.addEventListener('DOMContentLoaded', function(){
       range += p('<b>בנסיבות תיק זה, מתחם העונש ההולם המבוקש נע בין '+esc(mMin)+' לבין '+esc(mMax)+' חודשי מאסר בפועל</b>, לצד פסילה ממושכת, מאסר מותנה, פסילה מותנית וקנס או התחייבות לפי העניין.');
       out += section('ו','קביעת מתחם העונש ההולם',range);
 
-      var _placementTextV74 = placementText(route);
+      // v93.8.13.5.5 (item 3): hasSignal mirrors the real defendant-data
+      // flags already computed above for this route (heavy/repeat/
+      // prior_10a/no_fix_10a) plus whether buildPast() actually produced
+      // any past-record analysis text - the same signals this section
+      // already renders elsewhere, not a new calculation.
+      var _hasPlacementSignal = !!(heavy || repeat || prior10a || noFix || _pastComplex);
+      var _placementTextV74 = placementText(route, _hasPlacementSignal);
       if (_pastComplex) _placementTextV74 += '<div style="margin-top:18px;">'+_pastComplex+'</div>';
       out += section('ז','מיקום הנאשם בתוך המתחם',_placementTextV74);
 
@@ -21175,11 +21211,30 @@ window.__v93619Diagnostics=function(){
   }
   window.getOutputQualityReport=audit;
   function schedule(){setTimeout(audit,60);}
-  document.addEventListener('DOMContentLoaded',function(){
+  var observersInstalled=false;
+  function installObservers(){
+    if(observersInstalled) return;
+    observersInstalled=true;
     ['paper','paperDesktop','acc_paper'].forEach(function(id){
       var target=el(id);
       if(target&&typeof MutationObserver==='function') new MutationObserver(schedule).observe(target,{subtree:true,childList:true,characterData:true});
     });
+  }
+  // v93.8.13.5.4 (QA-audit follow-up only, no generator logic touched): this
+  // script sits at the very end of the document, so a DOMContentLoaded
+  // listener alone still fires correctly - but window.safeGenerate/
+  // window.generate are re-assigned MULTIPLE times AFTER that point by
+  // reinforceV66Routing() (immediately, then again at +900ms/+1600ms) and by
+  // other route-install code elsewhere in this file. A one-time wrap here
+  // gets silently discarded whenever any of those later reassignments runs
+  // after this one. wrapGenerators() is idempotent (skips a fn it already
+  // wrapped) and is re-run on the same schedule as reinforceV66Routing plus a
+  // safety margin, so it keeps re-attaching itself to whichever function is
+  // actually live at each checkpoint. The MutationObserver path (which does
+  // not depend on wrapping any function) already covers most cases on its
+  // own; this closes the remaining gap for callers that invoke generate()/
+  // safeGenerate() without ever mutating #paper through the normal DOM path.
+  function wrapGenerators(){
     ['safeGenerate','generate'].forEach(function(name){
       var fn=window[name];
       if(typeof fn!=='function'||fn.__outputQualityWrapped)return;
@@ -21188,7 +21243,14 @@ window.__v93619Diagnostics=function(){
       wrapped.__outputQualityPrevious=fn;
       window[name]=wrapped;
     });
-  });
+  }
+  function init(){
+    installObservers();
+    wrapGenerators();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+  [0,900,1600,3000,6000].forEach(function(ms){ setTimeout(wrapGenerators, ms); });
 })();
 </script>
 </body></html>
