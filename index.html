@@ -4923,19 +4923,25 @@ function buildDefenseArgumentParagraph(track, key){
      language belonging to every offense actually present in that track.
      Previously these routes fell through to the empty branch. */
   if(track === '67_shichrut'){
-    var p67s = buildDefense67Paragraph(key);
-    var pSh = buildDefenseShichrutParagraph(key);
-    return [p67s,pSh].filter(function(x){ return !!x; }).join('');
+    // Use one coherent answer for common mitigating arguments. Add the
+    // alcohol-specific answer only for arguments that exist only on the
+    // shichrut track, avoiding duplicated admission/record paragraphs.
+    if(['treatment','low_alcohol_level','no_accident'].indexOf(key)>=0){
+      return buildDefenseShichrutParagraph(key);
+    }
+    return buildDefense67Paragraph(key) || buildDefenseShichrutParagraph(key);
   }
   if(track === '10a_shichrut'){
-    var p10s = buildDefense10aParagraph(key);
-    var pSh10 = buildDefenseShichrutParagraph(key);
-    return [p10s,pSh10].filter(function(x){ return !!x; }).join('');
+    if(['treatment','low_alcohol_level','no_accident'].indexOf(key)>=0){
+      return buildDefenseShichrutParagraph(key);
+    }
+    return buildDefense10aParagraph(key) || buildDefenseShichrutParagraph(key);
   }
   if(track === '67_10a_shichrut'){
-    var p67_10 = buildDefenseCombinedParagraph(key);
-    var pSh67_10 = buildDefenseShichrutParagraph(key);
-    return [p67_10,pSh67_10].filter(function(x){ return !!x; }).join('');
+    if(['treatment','low_alcohol_level','no_accident'].indexOf(key)>=0){
+      return buildDefenseShichrutParagraph(key);
+    }
+    return buildDefenseCombinedParagraph(key) || buildDefenseShichrutParagraph(key);
   }
   return '';
 }
@@ -5646,7 +5652,9 @@ function generateAccidentInjury(){
 
   let p3=`בחינת נסיבות התאונה מלמדת כי רף הרשלנות בענייננו הוא <b>${E(neg)}</b>.`;
   if(gv('acc_negligence_reason')) p3+=` מסקנה זו נלמדת מ${E(_nd(gv('acc_negligence_reason')))}.`;
-  p3+=` אין מדובר בבחינה טכנית של תוצאת התאונה בלבד, אלא בשקלול המחדל הנהיגתי, הסיכון שנוצר, האפשרות למנוע את התאונה וסוג משתמש הדרך שנפגע.`;
+  var _accNegFactors=['המחדל הנהיגתי','הסיכון שנוצר','האפשרות למנוע את התאונה'];
+  if(gv('acc_victim_type')) _accNegFactors.push('סוג משתמש הדרך שנפגע');
+  p3+=` אין מדובר בבחינה טכנית של תוצאת התאונה בלבד, אלא בשקלול `+_accNegFactors.join(', ')+'.';
   if(!isBelowReal){
     p3+=` עבירת ההתנהגות הגורמת נזק לפי תקנה 21(ב)(2) משמשת רכיב קבוע במסלול זה, שכן התאונה אינה נבחנת רק ככשל תוצאתי אלא כהתנהגות נהיגתית שגרמה לנזק גוף ממשי.`;
   } else {
@@ -5693,7 +5701,9 @@ function generateAccidentInjury(){
   var _conclusionClause = isBelowReal
     ? 'פגיעה בנפגעים שנזקקו לטיפול רפואי.'
     : 'פגיעה ממשית בגופו של אדם.';
-  var aggBody=`לחומרה יש לזקוף את רף הרשלנות, את ${_damageClause}, את סוג משתמש הדרך שנפגע, ואת העובדה כי הסיכון שיצרה נהיגת הנאשם התממש ב${_conclusionClause}`;
+  var _accAggFactors=['רף הרשלנות',_damageClause];
+  if(gv('acc_victim_type')) _accAggFactors.push('סוג משתמש הדרך שנפגע');
+  var aggBody='לחומרה יש לזקוף את '+_accAggFactors.join(', ')+', ואת העובדה כי הסיכון שיצרה נהיגת הנאשם התממש ב'+_conclusionClause;
   if(breach){
     aggBody+=`<br><br>לצד עבירת המסגרת ועבירת ההתנהגות הגורמת נזק לפי תקנה ${_takanaDamage}, יש ליתן משקל להפרה הספציפית: ${E(breachWithCitation)}. הפרה זו ממחישה את המחדל הנהיגתי הקונקרטי ואת הקשר הסיבתי שבין אופן הנהיגה לבין התאונה.`;
   }
@@ -6124,7 +6134,10 @@ function generateAccidentInjury(){
     } else {
       clBody+='<br><br>בתיקי חבלה של ממש שאינה ברף העליון נקבע מתחם של פסילה בפועל לצד מאסר מותנה וקנס: ' + (_baseOff==='carelessness' ? _carelessCite : _recklessCite) + 'ככל שעולה חומרת החבלה, רף הרשלנות ותוצאות התאונה — כך עולה רף הענישה עד לכלל מאסר בפועל.';
     }
-    clBody+=`<br><br>מן הפסיקה עולה כי אין לקבוע מתחם ענישה מכני; יש לבחון את רף הרשלנות, את חומרת החבלות, את השלכותיהן על חיי הנפגע, את מספר הנפגעים, את סוג משתמש הדרך שנפגע ואת נסיבותיו של הנאשם.`;
+    var _accPolicyFactors='רף הרשלנות, חומרת החבלות והשלכותיהן על חיי הנפגע';
+    if(gv('acc_victim_count')) _accPolicyFactors+=', מספר הנפגעים';
+    if(gv('acc_victim_type')) _accPolicyFactors+=', סוג משתמש הדרך שנפגע';
+    clBody+=`<br><br>מן הפסיקה עולה כי אין לקבוע מתחם ענישה מכני; יש לבחון את `+_accPolicyFactors+', ואת נסיבותיו של הנאשם.';
   }
   var _enhNote=buildEnhancementPolicyNote();
   if(_enhNote) clBody+='<br><br><b>החמרה נוכח עבירות נלוות:</b> '+_enhNote;
@@ -6172,7 +6185,11 @@ function generateAccidentInjury(){
       return accBlockGeneration('סומן ריצוי בדרך של עבודות שירות, אך התקופה ('+_prCheck.prisonMonths+' חודשים, '+(_prCheck.prisonIsManual?'שהוזנה ידנית':'שנבחרה אוטומטית מתוך המתחם שהוגדר')+') חורגת מהתקרה של 9 חודשים לעבודות שירות. המערכת לא תקצר את התקופה ולא תעביר את הרכיב למאסר מאחורי סורג ובריח באופן שקט - יש להכריע במפורש: הקטן את התקופה, הרחב את הבחירה למאסר מאחורי סורג ובריח, או תקן את מתחם המאסר.');
     }
   }
-  var mBody='בשים לב לערכים החברתיים שנפגעו, למידת הפגיעה בהם, לרף הרשלנות, לעוצמת החבלות, לסוג משתמש הדרך שנפגע, למספר הנפגעים ולמדיניות הענישה הנוהגת'+(hasEnhancement?' ולעבירות הנלוות החמורות שנעברו בעת התאונה':'')+', סבורה המאשימה כי מתחם העונש ההולם בנסיבות העניין הוא כדלקמן:';
+  var _accContextFactors=['רף הרשלנות','עוצמת החבלות'];
+  if(gv('acc_victim_type')) _accContextFactors.push('סוג משתמש הדרך שנפגע');
+  if(gv('acc_victim_count')) _accContextFactors.push('מספר הנפגעים');
+  _accContextFactors.push('מדיניות הענישה הנוהגת');
+  var mBody='בשים לב לערכים החברתיים שנפגעו, למידת הפגיעה בהם, '+_accContextFactors.join(', ')+(hasEnhancement?' ולעבירות הנלוות החמורות שנעברו בעת התאונה':'')+', סבורה המאשימה כי מתחם העונש ההולם בנסיבות העניין הוא כדלקמן:';
   if(_enhRange && _enhRange.probationToPrisonMax && !_enhRange.prisonRequired){
     mBody+=`<br><br><div style="margin-top:12px;"><b>מתחם רכיב המאסר:</b> ממאסר מותנה ועד ${E(String(_enhRange.probationToPrisonMax))} חודשי מאסר בפועל.</div>`;
   } else if(_enhRange && _enhRange.swProbationOnly && !_enhRange.prisonRequired){
