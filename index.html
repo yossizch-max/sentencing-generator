@@ -2649,7 +2649,14 @@ function setBodyRouteClass(mode){
     if(c.indexOf('mode-') !== 0) kept.push(c);
   }
   kept.push(mode);
-  body.className = kept.join(' ');
+  var next = kept.join(' ');
+  // v93.8.14: only write body.className when it actually changes. An
+  // unconditional write here re-fires every MutationObserver watching
+  // document.body's class attribute (even when the resulting string is
+  // identical), and those observers re-trigger route-sync/live-preview
+  // logic that can call back into this function - turning a same-value
+  // write into a self-sustaining call loop.
+  if(body.className !== next) body.className = next;
 }
 
 // v93.8.13.5 (item ד - per-route multiple support fix): "ריבוי אישומים /
@@ -8090,6 +8097,22 @@ function showCopyError() {
       var _v91BasicCase = document.getElementById('v91_basic_case');
       if(_v91BasicCase) _v91BasicCase.value = '';
       window.lastGeneratedContent = null;
+      // v93.8.14: a live-preview cycle scheduled just before "נקה" was clicked
+      // (e.g. from the last field edit) can still be pending and fire shortly
+      // after showIntro() runs, regenerating a full document straight over the
+      // clean intro screen. Reuse the existing manual-generation lock so any
+      // such pending cycle no-ops instead of overwriting the intro; release it
+      // after the live-preview debounce window has safely elapsed so normal
+      // editing right after Clear is unaffected.
+      window.__manualGenerationActive = true;
+      setTimeout(function(){ window.__manualGenerationActive = false; }, 1500);
+      // v93.8.14: the accident route (and any route using the canonical
+      // GenerationOutput store) keeps its own last-written snapshot and
+      // reconciles it back onto acc_paper/paper on its own schedule,
+      // independent of the manual-generation lock above. Without resetting
+      // that store too, "נקה" clears the DOM once and the reconciler then
+      // restores the pre-clear document a moment later.
+      if (window.GenerationOutput && typeof window.GenerationOutput.reset === 'function') window.GenerationOutput.reset('user-clear');
       showIntro();
       showFloatingMessage('נוקה', 'success');
     }
@@ -14101,7 +14124,11 @@ document.addEventListener('DOMContentLoaded', function(){
   var previewTimer = null;
   var running = false;
   var pending = false;
+  var runStartedAt = 0;
+  var pendingHadRealEdit = false;
   var combinedLastUserEditAt = 0;
+  var lastGenerationCompletedAt = 0;
+  var lastGenerationRoute = '';
   window.__v92562GetCombinedLastUserEditAt=function(){return Number(combinedLastUserEditAt||0);};
   function completedCombinedSnapshot(){
     try{
@@ -14115,14 +14142,34 @@ document.addEventListener('DOMContentLoaded', function(){
     if (homeVisible()) return '';
     if (window.__manualGenerationActive) return '';
     try{var __cs=window.GenerationOutput&&GenerationOutput.snapshot?GenerationOutput.snapshot():null;if(completedCombinedSnapshot()&&Number(combinedLastUserEditAt||0)<=Number(__cs&&__cs.contextCompletedAt||0))return '';}catch(_e){}
-    if (running) { pending = true; return ''; }
+    // v93.8.14: any caller reaching this point (the debounce timer, the
+    // pending catch-up, or a legacy wrapper elsewhere in the page invoking
+    // runLivePreview()/schedulePreview() directly on its own timer) is a
+    // no-op if this exact route already has a completed generation and no
+    // genuine (isTrusted) user edit has happened since - there is nothing
+    // new to reflect, so re-running the generator would only waste work.
+    if (lastGenerationRoute === normRoute(currentRoute()) && lastGenerationCompletedAt > 0 && Number(combinedLastUserEditAt||0) <= lastGenerationCompletedAt) {
+      return '';
+    }
+    if (running) {
+      pending = true;
+      // v93.8.14: a request that arrives while a generation is already running
+      // only earns a follow-up run if it reflects a genuine (isTrusted) user
+      // edit made after the current run started - not a mirror dispatch,
+      // normalization pass, or other internal re-schedule of this same cycle.
+      if (Number(combinedLastUserEditAt||0) > runStartedAt) pendingHadRealEdit = true;
+      return '';
+    }
     running = true;
+    runStartedAt = Date.now();
     showIndicator();
     try {
       var html = generateRouteNow(true);
-      if(html) combinedLastUserEditAt=0;
+      if (Number(combinedLastUserEditAt||0) > runStartedAt) pendingHadRealEdit = true;
+      if(html) { combinedLastUserEditAt=0; lastGenerationCompletedAt=Date.now(); lastGenerationRoute=normRoute(currentRoute()); }
       return html;
     } catch(e) {
+      if (Number(combinedLastUserEditAt||0) > runStartedAt) pendingHadRealEdit = true;
       setDesktopStatus('error','⚠️ עדכון התצוגה נכשל.<br>לחץ/י על <b>הפק</b> להפקה ידנית.<br><span style="font-size:12px;direction:ltr;display:inline-block;margin-top:8px;">'+esc(e && e.message ? e.message : e)+'</span>');
       try { console.warn(e); } catch(_e) {}
       return '';
@@ -14131,7 +14178,8 @@ document.addEventListener('DOMContentLoaded', function(){
       hideIndicator();
       if (pending) {
         pending = false;
-        schedulePreview();
+        if (pendingHadRealEdit) { pendingHadRealEdit = false; schedulePreview(); }
+        else pendingHadRealEdit = false;
       }
     }
   }
@@ -16431,7 +16479,8 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     return s;
   }
-  function apply(){ ['paper','paperDesktop','output','acc_paper','acc_output','livePreview','preview'].forEach(function(id){ var e=q(id); if(e&&e.innerHTML){ var h=fix(e.innerHTML); if(h!==e.innerHTML) e.innerHTML=h; } }); if(window.lastGeneratedContent) window.lastGeneratedContent=fix(window.lastGeneratedContent); }
+  function homeVisible(){ var s=q('splash'); return !!(s && getComputedStyle(s).display !== 'none'); }
+  function apply(){ if(homeVisible()) return; ['paper','paperDesktop','output','acc_paper','acc_output','livePreview','preview'].forEach(function(id){ var e=q(id); if(e&&e.innerHTML){ var h=fix(e.innerHTML); if(h!==e.innerHTML) e.innerHTML=h; } }); if(window.lastGeneratedContent) window.lastGeneratedContent=fix(window.lastGeneratedContent); }
   function wrap(name){ if((name==='generate'||name==='safeGenerate')&&window.GenerationPipeline&&window.GenerationPipeline.__v9171Facade) return; var fn=window[name]; if(typeof fn!=='function'||fn.__v923Wrapped) return; var w=function(){ var ret=fn.apply(this,arguments); if(typeof ret==='string'&&ret.trim()) ret=fix(ret); apply(); return ret; }; w.__v923Wrapped=true; w.__v923Prev=fn; window[name]=w; }
   function boot(){ ['chooseMashlul','safeGenerate','runLivePreview','generate','generate67_core','generate10a','generate67_10a','generateShichrut','generate67Shichrut','generate10aShichrut','generate67_10a_Shichrut','generateAccidentInjury'].forEach(wrap); apply(); }
   /* v92.8: duplicate court input boot listener disabled. */
@@ -20212,8 +20261,11 @@ window.__v9260Architecture=true;</script>
         return;
       }
       /* Several legacy mobile layers publish a short toolbar shell after the real document.
-         Once a substantive document exists for the active route, never let that shell replace it. */
-      if(currentLen<900&&stableOutputByRoute[r]&&visibleTextLength(stableOutputByRoute[r])>=900){
+         Once a substantive document exists for the active route, never let that shell replace it.
+         v93.8.14: the intro/splash placeholder written by showIntro() (explicit "נקה"/reset,
+         or real init) is also short - exclude it explicitly, otherwise clearing the form
+         just restores the old cached document instead of the clean intro screen. */
+      if(currentLen<900&&stableOutputByRoute[r]&&visibleTextLength(stableOutputByRoute[r])>=900&&current.indexOf('מחולל טיעונים לעונש')===-1){
         target.innerHTML=stableOutputByRoute[r];
       }else{
         var fixed=processor(current,{route:r});
@@ -20799,8 +20851,21 @@ window.__v93619Diagnostics=function(){
     block.style.display = currentRoute() === '67' ? '' : 'none';
   }
 
+  // v93.8.14: classList.add()/remove() re-serialize and re-set the class
+  // attribute even when the requested token is already in the desired
+  // state, which unconditionally fires every MutationObserver watching
+  // document.body's class attribute. Since this module (and an unrelated
+  // one) install exactly such an observer to call back into settle()/
+  // syncRoute(), an unconditional add/remove here turned into an infinite
+  // observer<->write ping-pong (hundreds of calls/sec) any time settle()
+  // ran while the classes were already correct. Guard each call so a
+  // write - and the notification it produces - only happens when the
+  // class list would actually change.
+  function addClassOnce(cls){ if(!document.body.classList.contains(cls)) document.body.classList.add(cls); }
+  function removeClassOnce(cls){ if(document.body.classList.contains(cls)) document.body.classList.remove(cls); }
+
   function cleanupIntroForSplash(){
-    document.body.classList.remove('v91-route-active','v91-stage-intro','v91-stage-full');
+    ['v91-route-active','v91-stage-intro','v91-stage-full'].forEach(removeClassOnce);
     var i=document.getElementById(INTRO_ID), s=document.getElementById(SUMMARY_ID);
     if(i && i.parentNode) i.parentNode.removeChild(i);
     if(s && s.parentNode) s.parentNode.removeChild(s);
@@ -20813,13 +20878,13 @@ window.__v93619Diagnostics=function(){
     }
     var intro=document.getElementById(INTRO_ID), summary=document.getElementById(SUMMARY_ID);
     if(!intro && !summary) return;
-    document.body.classList.add('v91-route-active');
+    addClassOnce('v91-route-active');
     if(introIntent === 'full'){
-      document.body.classList.remove('v91-stage-intro');
-      document.body.classList.add('v91-stage-full');
+      removeClassOnce('v91-stage-intro');
+      addClassOnce('v91-stage-full');
     }else{
-      document.body.classList.remove('v91-stage-full');
-      document.body.classList.add('v91-stage-intro');
+      removeClassOnce('v91-stage-full');
+      addClassOnce('v91-stage-intro');
     }
   }
 
