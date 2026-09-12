@@ -41,6 +41,8 @@ async function seed(p,vals){await p.evaluate(v=>{for(const [id,x] of Object.entr
 async function generate(p){return await p.evaluate(async()=>{
       try{
         if(window.safeGenerate)window.safeGenerate();else if(window.generate)window.generate();
+        const currentRoute=(window.RouteEngine&&typeof window.RouteEngine.current==='function')?String(window.RouteEngine.current()||''):String(window._mashlul||'');
+        if(['67_shichrut','10a_shichrut','67_10a_shichrut'].includes(currentRoute)) await new Promise(r=>setTimeout(r,1600));
         const read=()=>String(document.getElementById('paper')?.innerText||'').replace(/\s+/g,' ').trim();
         let prev='',stable=0,last='';
         for(let i=0;i<20;i++){
