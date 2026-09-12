@@ -19575,7 +19575,7 @@ window.__v9260Architecture=true;</script>
     var acc=document.body.classList.contains('mode-accident');
     var pages=[].slice.call(document.querySelectorAll(acc?'.acc-page':'.wizard-page'));
     var active=pages.find(function(x){return x.classList.contains('active')||getComputedStyle(x).display!=='none';});
-    var n=active?parseInt(active.getAttribute(acc?'data-acc-page':'data-page')||active.getAttribute('data-page')||'1',10):1;
+    var n=active?parseInt(active.getAttribute(acc?'data-accpage':'data-page')||active.getAttribute('data-page')||'1',10):1;
     var total=pages.length|| (acc?4:5);
     return {n:isFinite(n)?n:1,total:total,acc:acc};
   }
