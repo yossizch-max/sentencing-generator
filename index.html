@@ -1602,7 +1602,7 @@ body.mode-accident #v75_40a_panel{display:none!important;}
 <div id="splash" class="home-screen">
   <div class="home-topbar">
     <div class="home-brand-mark" aria-hidden="true">⚖</div>
-    <div class="home-brand-text"><span>חטיבת התביעות</span></div>
+    
   </div>
   <div class="home-hero">
     <div class="home-kicker">מערכת עבודה לתביעות תעבורה</div>
@@ -1650,7 +1650,7 @@ body.mode-accident #v75_40a_panel{display:none!important;}
 <header>
 <div class="header-inner">
 <h1>⚖ מחולל טיעונים לעונש — <span id="mode_title">נהיגה בזמן פסילה</span></h1>
-<p>חטיבת התביעות</p>
+
 </div>
 </header>
 <div data-no-draft="1" id="case_save_bar">
@@ -6385,7 +6385,7 @@ function generateAccidentInjury(){
     var _sigUnitAcc = (typeof getSignatureUnit==='function') ? getSignatureUnit() : 'שלוחת תביעות תעבורה';
     var _lawyerFmt = (typeof formatLawyerName==='function') ? formatLawyerName(_lawyerAcc) : _lawyerAcc;
     var _lawyerEsc = (typeof escapeHtml==='function') ? escapeHtml(_lawyerFmt) : _lawyerFmt;
-    o += '<br><div style="text-align: right; margin-top: 40px; border-top: 1px solid #dde8f5; padding-top: 16px;">בכבוד רב,<br><br>עו\"ד ' + (_lawyerEsc || '________________') + '<br>' + _sigUnitAcc + '<br>חטיבת התביעות</div>';
+    o += '<br><div style="text-align: right; margin-top: 40px; border-top: 1px solid #dde8f5; padding-top: 16px;">בכבוד רב,<br><br>עו\"ד ' + (_lawyerEsc || '________________') + '<br>' + _sigUnitAcc + '<br></div>';
   }
 
   o=uMo(o);
@@ -7203,7 +7203,7 @@ const _petitionLetter67 = includePolicy ? (_defense67 ? 'ח' : 'ז') : (_defense
         const lawyerOffice = document.getElementById('lawyer_office')?.value || '';
         
         const _sigUnit67 = getSignatureUnit();
-        content += `<br><div style="text-align: right; margin-top: 40px; border-top: 1px solid #dde8f5; padding-top: 16px;">בכבוד רב,<br><br>עו"ד ${escapeHtml(formatLawyerName(lawyerName)) || '________________'}<br>${_sigUnit67}<br>חטיבת התביעות</div></div>`;
+        content += `<br><div style="text-align: right; margin-top: 40px; border-top: 1px solid #dde8f5; padding-top: 16px;">בכבוד רב,<br><br>עו"ד ${escapeHtml(formatLawyerName(lawyerName)) || '________________'}<br>${_sigUnit67}<br></div></div>`;
 
         // שמירת הקוד המקורי כדי שנוכל לחזור אליו
         content = uMo(content);
@@ -9376,7 +9376,7 @@ function generate10a(){
   o += 'בכבוד רב,<br><br>';
   o += 'עו"ד ' + (formatLawyerName(lawyerName) || '________________') + '<br>';
   o += _sigUnit10 + '<br>';
-  o += 'חטיבת התביעות';
+  o += '';
   o += '</div>';
 
   // פלט
@@ -9558,7 +9558,7 @@ function generateShichrut(){
   o += 'בכבוד רב,<br><br>';
   o += 'עו"ד ' + (formatLawyerName(lawyerName) || '________________') + '<br>';
   o += esc((typeof getSignatureUnit==='function')?getSignatureUnit():'שלוחת תביעות תעבורה') + '<br>';
-  o += 'חטיבת התביעות';
+  o += '';
   o += '</div>';
   o += '</div>';
 
@@ -9868,7 +9868,7 @@ function generate67_10a(){
       const _sigUnitMix = getSignatureUnit();
       o += `<div><b>עו"ד ${formatLawyerName(lawyerName) || '________________'}</b></div>`;
       o += `<div>${_sigUnitMix}</div>`;
-      o += `<div>חטיבת התביעות</div>`;
+      o += `<div></div>`;
       o += `</div>`;
     }
 
@@ -11175,7 +11175,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
       out += '<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div>';
       out += '<div><b>עו״ד '+((typeof formatLawyerName==='function') ? formatLawyerName(lawyerName) : (lawyerName||'________________'))+'</b></div>';
-      out += '<div>'+esc((typeof getSignatureUnit==='function') ? getSignatureUnit() : 'שלוחת תביעות תעבורה')+'</div><div>חטיבת התביעות</div></div>';
+      out += '<div>'+esc((typeof getSignatureUnit==='function') ? getSignatureUnit() : 'שלוחת תביעות תעבורה')+'</div><div></div></div>';
       out += '</div>';
       if(typeof uMo === 'function') out = uMo(out);
       var paper=q('paper'); if(paper) paper.innerHTML=out;
@@ -11513,7 +11513,7 @@ document.addEventListener('DOMContentLoaded', function(){
     petition+='</ol>'+p('נוכח כל האמור, מתבקשת ענישה ממשית, מרתיעה ומציבת גבול, שתגן על ציבור משתמשי הדרך ותשיב את משקלם הראוי של צווי הפסילה ושל הוראות הבטיחות.');
     html+=sec(letter,'עתירת המאשימה',petition);
 
-    html+='<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו״ד '+(lawyer||'________________')+'</b></div><div>'+unit+'</div><div>חטיבת התביעות</div></div></div>';
+    html+='<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו״ד '+(lawyer||'________________')+'</b></div><div>'+unit+'</div><div></div></div></div>';
     html=clean(html);
     var paper=q('paper'); if(paper) paper.innerHTML=html;
     window.lastGeneratedContent=html;
@@ -11866,7 +11866,7 @@ document.addEventListener('DOMContentLoaded', function(){
     html += S('עתירת המאשימה', p('המאשימה תעתור ל-'+reqPrison+' חודשי מאסר בפועל, לפסילה בפועל של '+(typeof normalizeMonths==='function'?normalizeMonths(reqDisq):reqDisq)+', למאסר מותנה, פסילה מותנית, קנס והתחייבות, וכן להפעלת תנאים בני הפעלה ככל שקיימים.'));
     var lawyer = esc(val('lawyer_name') || '________________');
     var unit = esc(val('lawyer_office') || 'שלוחת תביעות תעבורה');
-    html += '<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו"ד '+lawyer+'</b></div><div>'+unit+'</div><div>חטיבת התביעות</div></div></div>';
+    html += '<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו"ד '+lawyer+'</b></div><div>'+unit+'</div><div></div></div></div>';
     html = cleanOut(html);
     var paper = $('paper'); if(paper) paper.innerHTML = html;
     window.lastGeneratedContent = html;
@@ -12587,7 +12587,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(def) out += section('ח','התייחסות לשיקולים לקולא',def);
 
       out += section(def?'ט':'ח','עתירת המאשימה לעונש',petitionHtml(route));
-      out += '<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו״ד '+esc((typeof formatLawyerName==='function') ? formatLawyerName(val('lawyer_name')) : (val('lawyer_name')||'________________'))+'</b></div><div>'+esc((typeof getSignatureUnit==='function') ? getSignatureUnit() : 'שלוחת תביעות תעבורה')+'</div><div>חטיבת התביעות</div></div>';
+      out += '<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;"><div style="margin-bottom:20px;">_________________</div><div><b>עו״ד '+esc((typeof formatLawyerName==='function') ? formatLawyerName(val('lawyer_name')) : (val('lawyer_name')||'________________'))+'</b></div><div>'+esc((typeof getSignatureUnit==='function') ? getSignatureUnit() : 'שלוחת תביעות תעבורה')+'</div><div></div></div>';
       out += '</div>';
       if(typeof uMo === 'function') out = uMo(out);
       var paper = q('paper'); if(paper) paper.innerHTML = out;
