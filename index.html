@@ -3352,7 +3352,17 @@ function buildPlacementSection(opts) {
   const closing = buildPlacementClosing(posVal, posParts.length > 0);
 
   // ז. הרכב HTML: <p> פתיחה + <ul> נימוקים (אם יש) + <p> סיום
-  let out = opening;
+  // v93.8.15: the fixed opening above and buildPlacementClosing()'s neutral
+  // fallback - used only for the CENTER default with an empty posParts -
+  // both state the same general principle ("placement follows the
+  // defendant's data, personal circumstances and the cumulative weight of
+  // aggravating/mitigating considerations"), producing two adjacent
+  // sentences that say the same thing in exactly that one combination. The
+  // opening is suppressed only there; every other combination (LOW/HIGH/TOP
+  // regardless of reasons, or CENTER with real reasons) is unaffected - both
+  // buildPlacementClosing()'s wording and this opening are unchanged.
+  const usesNeutralClosing = (posVal !== 'LOW' && posVal !== 'HIGH' && posVal !== 'TOP' && posParts.length === 0);
+  let out = usesNeutralClosing ? '' : opening;
   if (posParts.length > 0) {
     out += '<ul style="margin:10px 0; padding-right:22px; line-height:2.2;">';
     for (var _i = 0; _i < posParts.length; _i++) {
@@ -3900,15 +3910,19 @@ window.accResetWarningBanners=accResetWarningBanners;
 // copy/Word-export code paths read from) in one place, then shows the
 // explanation in the UI.
 function accBlockGeneration(message){
+  // v93.8.15: a blocked generation must never delete a previously-produced
+  // document or leave the output area blank - the drafter's entered data
+  // and last successful result stay exactly as they were; this only records
+  // why THIS attempt didn't produce a (new) document and, when there is no
+  // prior document to preserve, shows that explanation in the output area
+  // itself instead of leaving it empty.
+  window.__accGenerationBlocked = { message: message, at: new Date().toISOString() };
   try{
-    if(window.GenerationOutput && typeof window.GenerationOutput.reset==='function'){
-      window.GenerationOutput.reset('accident-generation-blocked');
-    } else {
-      ['paper','paperDesktop','output','acc_paper'].forEach(function(id){var el=document.getElementById(id); if(el) el.innerHTML='';});
-      window.lastGeneratedContent='';
+    var ap = document.getElementById('acc_paper');
+    if(ap && !ap.innerHTML.trim()){
+      ap.innerHTML = '<div style="background:#fff3f3;border:1px solid #e0b4b4;padding:20px;border-radius:12px;color:#7a1f1f;"><b>⚠️ לא ניתן להפיק מסמך:</b><br>'+message+'</div>';
     }
   }catch(e){}
-  try{ var ao=document.getElementById('acc_output'); if(ao) ao.style.display='none'; }catch(e){}
   // v93.8.6: sync (never reset) the warning banners to whatever
   // generateAccidentInjury() already decided for THIS attempt before
   // calling accBlockGeneration() - it resets all four flags at the top of
@@ -4444,7 +4458,15 @@ window.accResolvePenaltyRequest = function(rng, tier, placementKey, enhInfo){
     r.disqRequested = window.accPickPointInRange(toNum(enhInfo.disqMin), toNum(enhInfo.disqMax), placementKey);
   }
 
-  var autoPrisonEligible = (enhInfo && enhInfo.prisonRequired) || tier==='HARD' || tier==='EXTREME';
+  // v93.8.15: tier alone (HARD/EXTREME) used to make this true, so a
+  // concrete prison figure was auto-selected and stated as "requested" in
+  // the document even when the prosecutor never checked "מאסר מאחורי סורג
+  // ובריח" or "עבודות שירות" - choosing a high negligence/hard injury tier
+  // or a high placement must not by itself produce a custody petition.
+  // enhInfo.prisonRequired (a real prosecutor-selected combination of
+  // aggravating offenses) is an explicit choice, not a bare inference from
+  // tier, and is unaffected.
+  var autoPrisonEligible = !!(enhInfo && enhInfo.prisonRequired);
   if(!r.bothPrisonChecked){
     if(r.prisonBehindChecked){
       var manualPrisonRaw = gv('acc_p_prison_m');
@@ -6117,13 +6139,44 @@ function generateAccidentInjury(){
     var _brHasSupport = _brDirection==='agg' ? !!_brFactors.aggravating.length : (_brDirection==='mit' ? !!_brFactors.mitigating.length : true);
     var _brManualReason = gv('acc_placement_manual_reason');
     var _brPlaceReason;
+    var _brUseNeutralText = false;
     if(_brIsManual && _brManualReason){
       _brPlaceReason = ', עמדת המאשימה למיקום זה מבוססת על: ' + E(_nd(_brManualReason));
     } else if(_brIsManual && !_brHasSupport){
+      // v93.8.17: a manually-chosen HIGH/TOP/LOW/BOTTOM placement with no
+      // supporting defendant-record data must not block generation, and
+      // must not fabricate a reason from negligence/injury/accident
+      // circumstances - those already set the range (see
+      // accNeutralManualPlacementText()'s own comment above), and reusing
+      // them here would double-count the same fact for placement.
+      // accNeutralManualPlacementText() states the prosecution's position
+      // plainly instead, without inventing data. The UI-only flag still
+      // invites the drafter to add supporting data.
       window._accPlacementNeedsManualReason = true;
-      return accBlockGeneration('המיקום שנבחר ידנית בתוך המתחם אינו נתמך בנתון '+(_brDirection==='agg'?'מחמיר':'מקל')+' שהוזן. יש להזין נימוק תביעתי בשדה "נימוק התביעה למיקום שנבחר" לפני ההפקה הסופית.');
+      _brUseNeutralText = true;
+      _brPlaceReason = '';
+    } else if(_brDirection!=='neutral' && _brHasSupport){
+      // v93.8.17: manual placement toward an end actually supported by real
+      // defendant-record data, with no free-text reason typed - name the
+      // real factors (exactly like the main route's _plFactorsNote) instead
+      // of the negligence/accident-outcome text below, which would
+      // double-count a fact already used to set the range.
+      var _brFList = _brDirection==='agg' ? _brFactors.aggravating : _brFactors.mitigating;
+      _brPlaceReason = ', עמדת המאשימה למיקום זה מבוססת על: ' + _brFList.join('; ');
     } else {
-      _brPlaceReason = ', בהתחשב ברף הרשלנות, בתוצאות התאונה ובנסיבות ביצוע העבירה' + (_brEnh?' ובעבירות הנלוות שנעברו בעת התאונה':'');
+      // v93.8.18: this shared fallback (reached only for CENTER, direction
+      // 'neutral') used to cite "negligence level, accident results and
+      // circumstances of the offense" - the exact double-counting the
+      // HIGH/TOP/LOW/BOTTOM fix above addresses, just left over for the one
+      // direction that fix didn't touch. Grounded now only in whatever real
+      // defendant-record factors exist on either side (center reflects a
+      // balance of them), exactly like the main route's _plFactorsNote; with
+      // no such factors at all, the sentence states the position without
+      // inventing a reason.
+      var _brAllFactors = [].concat(_brFactors.aggravating||[], _brFactors.mitigating||[]);
+      _brPlaceReason = _brAllFactors.length
+        ? ', בהתחשב בנתונים הנוגעים לנאשם - ' + _brAllFactors.join('; ')
+        : '';
     }
     // v93.8.8: this used to unconditionally append ", פסילה מותנית וקנס"
     // (conditional disqualification and a fine) regardless of whether
@@ -6147,7 +6200,9 @@ function generateAccidentInjury(){
     } else {
       _brConcretePenalty = '.';
     }
-    var brPlace = '<p>עמדת המאשימה היא למקם את הנאשם ' + _brPlaceLabel + _brPlaceReason + _brConcretePenalty + '</p>';
+    var brPlace = _brUseNeutralText
+      ? '<p>' + accNeutralManualPlacementText(_brPlaceKey) + '</p>'
+      : '<p>עמדת המאשימה היא למקם את הנאשם ' + _brPlaceLabel + _brPlaceReason + _brConcretePenalty + '</p>';
     o += SECa('מיקום הנאשם בתוך המתחם', brPlace);
     var defB = (typeof buildDefenseArgumentsSection==='function') ? buildDefenseArgumentsSection('accident_injury',{bodyOnly:true}) : '';
     if(defB) o += SECa('התייחסות לשיקולים לקולא', defB);
@@ -6160,6 +6215,7 @@ function generateAccidentInjury(){
     var ap=document.getElementById('acc_paper'); if(ap) ap.innerHTML=o;
     var ao=document.getElementById('acc_output'); if(ao) ao.style.display='block';
     _accSyncWarningBanners();
+    window.__accGenerationBlocked = null;
     window.lastGeneratedContent=o;
     return o;
   }
@@ -6289,6 +6345,21 @@ function generateAccidentInjury(){
   o+=SECa('קביעת מתחם העונש ההולם', mBody);
 
   var plMap={bottom:'בתחתית המתחם',low:'בחלקו הנמוך של המתחם',center:'במרכז המתחם',high:'בחלקו הגבוה של המתחם',top:'ברף העליון של המתחם'};
+  // v93.8.16: a manually-chosen HIGH/TOP (or LOW/BOTTOM) placement with no
+  // supporting defendant-record data must not be blocked, and must not
+  // invent a reason from negligence/injury severity/accident circumstances -
+  // those already set the tier/range (see accPlacementRationaleFor()'s own
+  // comment above) and using them again here would double-count the same
+  // fact for placement. This states the prosecution's position plainly and
+  // makes clear the concrete placement still depends on defendant-specific
+  // data being presented, without fabricating that data or refusing to
+  // generate the document over its absence.
+  function accNeutralManualPlacementText(placeKey){
+    if(placeKey==='top') return 'עמדת המאשימה היא למיקום עונשו של הנאשם ברף העליון של המתחם. עמדה זו כפופה להצגת נתונים הנוגעים לנאשם המצדיקים מיקום כאמור.';
+    if(placeKey==='bottom') return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בתחתית המתחם. עמדה זו כפופה להצגת נתונים הנוגעים לנאשם המצדיקים מיקום כאמור.';
+    if(placeKey==='low') return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בחלקו הנמוך של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו ולשיקולים שאינם קשורים בביצוע העבירה.';
+    return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בחלקו הגבוה של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו של הנאשם ולשיקולים שאינם קשורים בביצוע העבירה.';
+  }
   // v93.8.x: previously several of these strings cited injury severity/
   // negligence ("עוצמת החבלה ורף הרשלנות") as justifying the PLACEMENT
   // itself - the same double-counting the scoring rework fixed, just left
@@ -6380,15 +6451,26 @@ function generateAccidentInjury(){
   window._accPlacementNeedsManualReason = false;
   var _plManualReason = gv('acc_placement_manual_reason');
   var _plRationale;
+  var _plUseNeutralText = false;
   if(_placementIsManual && _plManualReason){
     _plRationale = 'עמדת המאשימה למיקום זה מבוססת על: ' + E(_nd(_plManualReason)) + '.';
   } else if(_placementIsManual && !_plHasSupport){
+    // v93.8.17: a manually-chosen HIGH/TOP/LOW/BOTTOM placement with no
+    // supporting defendant-record data must not block generation, and must
+    // not fabricate a reason from negligence/injury/accident circumstances -
+    // those already set the range (see accNeutralManualPlacementText()'s own
+    // comment above), and reusing them here would double-count the same
+    // fact for placement. accNeutralManualPlacementText() states the
+    // prosecution's position plainly instead, without inventing data. The
+    // UI-only flag still invites the drafter to add supporting data.
     window._accPlacementNeedsManualReason = true;
-    return accBlockGeneration('המיקום שנבחר ידנית בתוך המתחם אינו נתמך בנתון '+(_plDirection==='agg'?'מחמיר':'מקל')+' שהוזן. יש להזין נימוק תביעתי בשדה "נימוק התביעה למיקום שנבחר" לפני ההפקה הסופית.');
+    _plUseNeutralText = true;
   } else {
     _plRationale = accPlacementRationaleFor(tier,_plKey);
   }
-  var plBody=`בתוך מתחם זה, עמדת המאשימה היא כי יש למקם את הנאשם ${pl}.`+(_plRationale?' '+_plRationale:'')+_plFactorsNote;
+  var plBody = _plUseNeutralText
+    ? accNeutralManualPlacementText(_plKey)
+    : `בתוך מתחם זה, עמדת המאשימה היא כי יש למקם את הנאשם ${pl}.`+(_plRationale?' '+_plRationale:'')+_plFactorsNote;
   // v93.8.3: this inline concrete-figure sentence used to compute its own
   // disq/prison point directly from _enhRange, ignoring any manually-
   // entered acc_p_disq_m/acc_p_prison_m/acc_p_sw_m - so a manual figure
@@ -6418,7 +6500,16 @@ function generateAccidentInjury(){
     if(_pr.prisonOutOfRange || _pr.disqOutOfRange) window._accPlacementContradictionWarning = true;
     { var _gapNote2=window.accPlacementGapNoteText(_pr); if(_gapNote2) window._accPlacementGapNote=_gapNote2; }
   }
-  if((ct==='confession_early'||ct==='plea') && (tCount===''||parseInt(tCount,10)===0) && _plKey!=='bottom' && _plKey!=='low') plBody+=` גם אם יינתן משקל להודאת הנאשם ולעברו שאינו מכביד, אין בכך כדי להצדיק מיקום נמוך יותר, בשים לב לחומרת החבלות ולצורך בענישה מוחשית.`;
+  // v93.8.20: this used to unconditionally add, for any CENTER/HIGH/TOP
+  // placement alongside a genuine confession+clean-record mitigating fact,
+  // "...אין בכך כדי להצדיק מיקום נמוך יותר, בשים לב לחומרת החבלות..." -
+  // citing injury severity to discount a real mitigating factor for
+  // placement purposes is exactly the double-counting this whole mechanism
+  // exists to prevent (injury severity already sets the tier/range - see
+  // accNeutralManualPlacementText()'s comment above). The mitigating fact
+  // itself is already named via _plFactorsNote below; no separate sentence
+  // is needed to explain why it wasn't enough, and none may be grounded in
+  // injury severity.
   if(isTenShichrutAccident && typeof window.accTenShichrutHasSignificantHistory==='function' && window.accTenShichrutHasSignificantHistory()){
     plBody+=`<br><br><b>פסיקה הנוגעת למיקום:</b> בעפ״ת (חי׳) 54261-01-17 אל־באקי נ׳ מדינת ישראל התקיימו חזרתיות בנהיגה ללא רישיון ועבר פלילי ותעבורתי. בית משפט קמא קבע מתחם של <b>8–14 חודשי מאסר</b>. בית המשפט המחוזי הפחית את העונש והעמידו על <b>5 חודשי מאסר בפועל</b> ו-<b>24 חודשי פסילה</b>.`;
   }
@@ -6447,6 +6538,7 @@ function generateAccidentInjury(){
   var ap=document.getElementById('acc_paper'); if(ap && ap.innerHTML!==o) ap.innerHTML=o;
   var ao=document.getElementById('acc_output'); if(ao) ao.style.display='block';
   _accSyncWarningBanners();
+  window.__accGenerationBlocked = null;
   window.lastGeneratedContent=o;
   return o;
 }
@@ -11165,6 +11257,21 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function generate67Shichrut(){
+    // v93.8.19 (dead-code guard, no refactor): this pre-V66 implementation
+    // is never actually reached in the live app - window.generate67Shichrut
+    // (the same global binding as this bare identifier, since both are
+    // top-level function declarations) is reassigned further down in this
+    // file to generate67ShichrutV65 and then, last, to
+    // generate67ShichrutV66; every real call site reads that final binding.
+    // This function's own placement paragraph below still carries the
+    // pre-v93.8.13.2 text that justified placement by restating the
+    // disqualified-driving+intoxication combination itself (the exact
+    // double-counting already removed from the live path in
+    // placement67Shichrut()). Kept only as version history; this guard
+    // makes an accidental future reactivation (e.g. deleting the later
+    // reassignment) delegate to the fixed V66 implementation instead of
+    // silently reintroducing that bug.
+    if(typeof generate67ShichrutV66 === 'function') return generate67ShichrutV66();
     try{
       var judge=esc(val('judge')||'________'), name=esc(ns(val('def_name'))||'________'), caseN=esc(val('case_num')||'________'), court=esc(val('court_name')||'________');
       var disqType=val('disq_type'), disqDetails=esc(val('disq_details'));
@@ -11955,8 +12062,15 @@ document.addEventListener('DOMContentLoaded', function(){
 
     html += S('סקירת פסיקה נוהגת', table67Shichrut());
     html += S('מתחם ענישה', p('במסלול זה ברירת המחדל הענישתית היא מתחם מאסר של '+mMin+'-'+mMax+' חודשי מאסר בפועל, לצד פסילה ממושכת, מאסר מותנה, פסילה מותנית, קנס וענישה נלווית. רף חמור יותר יישקל רק בתיק חריג במיוחד ועל בסיס נתונים מחמירים שהוזנו.'));
-    var _placement67sText = p('בשים לב לעברו הרלוונטי של הנאשם ולתנאים בני ההפעלה ככל שקיימים, עמדת המאשימה היא למקם את הנאשם בהתאם לנתוני התיק.');
-    if(_past67s) _placement67sText += '<div style="margin-top:18px;">'+_past67s+'</div>';
+    // v93.8.19: fix67Shichrut() (the post-processor that always runs for
+    // this route - see processor()) replaces this first paragraph with a
+    // single sentence that already names the real record data (via
+    // shichrut67PlacementFactors(), reading these same fields) and states
+    // the placement itself. _past67s is no longer appended as a separate,
+    // disconnected trailing block here - that used to leave the real data
+    // sitting in its own paragraph, unconnected to why any placement was
+    // taken, once the post-processor rewrote the first sentence around it.
+    var _placement67sText = p('עמדת המאשימה היא למקם את הנאשם בהתאם לנתוני התיק.');
     html += S('מיקום בתוך המתחם', _placement67sText);
     var _defense67s = defenseBlock();
     if(_defense67s) html += S('התייחסות לשיקולים לקולא', _defense67s);
@@ -12571,10 +12685,31 @@ document.addEventListener('DOMContentLoaded', function(){
     // caller reports no real signal (no heavy/repeat/prior_10a/no_fix_10a/
     // record-analysis text) AND the position is only the CENTER default,
     // use the neutral fallback instead of naming unentered factors.
-    if ((pos!=='LOW' && pos!=='HIGH' && pos!=='TOP') && hasSignal===false) {
-      return p('מיקום העונש בתוך המתחם ייקבע בהתאם לנתוני הנאשם, לנסיבותיו האישיות ולמשקלם המצטבר של השיקולים המחמירים והממתנים.');
+    //
+    // v93.8.19: the fix above still let LOW/HIGH/TOP through to the
+    // unconditional sentence below regardless of hasSignal, and that
+    // sentence named all three factor categories (record, repeat offending,
+    // dependent prison/conditions) together, hedged only by "ככל שקיימים" -
+    // so a case with, say, only a repeat conviction entered still read as
+    // if all three were weighed. signals (passed in by the caller instead
+    // of a single boolean) now gates each category independently, and ANY
+    // placement (not just the CENTER default) falls back to position-
+    // specific neutral text when none of the three are actually entered.
+    var sig = (hasSignal && typeof hasSignal === 'object') ? hasSignal : {hasRecord:!!hasSignal, hasRepeat:!!hasSignal, hasPending:!!hasSignal};
+    var clauses=[];
+    if(sig.hasRecord) clauses.push('לעברו');
+    if(sig.hasRepeat) clauses.push('לשאלת חזרתיות העבירות');
+    if(sig.hasPending) clauses.push('למאסרים או תנאים תלויים');
+    if(!clauses.length){
+      var neutralMap={
+        TOP:'עמדת המאשימה היא למיקום עונשו של הנאשם ברף העליון של המתחם. עמדה זו כפופה להצגת נתונים הנוגעים לנאשם המצדיקים מיקום כאמור.',
+        LOW:'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם ברף התחתון של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו ולשיקולים שאינם קשורים בביצוע העבירה.',
+        HIGH:'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בשליש העליון של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו של הנאשם ולשיקולים שאינם קשורים בביצוע העבירה.',
+        CENTER:'מיקום העונש בתוך המתחם ייקבע בהתאם לנתוני הנאשם, לנסיבותיו האישיות ולמשקלם המצטבר של השיקולים המחמירים והממתנים.'
+      };
+      return p(neutralMap[pos]||neutralMap.CENTER);
     }
-    var s=p('בנסיבות העניין, המאשימה תטען כי יש למקם את הנאשם '+t+', בשים לב לעברו, לשאלת חזרתיות העבירות ולמאסרים או תנאים תלויים ככל שקיימים.');
+    var s=p('בנסיבות העניין, המאשימה תטען כי יש למקם את הנאשם '+t+', בשים לב '+clauses.join(', ')+'.');
     return s;
   }
   function petitionHtml(route){
@@ -12687,13 +12822,24 @@ document.addEventListener('DOMContentLoaded', function(){
       range += p('<b>בנסיבות תיק זה, מתחם העונש ההולם המבוקש נע בין '+esc(mMin)+' לבין '+esc(mMax)+' חודשי מאסר בפועל</b>, לצד פסילה ממושכת, מאסר מותנה, פסילה מותנית וקנס או התחייבות לפי העניין.');
       out += section('ו','קביעת מתחם העונש ההולם',range);
 
-      // v93.8.13.5.5 (item 3): hasSignal mirrors the real defendant-data
-      // flags already computed above for this route (heavy/repeat/
-      // prior_10a/no_fix_10a) plus whether buildPast() actually produced
-      // any past-record analysis text - the same signals this section
-      // already renders elsewhere, not a new calculation.
-      var _hasPlacementSignal = !!(heavy || repeat || prior10a || noFix || _pastComplex);
-      var _placementTextV74 = placementText(route, _hasPlacementSignal);
+      // v93.8.13.5.5 (item 3), refined in v93.8.19: this used to collapse
+      // every signal into one "hasSignal" boolean, so placementText() named
+      // all three factor categories (record / repeat offending / dependent
+      // prison-or-conditions) together whenever ANY one of them was true -
+      // a case with only, say, a repeat conviction still read as if the
+      // record and pending-conditions categories were weighed too. Each
+      // category is now its own flag, built from the same already-computed
+      // signals (no new calculation): record from has_heavy_traffic or
+      // buildPast() actually producing analysis text; repeat offending from
+      // shich_repeat/prior_10a/no_fix_10a; dependent prison from
+      // has_prior_prison (a served custodial term is exactly what "מאסרים
+      // ... תלויים" refers to for this route).
+      var _placementSignals = {
+        hasRecord: !!(checked('has_heavy_traffic') || _pastComplex),
+        hasRepeat: !!(repeat || prior10a || noFix),
+        hasPending: !!checked('has_prior_prison')
+      };
+      var _placementTextV74 = placementText(route, _placementSignals);
       if (_pastComplex) _placementTextV74 += '<div style="margin-top:18px;">'+_pastComplex+'</div>';
       out += section('ז','מיקום הנאשם בתוך המתחם',_placementTextV74);
 
@@ -19981,24 +20127,70 @@ window.__v9260Architecture=true;</script>
     return out;
   }
 
+  // v93.8.19: real record data entered for this route (traffic/criminal
+  // counts and details, heavy-record flags) used to be computed as
+  // _past67s in generate67ShichrutV66() and appended as a SEPARATE <div>
+  // after this function's bare sentence - fix67Shichrut() below only ever
+  // replaced that first sentence, so the real data itself was never lost,
+  // but it was also never actually why any placement was stated (the
+  // sentence and the facts read as two disconnected paragraphs). Recomputed
+  // here (same field IDs, same gating - only entered data ever appears) so
+  // the ONE sentence fix67Shichrut() writes both states the position and
+  // names the real reason for it; generate67ShichrutV66() no longer appends
+  // _past67s a second time (see the comment at its own call site).
+  function shichrut67PlacementFactors(){
+    var agg=[], mit=[];
+    var tc=val('traffic_count');
+    if(tc!==''){
+      if(parseInt(tc,10)===0) mit.push('היעדר עבר תעבורתי קודם');
+      else agg.push(tc+' הרשעות תעבורה קודמות');
+    }
+    var td=val('traffic_detail');
+    if(td) agg.push('העבר התעבורתי הרלוונטי - '+esc(td));
+    var cc=val('crim_count');
+    if(cc!==''){
+      if(parseInt(cc,10)===0) mit.push('היעדר עבר פלילי קודם');
+      else agg.push(cc+' הרשעות פליליות');
+    }
+    var cd=val('crim_detail');
+    if(cd) agg.push('העבר הפלילי הרלוונטי - '+esc(cd));
+    if(checked('has_heavy_traffic')) agg.push('עבר תעבורתי מכביד');
+    if(checked('has_heavy_criminal')) agg.push('עבר פלילי מכביד');
+    return {aggravating:agg, mitigating:mit};
+  }
+  // v93.8.19: matches accNeutralManualPlacementText()'s wording/rationale
+  // (see that function's own comment) - a chosen placement with no real
+  // supporting defendant data must not be justified by restating the
+  // offense/route combination (already priced into the range) or by
+  // inventing data. States the position plainly instead; TOP/HIGH mirror
+  // the accident-route wording exactly for consistency across the app.
+  function placement67ShichrutNeutralText(p){
+    if(p==='TOP') return 'עמדת המאשימה היא למיקום עונשו של הנאשם ברף העליון של המתחם. עמדה זו כפופה להצגת נתונים הנוגעים לנאשם המצדיקים מיקום כאמור.';
+    if(p==='BOTTOM') return 'עמדת המאשימה היא למיקום עונשו של הנאשם בתחתית המתחם. עמדה זו כפופה להצגת נתונים הנוגעים לנאשם המצדיקים מיקום כאמור.';
+    if(p==='LOW') return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בחלקו הנמוך של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו ולשיקולים שאינם קשורים בביצוע העבירה.';
+    if(p==='HIGH') return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם בחלקו הגבוה של המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו של הנאשם ולשיקולים שאינם קשורים בביצוע העבירה.';
+    return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם במרכז המתחם. המיקום הקונקרטי ייקבע בהתאם לנתונים שיוצגו בעניינו ולשיקולים שאינם קשורים בביצוע העבירה.';
+  }
   function placement67Shichrut(){
     var p=val('pos').toUpperCase();
-    var map={
-      BOTTOM:'עמדת המאשימה היא למקם את הנאשם בתחתית המתחם, ככל שנתוני התיק מצדיקים זאת.',
-      LOW:'עמדת המאשימה היא למקם את הנאשם בחלקו הנמוך של המתחם.',
-      CENTER:'עמדת המאשימה היא למקם את הנאשם במרכז המתחם.',
-      HIGH:'עמדת המאשימה היא למקם את הנאשם בחלקו הגבוה של המתחם.',
-      TOP:'עמדת המאשימה היא למקם את הנאשם ברף העליון של המתחם.'
+    var labelMap={
+      BOTTOM:'בתחתית המתחם',
+      LOW:'בחלקו הנמוך של המתחם',
+      CENTER:'במרכז המתחם',
+      HIGH:'בחלקו הגבוה של המתחם',
+      TOP:'ברף העליון של המתחם'
     };
-    // v93.8.13.2 (range/placement ownership fix): removed the trailing
-    // sentence that justified this placement by restating the combination
-    // of disqualified driving + intoxication itself ("הנאשם לא רק נהג במצב
-    // של שכרות... אלא עשה כן כאשר נאסר עליו לנהוג מלכתחילה") - that
-    // combination already set the RANGE for this route and must not be
-    // reused a second time to justify where within it the defendant is
-    // placed. Any defendant-specific placement data (record, conditions)
-    // is added separately, right after this sentence, from _past67s.
-    return map[p]||map.CENTER;
+    var label=labelMap[p]||labelMap.CENTER;
+    // v93.8.13.2 (range/placement ownership fix, kept): the placement is
+    // never justified by restating the combination of disqualified driving
+    // + intoxication itself - that combination already set the RANGE for
+    // this route. Only real, entered defendant-record data (below) may
+    // support it.
+    var factors=shichrut67PlacementFactors();
+    var direction=(p==='HIGH'||p==='TOP')?'agg':((p==='BOTTOM'||p==='LOW')?'mit':'neutral');
+    var relevant = direction==='agg' ? factors.aggravating : (direction==='mit' ? factors.mitigating : factors.aggravating.concat(factors.mitigating));
+    if(!relevant.length) return placement67ShichrutNeutralText(p);
+    return 'בתוך מתחם העונש ההולם, עמדת המאשימה היא כי יש למקם את עונשו של הנאשם '+label+'. עמדה זו נתמכת בנתונים הבאים: '+relevant.join('; ')+'.';
   }
 
   function petition67Shichrut(){
@@ -21263,10 +21455,26 @@ window.__v93619Diagnostics=function(){
     return String(d.textContent||'').replace(/\s+/g,' ').trim();
   }
   function audit(){
-    var paper=el(route()==='accident_injury'?'acc_paper':'paper');
-    var text=textOf(paper), issues=[], r=route();
-    if(!text) return {ok:true,route:r,issues:[],checkedAt:new Date().toISOString()};
+    var r=route();
+    // v93.8.15: route() falls back to document.body's mode-* class for this
+    // route (the accident form never populates #mashlul), and that class is
+    // literally "mode-accident" (see setBodyRouteClass()), not
+    // "accident_injury" - the accident branch below never matched and this
+    // audit silently read the wrong (empty) #paper element for the whole
+    // route. isAccidentRoute covers both spellings so the correct element
+    // (#acc_paper) is read and the block-reason check below can match.
+    var isAccidentRoute = (r==='accident_injury' || r==='accident');
+    var paper=el(isAccidentRoute?'acc_paper':'paper');
+    var text=textOf(paper), issues=[];
     function issue(code,severity,message){issues.push({code:code,severity:severity,message:message});}
+    // v93.8.15: surface an internal generation block (accBlockGeneration())
+    // here instead of letting an empty-or-stale output area silently read
+    // as ok:true - the drafter needs this reason visible even when a prior
+    // document is still on screen (the block did not touch it).
+    if(isAccidentRoute && window.__accGenerationBlocked && window.__accGenerationBlocked.message){
+      issue('accident-generation-blocked','high','ההפקה האחרונה נחסמה: '+window.__accGenerationBlocked.message);
+    }
+    if(!text) return {ok:issues.length===0,route:r,issues:issues,checkedAt:new Date().toISOString()};
     ['משטרת ישראל','חטיבת התביעות','installPolicy','policy_text','__legacy_policy_default__'].forEach(function(token){
       if(text.indexOf(token)!==-1) issue('internal-or-branding-token','high','נמצא בפלט טקסט פנימי או מיתוג שאינו אמור להופיע במסמך: '+token);
     });
