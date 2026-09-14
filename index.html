@@ -8544,6 +8544,7 @@ function getSignatureUnit() {
     
 
 function generateMultiple() {
+  var heb=['א','ב','ג','ד','ה','ו','ז','ח','ט'];var si=0;
   var want40a = (document.getElementById('request_40a') && document.getElementById('request_40a').checked) === true;
 
   
@@ -8605,7 +8606,7 @@ function generateMultiple() {
   content += `<b>נגד הנאשם: ${name}</b><br><br>`;
   content += `<div style="text-align: center; font-weight: bold; text-decoration: underline; font-size: 22px; color: var(--navy); margin-bottom: 20px;">טיעונים לעונש מטעם המאשימה</div>`;
 
-  content += `<div style="margin-bottom: 30px;"><b><u>א. פתיח ורקע עובדתי:</u></b><br>`;
+  content += `<div style="margin-bottom: 30px;"><b><u>${heb[si++]}. פתיח ורקע עובדתי:</u></b><br>`;
 
   if (isConsol) {
     content += `1. במסגרת צירוף התיקים המפורטים לעיל, הורשע הנאשם ${name} על פי הודאתו ב-<b>${count} אישומים של נהיגה בזמן פסילה</b>, כמפורט להלן:<br><br>`;
@@ -8669,25 +8670,25 @@ function generateMultiple() {
   // v93.8.13.4 (item 2): decoupled from _past67Multi - see the parallel
   // comment at the plain '67' route's evidence-gate above.
   if (hasRecordEvidenceData()) {
-    content += `<b><u>ב. ראיות לעונש:</u></b><br><br>`;
+    content += `<b><u>${heb[si++]}. ראיות לעונש:</u></b><br><br>`;
     content += `${buildEvidenceSubmissionSentence()}<br>`;
   }
 
   content += `<br></div>`;
 
-  content += `<div style="margin-bottom: 30px;"><b><u>ה. הערך החברתי המוגן:</u></b><br>
+  content += `<div style="margin-bottom: 30px;"><b><u>${heb[si++]}. הערך החברתי המוגן:</u></b><br>
 הערך החברתי המוגן בעבירה של נהיגה בזמן פסילה הוא שילוב של פגיעה בביטחון הציבור ובמשתמשי הדרך יחד עם פגיעה בכיבוד צווים שיפוטיים ובשלטון החוק.<br><br>ברע״פ 6115/06 מדינת ישראל נ׳ אבו-לבן (8.5.2007) נקבע כי:<br>"נדמה כי אין צורך להרחיב אודות החומרה הכרוכה בנהיגה בזמן פסילה. בביצוע מעשה כזה מסכן הנהג… את שלום הציבור – נהגים והולכי רגל כאחד; הוא מבטא זלזול בצווים של בית-המשפט; הוא מוכיח, כי לא ניתן להרחיק אותו נהג מהכביש כל עוד הדבר תלוי ברצונו הטוב".<br><br>וברע״פ 8013/13 מסעוד נ׳ מדינת ישראל (18.12.2013) נקבע:<br>"רחמנות יתירה על מי שנוהג פעם אחר פעם ללא רישיון נהיגה היא אכזריות כלפי יתר עוברי הדרך."<br><br>מן האמור עולה כי מדובר בעבירה הפוגעת פגיעה ממשית הן בביטחונם של משתמשי הדרך והן בעקרון יסוד של כיבוד צווים שיפוטיים, ומשכך מידת הפגיעה בערכים המוגנים היא גבוהה.<br><br>
 </div>`;
 
   if (includePolicy && policyText.trim()) {
     const esc = policyText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-    content += `<div style="margin-bottom: 30px;"><b><u>ד. מדיניות הענישה הנוהגת והמסר ההרתעתי:</u></b><br>${esc}<br></div>`;
+    content += `<div style="margin-bottom: 30px;"><b><u>${heb[si++]}. מדיניות הענישה הנוהגת והמסר ההרתעתי:</u></b><br>${esc}<br></div>`;
   }
 
-  content += `<div style="margin-bottom: 30px;"><b><u>ה. מתחם העונש:</u></b><br>`;
+  content += `<div style="margin-bottom: 30px;"><b><u>${heb[si++]}. מתחם העונש:</u></b><br>`;
   content += `1. <b>מתחם העונש ההולם (בגין העבירות כולן ובשים לב למכלול הנסיבות) נע בין ${mMin} ל-${mMax} חודשי מאסר בפועל.</b><br><br></div>`;
 
-  content += `<div style="margin-bottom: 30px;"><b><u>ו. מיקום העונש בתוך מתחם הענישה:</u></b><br>`;
+  content += `<div style="margin-bottom: 30px;"><b><u>${heb[si++]}. מיקום העונש בתוך מתחם הענישה:</u></b><br>`;
 content += buildPlacementSection({ pos: pos, isMultiple: true, isConsol: isConsol, trackType: '67' });
 if (_past67Multi) {
   content += `<div style="margin-top:18px;">${_past67Multi}</div>`;
@@ -8716,7 +8717,7 @@ content += `</div>`;
 
   const prisonMonthsFinal = normalizeHebText(document.getElementById('req_prison')?.value || '');
 
-  content += `<div style="margin-bottom: 40px;"><b><u>ז. עתירת המאשימה לעונש:</u></b><br>`;
+  content += `<div style="margin-bottom: 40px;"><b><u>${heb[si++]}. עתירת המאשימה לעונש:</u></b><br>`;
   if (want40a) {
     content += `<p style="margin:8px 0 0;"><strong>לעניין רכיב הפסילה:</strong> משמתקיימים תנאי סעיף <strong>40א(א)(1)</strong> לפקודת התעבורה, חלה <strong>חובת פסילת מינימום</strong> בת <strong>10 שנים</strong>. בהעדר טעמים מיוחדים שיירשמו המצדיקים סטייה מהוראת המחוקק, עותרת המאשימה להשית על הנאשם פסילה כאמור.</p>`;
   }
