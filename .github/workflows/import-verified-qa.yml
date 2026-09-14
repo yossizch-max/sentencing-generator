@@ -1,0 +1,36 @@
+name: Import verified QA generator
+
+on:
+  push:
+    branches:
+      - qa/verified-generator-2026-09-14
+    paths:
+      - .github/workflows/import-verified-qa.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/verified-generator-2026-09-14
+      - name: Download and verify exact QA file
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 5             https://sentencing-generator-qa-temp.vercel.app/index.html             --output index.html.new
+          echo "90347dc0461d072b5f0a5ebaa28294cb844746f0ea04a5cde19d924156c0c5a8  index.html.new" | sha256sum --check -
+          mv index.html.new index.html
+      - name: Commit verified file and remove importer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/import-verified-qa.yml
+          git add index.html
+          git commit -m "Import verified QA generator"
+          git push origin HEAD:qa/verified-generator-2026-09-14
