@@ -3500,8 +3500,18 @@ var ACCIDENT_CASES=[
    summary:'סטייה מנתיב ופגיעה ברוכב קטנוע',injury:'',sentence:'11 חודשי פסילה, 3 חודשי מאסר על תנאי, 4 חודשי פסילה על תנאי, קנס 3,000 ₪ ופיצוי 3,000 ₪',display:true},
   {id:'c4',proc:'עפ"ת 48308-02-25',court:'מחוזי',name:'שלום מויאל נ׳ מדינת ישראל',use:'CORE_BASE',neg:'medium_high',inj:'medium',victim:['minor','crosswalk','pedestrian'],tags:['crosswalk','minor'],
    summary:'פגיעה בקטין במעבר חציה',injury:'',sentence:'7 חודשי פסילה, 4 חודשי פסילה על תנאי וקנס 2,000 ₪',display:true},
-  {id:'c5',proc:'ת"ד 4838-09-19',court:'תעבורה',name:'מדינת ישראל נ׳ בקר טורקמן',use:'CORE_BASE',neg:'medium',inj:'medium_high',victim:['pedestrian'],tags:['surgery'],
-   summary:'פגיעה בהולכת רגל',injury:'נגרמו שבר בברך שהצריך ניתוח ושבר בקרסול.',sentence:'7 חודשי פסילה, 6 חודשי פסילה על תנאי, 2 חודשי מאסר על תנאי וקנס 1,000 ₪',display:true},
+// v93.8.14: c5 corrected (28.9.26) — previously contained the facts/sentence of
+// ת"ד 104-11-20 מדינת ישראל נ' אורי חפר, quoted as supporting precedent inside
+// טורקמן's own sentencing document, but mislabeled here under טורקמן's case
+// number (4838-09-19). c5 now reflects טורקמן's own verified sentencing
+// document (22.11.2022) — a case where the defendant himself was injured,
+// not a pedestrian. אורי חפר (104-11-20) is not represented as a verified
+// entry: it is known only via secondary quotation inside another judgment
+// (VERIFIED_VIA_SECONDARY_SOURCE), not the original judgment itself. Add a
+// proper entry only if the original חפר document is obtained and verified
+// directly.
+  {id:'c5',proc:'ת"ד 4838-09-19',court:'תעבורה',name:'מדינת ישראל נ׳ בקר טורקמן',use:'EXCEPTION_ONLY',neg:'high',inj:'medium',victim:[],tags:['self'],
+   summary:'תאונה שבה הנאשם עצמו, שנהג על אופנוע ועקף בצומת רכב שפנה שמאלה, נפגע; הנאשם הורשע גם בנהיגה ללא ביטוח. בית המשפט קבע רף רשלנות גבוה, אך בהתחשב בכך שהנאשם עצמו נפגע, קבע מתחם ללא מאסר או של״צ.',injury:'שבר טיביה מרוסק ופיבולה (שליש פרוקסימלי) מרוסק, שהצריך אשפוז, ניתוח ושיקום.',sentence:'5 חודשי פסילה בפועל, 6 חודשי פסילה על תנאי למשך 3 שנים, קנס 1,500 ₪ והתחייבות כספית בסך 5,000 ₪ למשך 3 שנים',display:true},
   {id:'c6',proc:'ת"ד 8497-03-17',court:'תעבורה',name:'מדינת ישראל נ׳ ישראל דרור',use:'CORE_BASE',neg:'medium',inj:'medium_high',victim:['bicycle'],tags:['heavy','surgery'],
    summary:'נהיגה ברכב משא ופגיעה ברוכבת אופניים',injury:'נגרם שבר באמה שקובע בניתוח.',sentence:'12 חודשי פסילה, מאסר על תנאי, פסילה על תנאי ופיצוי 7,500 ₪',display:true},
   {id:'c7',proc:'ת"ד 3504-08-22',court:'תעבורה',name:'מדינת ישראל נ׳ רנא נאסר',use:'AGGRAVATING',neg:'medium_high',inj:'hard',victim:[],tags:['brain','head','rehab'],
@@ -3512,8 +3522,6 @@ var ACCIDENT_CASES=[
    summary:'תאונה קשה עקב חציית צומת באור אדום; בית המשפט העליון עמד על הצורך בענישה מרתיעה גם בתאונות שבהן נגרמות חבלות קשות ולא רק במקרי מוות.',injury:'חבלות ופציעות חמורות.',sentence:'3 חודשי מאסר בפועל מאחורי סורג ובריח ו-40 חודשי פסילה',display:true},
   {id:'c32',proc:'רע״פ 7257/12',court:'עליון',name:'גדעון סנדרוביץ נ׳ מדינת ישראל',use:'AGGRAVATING',neg:'high',inj:'extreme',victim:['pedestrian','crosswalk'],tags:['crosswalk','pedestrian','brain','disability','custody'],
    summary:'פגיעה בהולכת רגל במעבר חצייה; בית המשפט הדגיש כי כאשר החבלות הן כפסע מגרימת מוות יש הצדקה לענישה מחמירה.',injury:'פגיעה רב-מערכתית וקוגניטיבית קשה ביותר.',sentence:'6 חודשי מאסר בפועל מאחורי סורג ובריח ו-6 שנות פסילה',display:true},
-  {id:'c33',proc:'רע״פ 2996/13',court:'עליון',name:'טטיאנה נייאזוב נ׳ מדינת ישראל',use:'AGGRAVATING',neg:'medium_high',inj:'extreme',victim:[],tags:['custody'],
-   summary:'תאונה קשה ברשלנות שאינה מצויה ברף הנמוך; בית המשפט העליון הדגיש את חובת השמירה על חוקי התנועה ואת חשיבות ההרתעה.',injury:'חבלות קשות בתאונת דרכים.',sentence:'6 חודשי מאסר בפועל מאחורי סורג ובריח ו-10 שנות פסילה',display:true},
   {id:'c34',proc:'רע״פ 3616/13',court:'עליון',name:'רמו רז נ׳ מדינת ישראל',use:'AGGRAVATING',neg:'high',inj:'extreme',victim:['pedestrian','crosswalk'],tags:['crosswalk','pedestrian','multi','disability','custody'],
    summary:'פגיעה בשני הולכי רגל במעבר חצייה; בית המשפט אישר ענישה של מאסר ממש בתיק שבו החבלות היו חמורות במיוחד.',injury:'לאחד הנפגעים נגרמה נכות צמיתה בשיעור 75%.',sentence:'8 חודשי מאסר בפועל מאחורי סורג ובריח ו-5 שנות פסילה',display:true},
   {id:'c35',proc:'עפ״ת 2316-03-24; עפ״ת 8613-03-24',court:'מחוזי',name:'הייתם גדיר נ׳ מדינת ישראל; מדינת ישראל נ׳ הייתם גדיר',use:'AGGRAVATING',neg:'high',inj:'extreme',victim:['public'],tags:['opposite','multi','public','heavy','custody','rehab','surgery'],
