@@ -9,8 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   /* Design tokens sourced from the live מחולל (https://generator-mocha-rho.vercel.app) —
-     colors, fonts, RTL, heading hierarchy, buttons, cards and mobile breakpoints only.
-     No data field, filter or JS logic was changed to match this. */
+     colors, fonts, RTL, heading hierarchy, buttons, cards and mobile breakpoints. */
   :root{
     --navy:     #1e3a5f;
     --navy2:    #13315c;
@@ -67,10 +66,13 @@
   .controls input:hover, .controls select:hover{border-color:var(--border2);}
   .controls input:focus, .controls select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
   @media(min-width:768px){ .controls input, .controls select{border-radius:8px;} }
+  .tag-section-label{font-size:.72rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin:2px 0 6px;}
   .tagbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
   .tagchip{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:4px 12px;font-size:.78rem;cursor:pointer;color:var(--muted2);transition:border-color .15s;}
   .tagchip:hover{border-color:var(--border2);}
   .tagchip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .groupchip{border-color:var(--blue);color:var(--navy2);background:var(--blue-lt);font-weight:600;}
+  .groupchip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
   .results-meta{font-size:.85rem;color:var(--muted2);margin-bottom:10px;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:12px;transition:border-color .15s,box-shadow .15s;}
   .card:hover{border-color:var(--border2);}
@@ -127,6 +129,9 @@
     <select id="fPunishment"><option value="">כל סוגי העונש</option></select>
   </div>
 
+  <div class="tag-section-label">קטגוריות מאוחדות (סינון מהיר)</div>
+  <div class="tagbar" id="tagGroupBar"></div>
+  <div class="tag-section-label">כל התגיות (18 השכיחות)</div>
   <div class="tagbar" id="tagbar"></div>
 
   <div class="results-meta" id="resultsMeta"></div>
@@ -138,15 +143,57 @@
 <script>
 let ALL_CASES = [];
 let activeTag = null;
+let activeTagGroup = null;
 
 const injuryLabels = {
   PROPERTY_ONLY: 'נזק רכוש בלבד',
   BELOW_REAL: 'פגיעה שאינה חבלה של ממש',
   REAL_INJURY: 'חבלה של ממש',
   SEVERE_REAL_INJURY: 'חבלה חמורה',
-  UNKNOWN: 'לא רלוונטי / לא ידוע',
-  FATAL: 'תאונה קטלנית'
+  UNKNOWN: 'לא רלוונטי / לא ידוע'
 };
+// קטגוריית FATAL אינה בשימוש בספרייה זו במכוון.
+
+// סיווג פגיעה מנורמל לתצוגה/סינון בלבד — 4 הקטגוריות המבוקשות, בתוספת "לא פורט"
+// לרשומות שבהן אירעה תאונה (occurred=true) אך סיווג הפגיעה לא צוין במקור.
+// לעולם אינו כותב חזרה לנתונים — נגזר בלבד מ-accident.occurred ו-accident.injuryClass הקיימים.
+const injuryCategoryOrder = ['REAL_INJURY_GROUP','BELOW_REAL','PROPERTY_ONLY','NOT_ACCIDENT','UNSTATED'];
+const injuryCategoryLabels = {
+  REAL_INJURY_GROUP: 'חבלה של ממש',
+  BELOW_REAL: 'ללא חבלה של ממש',
+  PROPERTY_ONLY: 'נזק רכוש בלבד',
+  NOT_ACCIDENT: 'לא תאונה',
+  UNSTATED: 'לא פורט (תאונה אירעה, סיווג לא צוין)'
+};
+function deriveInjuryCategory(c){
+  const acc = c.accident || {};
+  const ic = acc.injuryClass;
+  const occurred = acc.occurred;
+  if(ic === 'PROPERTY_ONLY') return 'PROPERTY_ONLY';
+  if(ic === 'REAL_INJURY' || ic === 'SEVERE_REAL_INJURY') return 'REAL_INJURY_GROUP';
+  if(ic === 'BELOW_REAL') return 'BELOW_REAL';
+  if(occurred === false) return 'NOT_ACCIDENT';
+  return 'UNSTATED';
+}
+function isAccidentCase(c){
+  const acc = c.accident || {};
+  return acc.occurred !== false; // true or not-stated -> treated as possible accident, fields shown
+}
+
+// קיבוץ תגיות תצוגה בלבד (תאונה / פסילה / 10(א) / נהיגה ללא רישיון) — התגיות המקוריות
+// בענן התגיות למטה אינן משתנות ואינן נמחקות; זהו שכבת סינון מהירה נוספת בלבד.
+// ה"קבוצה ללא רישיון" משמרת בפועל את ההבחנה בין "מעולם לא הורשה" לבין "רישיון פקע" –
+// הביטויים המדויקים (למשל "10א-מעולם" מול "10א-פקיעה"/"רישיון פקוע") נשארים זמינים
+// בענן התגיות המקורי, ולא מאוחדים לתווית אחת.
+const TAG_GROUPS = [
+  { id:'ACCIDENT', label:'תאונה', test:t=>t.includes('תאונ') },
+  { id:'DISQ', label:'פסילה', test:t=>t.includes('פסיל') || t.includes('פסול') },
+  { id:'A10', label:'10(א)', test:t=>t.includes('10א') || t.includes('10(א)') },
+  { id:'NOLIC', label:'נהיגה ללא רישיון', test:t=>t.includes('ללא רישיון') || t.includes('רישיון פקוע') || t.includes('פקיעת רישיון') || t.includes('רישיון פקע') }
+];
+function tagGroupsForTag(t){
+  return TAG_GROUPS.filter(g=>g.test(t)).map(g=>g.id);
+}
 
 const statusLabels = {
   VERIFIED_DIRECT: 'אומת ישירות',
@@ -202,10 +249,14 @@ async function init(){
     fetch('cases.json').then(r=>r.json())
   ]);
   ALL_CASES = cases;
-  ALL_CASES.forEach(c => { c._punishmentType = derivePunishmentType(c); });
+  ALL_CASES.forEach(c => {
+    c._punishmentType = derivePunishmentType(c);
+    c._injuryCategory = deriveInjuryCategory(c);
+  });
   renderStats();
   populateFilters();
   renderTagbar();
+  renderTagGroupBar();
   attachEvents();
   render();
 }
@@ -230,10 +281,10 @@ function populateFilters(){
     const o = document.createElement('option'); o.value=c; o.textContent=c; fCourt.appendChild(o);
   });
 
-  const injuries = [...new Set(ALL_CASES.map(c=>c.accident && c.accident.injuryClass).filter(Boolean))];
+  const usedCategories = new Set(ALL_CASES.map(c=>c._injuryCategory));
   const fInjury = document.getElementById('fInjury');
-  injuries.forEach(i=>{
-    const o = document.createElement('option'); o.value=i; o.textContent = injuryLabels[i] || i; fInjury.appendChild(o);
+  injuryCategoryOrder.filter(k=>usedCategories.has(k)).forEach(k=>{
+    const o = document.createElement('option'); o.value=k; o.textContent = injuryCategoryLabels[k]; fInjury.appendChild(o);
   });
 
   const statuses = [...new Set(ALL_CASES.map(c=>c.verificationStatus).filter(Boolean))];
@@ -276,6 +327,23 @@ function renderTagbar(){
   });
 }
 
+function renderTagGroupBar(){
+  const bar = document.getElementById('tagGroupBar');
+  if(!bar) return;
+  bar.innerHTML = TAG_GROUPS.map(g=>{
+    const n = ALL_CASES.filter(c=>(c.tags||[]).some(t=>g.test(t))).length;
+    return `<span class="tagchip groupchip" data-group="${g.id}">${g.label} (${n})</span>`;
+  }).join('');
+  bar.querySelectorAll('.groupchip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const g = el.getAttribute('data-group');
+      activeTagGroup = (activeTagGroup === g) ? null : g;
+      bar.querySelectorAll('.groupchip').forEach(x=>x.classList.toggle('active', x.getAttribute('data-group')===activeTagGroup));
+      render();
+    });
+  });
+}
+
 function attachEvents(){
   ['q','fCourt','fInjury','fStatus','fOffense','fPunishment'].forEach(id=>{
     document.getElementById(id).addEventListener('input', render);
@@ -285,11 +353,15 @@ function attachEvents(){
 
 function matches(c, q, court, injury, status, offense, punishment){
   if(court && c.court !== court) return false;
-  if(injury && (!c.accident || c.accident.injuryClass !== injury)) return false;
+  if(injury && c._injuryCategory !== injury) return false;
   if(status && c.verificationStatus !== status) return false;
   if(offense && !(Array.isArray(c.offenses) && c.offenses.includes(offense))) return false;
   if(punishment && c._punishmentType !== punishment) return false;
   if(activeTag && !(c.tags||[]).includes(activeTag)) return false;
+  if(activeTagGroup){
+    const grp = TAG_GROUPS.find(g=>g.id===activeTagGroup);
+    if(!grp || !(c.tags||[]).some(t=>grp.test(t))) return false;
+  }
   if(q){
     const offensesText = Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses || '');
     const hay = [c.caseName, c.caseNumber, c.facts, offensesText, (c.tags||[]).join(' ')]
@@ -330,6 +402,8 @@ function render(){
 function cardHtml(c, idx){
   const acc = c.accident || {};
   const inj = acc.injuryClass ? (injuryLabels[acc.injuryClass] || acc.injuryClass) : 'לא פורט';
+  const injCategory = injuryCategoryLabels[c._injuryCategory] || c._injuryCategory;
+  const isAccident = isAccidentCase(c);
   const fs = c.finalSentence || {};
   const sourcePath = c.sourceDocument && c.sourceDocument.file ? c.sourceDocument.file : null;
   const offensesArr = Array.isArray(c.offenses) ? c.offenses : [];
@@ -355,20 +429,24 @@ function cardHtml(c, idx){
     ${warningText ? `<div class="verify-warning">⚠️ ${warningText}</div>` : ''}
     <div class="card-tags">
       ${offensesArr.length ? offensesArr.slice(0,2).map(o=>`<span class="minitag">${o}</span>`).join('') : '<span class="minitag">עבירות: לא פורט</span>'}
-      <span class="minitag">פגיעה: ${inj}</span>
+      <span class="minitag">סוג פגיעה: ${injCategory}</span>
       ${(c.tags||[]).slice(0,4).map(t=>`<span class="minitag">${t}</span>`).join('')}
     </div>
     <button class="toggle-btn" type="button">הצג פרטים מלאים ▼</button>
     <div class="detail">
+      <dt>תמצית לתביעה</dt><dd>${esc(c.prosecutorSummary)}</dd>
       <dt>סוג העבירות (מלא)</dt><dd>${offensesArr.length ? offensesArr.join(', ') : 'לא פורט'}</dd>
       <dt>עובדות</dt><dd>${esc(c.facts)}</dd>
-      <dt>סוג התאונה והפגיעה</dt><dd>
+      <dt>סוג פגיעה (מנורמל)</dt><dd>${injCategory}</dd>
+      ${isAccident ? `
+      <dt>פרטי התאונה והפגיעה</dt><dd>
         האם אירעה תאונה: ${esc(acc.occurred)}<br>
-        סיווג הפגיעה: ${inj}<br>
+        סיווג הפגיעה (כפי שנרשם במקור): ${inj}<br>
         פרטי הפגיעה: ${esc(acc.injuryFacts)}<br>
         נזק רכוש: ${esc(acc.propertyDamage)}<br>
         תקנה 144: ${esc(acc.regulation144)}
-      </dd>
+      </dd>` : `
+      <dt>פרטי תאונה</dt><dd>אינו תיק תאונה — שדות פגיעה, נזק רכוש ותקנה 144 אינם רלוונטיים ואינם מוצגים.</dd>`}
       <dt>עבר תעבורתי ופלילי</dt><dd>
         עבר תעבורתי: ${esc(c.record && c.record.traffic)}<br>
         עבר פלילי: ${esc(c.record && c.record.criminal)}<br>
