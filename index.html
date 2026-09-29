@@ -51,18 +51,24 @@
   @media(min-width:768px){ header .header-inner{padding:24px 32px;} header h1{font-size:1.5rem;} header p{font-size:.9rem;} }
   .wrap{padding:14px 16px;}
   @media(min-width:700px){ .wrap{padding:20px 24px;} }
-  .subline{font-size:.8rem;color:var(--muted2);margin:0 0 12px;}
-  .controls{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr;gap:10px;}
-  @media(min-width:700px){.controls{grid-template-columns:2fr 1fr 1fr;}}
-  @media(min-width:980px){.controls{grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;}}
-  .controls input, .controls select{
-    width:100%;border:1.5px solid var(--border);border-radius:4px;
+  .controls{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;}
+  .controls input{
+    flex:1 1 220px;border:1.5px solid var(--border);border-radius:4px;
     padding:9px 12px;font-size:16px;background:#fff;color:var(--text);
     outline:none;font-family:inherit;transition:border-color .15s,box-shadow .15s;
   }
-  .controls input:hover, .controls select:hover{border-color:var(--border2);}
-  .controls input:focus, .controls select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
-  @media(min-width:768px){ .controls input, .controls select{border-radius:8px;} }
+  .controls input:hover{border-color:var(--border2);}
+  .controls input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+  @media(min-width:768px){ .controls input{border-radius:8px;} }
+  .clear-btn{
+    -webkit-tap-highlight-color:transparent;
+    flex:0 0 auto;border:1.5px solid var(--border2);border-radius:4px;background:#fff;color:var(--muted);
+    padding:9px 16px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;
+    transition:all .15s;white-space:nowrap;
+  }
+  .clear-btn:hover{border-color:var(--navy);color:var(--navy);}
+  .clear-btn:active{filter:brightness(0.95);}
+  @media(min-width:768px){ .clear-btn{border-radius:8px;} }
   .tag-section-label{font-size:.72rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;margin:2px 0 6px;}
   .tagbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
   .tagchip{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:4px 12px;font-size:.78rem;cursor:pointer;color:var(--muted2);transition:border-color .15s;}
@@ -106,47 +112,50 @@
   .note-line{color:var(--muted2);font-size:.82rem;font-style:italic;}
   .source-link{display:inline-block;margin-top:10px;font-size:.82rem;color:var(--blue);text-decoration:none;border-bottom:1px dotted var(--blue);}
   .empty{text-align:center;color:var(--muted2);padding:40px 0;}
-  .foot{text-align:center;color:var(--muted2);font-size:.78rem;padding:24px 0 40px;}
-  .top-banner{background:#fefce8;border-bottom:1px solid #fde68a;color:#92400e;font-size:.8rem;font-weight:600;text-align:center;padding:8px 12px;}
+  .tag-group-block{margin-bottom:12px;}
+  .groupchip.secondary{border-color:var(--border2);color:var(--muted2);background:#fff;font-weight:500;font-size:.74rem;padding:3px 10px;}
+  .groupchip.secondary.active{background:var(--muted);color:#fff;border-color:var(--muted);}
+  .minitag.primary{background:var(--navy);color:#fff;font-weight:600;}
 </style>
 </head>
 <body>
 <div class="page">
-<div class="top-banner">ספרייה עצמאית ונפרדת לחלוטין ממחולל הטיעונים — אינה מחוברת למנוע הטיעונים ואינה משפיעה עליו.</div>
 <header>
   <div class="header-inner">
-    <h1>⚖️ ספריית פסיקה — עבירות תעבורה</h1>
-    <p>חיפוש מהיר בתיקי פסיקה קנוניים ומאומתים.</p>
+    <h1>ספריית פסיקה — עבירות תעבורה</h1>
+    <p>חיפוש מהיר בפסיקת תעבורה</p>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="subline" id="subline"></div>
-
   <div class="controls">
     <input type="text" id="q" placeholder="חיפוש — מספר תיק, שם הליך, עובדות, תגיות...">
-    <select id="fCourt"><option value="">כל הערכאות</option></select>
-    <select id="fInjury"><option value="">כל סוגי הפגיעה</option></select>
-    <select id="fStatus"><option value="">כל סטטוסי האימות</option></select>
-    <select id="fOffense"><option value="">כל סוגי העבירה</option></select>
-    <select id="fPunishment"><option value="">כל סוגי העונש</option></select>
+    <button type="button" id="clearSearch" class="clear-btn">נקה חיפוש</button>
   </div>
 
-  <div class="tag-section-label">קטגוריות מאוחדות (סינון מהיר)</div>
-  <div class="tagbar" id="tagGroupBar"></div>
-  <div class="tag-section-label">כל התגיות (18 השכיחות)</div>
-  <div class="tagbar" id="tagbar"></div>
+  <div class="tag-group-block">
+    <div class="tag-section-label">עבירות</div>
+    <div class="tagbar" id="tagBarOffense"></div>
+  </div>
+  <div class="tag-group-block">
+    <div class="tag-section-label">תאונה ופגיעה</div>
+    <div class="tagbar" id="tagBarAccident"></div>
+  </div>
+  <div class="tag-group-block">
+    <div class="tag-section-label">נסיבות נלוות</div>
+    <div class="tagbar" id="tagBarCircumstance"></div>
+  </div>
 
   <div class="results-meta" id="resultsMeta"></div>
   <div id="results"></div>
-  <div class="foot">ספרייה זו נבנתה כשכבת מקור נפרדת ועצמאית. חיבורה למחולל הטיעונים, אם וכאשר, ייבחן בנפרד ולא בוצע כאן.</div>
 </div>
 </div>
 
 <script>
 let ALL_CASES = [];
-let activeTag = null;
-let activeTagGroup = null;
+// בחירה מרובה של תגיות קטגוריה: תיק מוצג רק כאשר הוא מתאים לכל התגיות שנבחרו
+// בו-זמנית (AND), לא רק לאחת מהן.
+let activeTagGroups = new Set();
 
 const injuryLabels = {
   PROPERTY_ONLY: 'נזק רכוש בלבד',
@@ -160,14 +169,6 @@ const injuryLabels = {
 // סיווג פגיעה מנורמל לתצוגה/סינון בלבד — 4 הקטגוריות המבוקשות, בתוספת "לא פורט"
 // לרשומות שבהן אירעה תאונה (occurred=true) אך סיווג הפגיעה לא צוין במקור.
 // לעולם אינו כותב חזרה לנתונים — נגזר בלבד מ-accident.occurred ו-accident.injuryClass הקיימים.
-const injuryCategoryOrder = ['REAL_INJURY_GROUP','BELOW_REAL','PROPERTY_ONLY','NOT_ACCIDENT','UNSTATED'];
-const injuryCategoryLabels = {
-  REAL_INJURY_GROUP: 'חבלה של ממש',
-  BELOW_REAL: 'ללא חבלה של ממש',
-  PROPERTY_ONLY: 'נזק רכוש בלבד',
-  NOT_ACCIDENT: 'לא תאונה',
-  UNSTATED: 'תאונה — סיווג פגיעה'
-};
 // נוסח קבוע לפי הנחיית יוסי (סעיף 3): כאשר אירעה תאונה אך סיווג הפגיעה אינו ידוע
 // במקור, אין להציג "לא פורט" — יש להציג את הביטוי הבא בלבד, ורק כשיש בכך צורך ממשי
 // (בפועל: בתוך תצוגת הפרטים המלאה, לא כתגית קומפקטית בראש הכרטיס).
@@ -196,18 +197,86 @@ function isAccidentCase(c){
   return (c.accident || {}).occurred === true;
 }
 
-// קיבוץ תגיות תצוגה בלבד — 9 הקטגוריות המבוקשות (סעיף 5 להנחיה), כשכבת סינון/תיוג
-// מהירה נוספת בלבד. התגיות המקוריות בענן התגיות למטה אינן משתנות ואינן נמחקות.
-// כל קבוצה יכולה לפעול על טקסט תגית בודדת (test) ו/או על התיק כולו (caseTest, כדי
+// קיבוץ תגיות תצוגה בלבד — שכבת סינון/תיוג נוספת בלבד, אינה נוגעת בנתונים.
+// כל תגית יכולה לפעול על טקסט תגית בודדת (test) ו/או על התיק כולו (caseTest, כדי
 // להשתמש בשדות מנורמלים כמו _injuryCategory או license.status מבלי לשנות נתון כלשהו).
-// תיק יכול להתאים למספר קבוצות בו-זמנית — כך "צירופי עבירות" מוצג כרשימת הקטגוריות
-// שבאמת מרכיבות אותו, ולא כתווית כללית אחת.
+// תיק יכול להתאים למספר תגיות בו-זמנית ובחירה מרובה פועלת כ-AND (matches() למטה).
+// אין תגית כללית "צירופים" — כל תגית ספציפית שמתאימה מוצגת בנפרד על הכרטיס.
 function textOf(c){
   const offenses = Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses||'');
   return (offenses + ' ' + (c.tags||[]).join(' '));
 }
-const TAG_GROUPS = [
+// טקסט שכרות/סמים/סירוב יכול להופיע רק בשדה intoxication (ולא ב-offenses/tags),
+// למשל "סירוב ליתן דגימת שתן" מופיע לרוב רק ב-intoxication.type — לכן ההתאמות
+// לשלוש התגיות הללו בודקות גם את intoxication, לא רק textOf(c).
+function intoxText(c){
+  const i = c.intoxication || {};
+  return [i.type, i.substance, i.measurement].filter(Boolean).join(' ');
+}
+
+// --- קרקע אמת לתיוג: טקסט העבירות בפועל (offenses) בלבד, ללא הסתמכות על השדה
+// הגולמי tags (שמכיל ערכים תקועים/מיושנים שגורמים ל-false positive — אומת מול
+// המקורות בפועל בסבב ביקורת ייעודי). כאשר offenses=NOT_STATED יש נפילה זהירה
+// לטקסט facts בלבד, ולא לשדות משניים אחרים.
+function offensesOnly(c){
+  return Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses||'');
+}
+const ALCOHOL_WORD = /שכרות|שיכרות|שיכור|אלכוהול|אוויר נשוף|ינשוף|משכר/;
+// הערה: \b אינו עובד באופן אמין סביב אותיות עבריות ב-JS regex (הן אינן \w) —
+// "\bסמים\b" נכשל בזיהוי "סמים" כמילה עצמאית בטקסט עברי. משתמשים בגבול מפורש
+// (לא-אות-עברית או תחילת/סוף מחרוזת) במקום.
+const DRUG_WORD = /סם מסוכן|(?:^|[^א-ת])סמים(?:[^א-ת]|$)|קנאביס|קנביס|קוקאין|חשיש/;
+const DISQ_RE = /סע(?:יף|')\s*67\b|,\s*67\b|\(67\)|נהיגה בזמן פסילה|נהיגה בפסילה|נהג בפסילה|נהג בעודו פסול|נהיגה בעודו פסול|בעת פסילה|בתקופת הפסילה|תחת פסילה פעילה|בעוד(?:ו|ה) פסול/;
+
+// סיווג 10(א) מאומת ידנית מול המקור עבור 36 הרשומות שנבדקו בסבב איחוד הרשימות
+// (איחוד הרשימה הידנית של יוסי עם הרשימה האוטומטית). לכל שאר הרשומות (מחוץ
+// לרשימה הזו) ממשיכה לפעול הלוגיקה הכללית הקיימת ללא שינוי — הן לא נבדקו בסבב
+// הזה ואין לנחש את סיווגן. ערכים: NEVER (מעולם) / EXPIRED (פקיעה) /
+// WRONG_CLASS (רישיון לסוג רכב אחר) / REVIEW (המקור אינו חד-משמעי — אין לתייג
+// אוטומטית, כולל ביטול תיוג LIC_EXPIRED/A10_NEVER קודם ככל שהיה שגוי).
+const A10_VERIFIED = {
+  "v4-1283-04-12": "NEVER", // 1283-04-12
+  "v4-17880-10-14": "NEVER", // 17880-10-14
+  "v5-10428-03-22": "NEVER", // 10428-03-22
+  "v4-4766-19": "NEVER", // 4766/19
+  "v4-5035-05-11": "EXPIRED", // 5035-05-11
+  "v2-פ״ל (ירושלים) 5069-12-14": "EXPIRED", // פ״ל (ירושלים) 5069-12-14
+  "v2-פ״ל (קריית גת) 102-08": "EXPIRED", // פ״ל (קריית גת) 102/08
+  "v4-10460-11-18": "EXPIRED", // 10460-11-18
+  "v4-13367-02-19": "EXPIRED", // 13367-02-19
+  "v4-5126-01-17": "EXPIRED", // 5126-01-17
+  "עפ_ת_38503_03_25": "EXPIRED", // עפ״ת 38503-03-25
+  "פל_11257_11_16": "EXPIRED", // פ״ל 11257-11-16
+  "v2-7982-13": "WRONG_CLASS", // 7982/13
+  "v2-פ״ל (ירושלים) 15445-08-23": "WRONG_CLASS", // פ״ל (ירושלים) 15445-08-23
+  "v4-7532-03-18": "WRONG_CLASS", // 7532-03-18
+  "v2-2910-20": "REVIEW", // 2910/20
+  "v2-5300-18": "REVIEW", // 5300/18
+  "v2-פ״ל (באר שבע) 10253-06-20": "REVIEW", // פ״ל (באר שבע) 10253-06-20
+  "v2-פ״ל (חדרה) 1460-06-09": "REVIEW", // פ״ל (חדרה) 1460-06-09
+  "v4-115-21": "REVIEW", // 115/21
+  "v4-225-09": "REVIEW", // 225/09
+  "v4-2372-18": "REVIEW", // 2372/18
+  "v4-2548-17": "REVIEW", // 2548/17
+  "v4-5018-02-13": "REVIEW", // 5018-02-13
+  "v4-6492-12": "REVIEW", // 6492-12
+  "v4-6551-10-13": "REVIEW", // 6551-10-13
+  "v4-7426-13": "REVIEW", // 7426-13
+  "v5-184-06-09": "REVIEW", // 184-06-09
+  "פ_ל_5193_03_22": "REVIEW", // פ״ל 5193-03-22
+  "פ_ל_643_06": "REVIEW", // פ״ל 643/06
+  "רע_פ_1042_14": "REVIEW", // רע״פ 1042/14
+  "רע_פ_5331_18": "REVIEW", // רע״פ 5331/18
+  "רע_פ_665_11": "REVIEW", // רע״פ 665/11
+  "תת_20118_06": "REVIEW", // תת 20118/06
+  "v2-נב״א (תל אביב-יפו) 6536-11-25": "REVIEW", // נב״א (תל אביב-יפו) 6536-11-25
+  "פלא_5640_09_22": "REVIEW", // פלא 5640-09-22
+};
+
+const OFFENSE_TAGS = [
   { id:'A10_NEVER', label:'10(א) — ללא רישיון מעולם', caseTest:c=>{
+      const v = A10_VERIFIED[c.canonicalId];
+      if(v) return v === 'NEVER';
       const t = textOf(c); const lic = (c.license||{}).status;
       const has10a = t.includes('10א') || t.includes('10(א)');
       if(!has10a && lic!=='NEVER_LICENSED') return false;
@@ -215,35 +284,60 @@ const TAG_GROUPS = [
       if(lic==='EXPIRED') return false;
       return has10a && t.includes('מעולם');
   }},
-  { id:'LIC_EXPIRED', label:'פקיעת רישיון', caseTest:c=>{
+  { id:'LIC_EXPIRED', label:'10(א) — פקיעת רישיון', caseTest:c=>{
+      const v = A10_VERIFIED[c.canonicalId];
+      if(v) return v === 'EXPIRED';
       const t = textOf(c); const lic = (c.license||{}).status;
       if(lic==='EXPIRED') return true;
       return /פקע|פקוע|פקיע/.test(t);
   }},
-  { id:'DISQ', label:'נהיגה בזמן פסילה', test:t=>t.includes('פסיל') || t.includes('פסול') },
+  { id:'A10_WRONG_CLASS', label:'10(א) — רישיון לסוג רכב אחר', caseTest:c=>A10_VERIFIED[c.canonicalId] === 'WRONG_CLASS' },
+  { id:'DISQ', label:'נהיגה בזמן פסילה', caseTest:c=>DISQ_RE.test(offensesOnly(c)) },
   { id:'INTOX', label:'שכרות', caseTest:c=>{
-      const intox = c.intoxication||{};
-      const v = (intox.type||'').trim();
-      if(v && v!=='' && v!=='NOT_STATED' && v!=='לא פורט' && v!=='לא רלוונטי/לא ידוע' && v!=='לא פורט/לא רלוונטי') return true;
-      return /שכרות/.test(textOf(c));
+      const ot = offensesOnly(c);
+      if(ALCOHOL_WORD.test(ot)) return true;
+      if(/NOT_STATED/.test(ot) && ALCOHOL_WORD.test(c.facts||'')) return true;
+      return false;
   }},
+  { id:'REFUSAL', label:'סירוב', caseTest:c=>{
+      const ot = offensesOnly(c) + ' ' + (c.facts||'');
+      if(/זוכה מסירוב|זיכוי מסירוב/.test(ot)) return false;
+      return /סירוב|סירב|הכשיל.{0,8}בדיק|חזקת סירוב/.test(ot);
+  }},
+  { id:'DRUGS', label:'סמים', caseTest:c=>{
+      const ot = offensesOnly(c);
+      if(DRUG_WORD.test(ot)) return true;
+      if(/NOT_STATED/.test(ot) && DRUG_WORD.test(c.facts||'')) return true;
+      return false;
+  }},
+  { id:'ACCIDENT', label:'תאונה', caseTest:c=>isAccidentCase(c) },
+];
+const ACCIDENT_TAGS = [
   { id:'ACC_INJURY', label:'תאונה עם חבלה', caseTest:c=>c._injuryCategory==='REAL_INJURY_GROUP' },
   { id:'ACC_NO_INJURY', label:'תאונה ללא חבלה', caseTest:c=>c._injuryCategory==='BELOW_REAL' },
   { id:'ACC_PROPERTY', label:'תאונה — נזק רכוש בלבד', caseTest:c=>c._injuryCategory==='PROPERTY_ONLY' },
-  { id:'NO_INSURANCE', label:'ללא ביטוח', test:t=>t.includes('ביטוח') },
 ];
-// "צירופי עבירות" — לא קטגוריה עצמאית עם test/caseTest משלה, אלא חישוב שמסתמך על
-// שאר הקבוצות: תיק שמתאים לשתיים מהן ומעלה. כשהמסנן הזה פעיל, כל כרטיס ממשיך להציג
-// את הקטגוריות הספציפיות שבאמת הרכיבו אותו (ולא תווית "צירוף" גנרית וסתומה).
+// "נאשם נפגע בעצמו": אין שדה מובנה בנתונים לכך — זו התאמת-טקסט best-effort על
+// עובדות/פרטי הפגיעה בלבד (לא על tags/offenses), לבדיקה ידנית של יוסי לפני אימוץ קבוע.
+function selfInjuredMatch(c){
+  const blob = [c.facts, (c.accident||{}).injuryFacts].filter(Boolean).join(' ');
+  return /(הנאשם|הנהג|המבקש|המערער)[^.]{0,20}(עצמו|בעצמו)[^.]{0,12}(נפגע|נחבל|נפצע)/.test(blob)
+      || /(נפגע|נחבל|נפצע)[^.]{0,12}(גם\s+)?(הנאשם|הנהג|בעצמו)/.test(blob);
+}
+const CIRCUMSTANCE_TAGS = [
+  { id:'NO_INSURANCE', label:'ללא ביטוח', test:t=>t.includes('ביטוח') },
+  { id:'SELF_INJURED', label:'נאשם נפגע בעצמו', caseTest:selfInjuredMatch },
+  { id:'PRIOR_RECORD', label:'עבר תעבורתי', caseTest:c=>isStated(c.record && c.record.traffic) },
+  { id:'APPEAL', label:'ערעור', caseTest:c=>(c.appeal||{}).exists === true },
+];
+const ALL_TAG_GROUPS = [...OFFENSE_TAGS, ...ACCIDENT_TAGS, ...CIRCUMSTANCE_TAGS];
+
 function matchedGroupIds(c){
-  return TAG_GROUPS.filter(g=>{
+  return ALL_TAG_GROUPS.filter(g=>{
     if(g.caseTest) return g.caseTest(c);
     if(g.test) return (c.tags||[]).some(t=>g.test(t)) || g.test(textOf(c));
     return false;
   }).map(g=>g.id);
-}
-function isComboCase(c){
-  return matchedGroupIds(c).length >= 2;
 }
 
 const statusLabels = {
@@ -251,15 +345,6 @@ const statusLabels = {
   VERIFIED_VIA_APPEAL_ONLY: 'אומת דרך פסק הערעור',
   VERIFIED_VIA_SECONDARY_SOURCE: 'אומת ממקור משני',
   UNVERIFIED: 'טרם אומת'
-};
-
-const punishmentLabels = {
-  ACTUAL_PRISON: 'מאסר בפועל',
-  COMMUNITY_SERVICE_PRISON: 'עבודות שירות (במקום מאסר)',
-  SUSPENDED_ONLY: 'מאסר על תנאי בלבד (ללא מאסר בפועל)',
-  COMMUNITY_SERVICE: 'שירות לתועלת הציבור',
-  FINE_ONLY: 'קנס בלבד (ללא מאסר)',
-  NOT_STATED: 'לא פורט'
 };
 
 function isStated(v){
@@ -283,139 +368,63 @@ function esc(s){
   return String(s);
 }
 
-// Derived (display-only) punishment category from the recorded finalSentence fields.
-// Never written back into the data — used only for the filter and never alters any stored fact.
-function derivePunishmentType(c){
-  const fs = c.finalSentence || {};
-  if(isStated(fs.actualPrison)) return 'ACTUAL_PRISON';
-  if(isStated(fs.communityServicePrison)) return 'COMMUNITY_SERVICE_PRISON';
-  if(isStated(fs.suspendedPrison)) return 'SUSPENDED_ONLY';
-  if(isStated(fs.communityService)) return 'COMMUNITY_SERVICE';
-  if(isStated(fs.fine)) return 'FINE_ONLY';
-  return 'NOT_STATED';
-}
-
 async function init(){
   const [cases] = await Promise.all([
     fetch('cases.json').then(r=>r.json())
   ]);
   ALL_CASES = cases;
   ALL_CASES.forEach(c => {
-    c._punishmentType = derivePunishmentType(c);
     c._injuryCategory = deriveInjuryCategory(c);
   });
-  renderStats();
-  populateFilters();
-  renderTagbar();
-  renderTagGroupBar();
+  renderTagBar('tagBarOffense', OFFENSE_TAGS, 'primary');
+  renderTagBar('tagBarAccident', ACCIDENT_TAGS, 'secondary');
+  renderTagBar('tagBarCircumstance', CIRCUMSTANCE_TAGS, 'secondary');
   attachEvents();
   render();
 }
 
-function renderStats(){
-  const total = ALL_CASES.length;
-  const el = document.getElementById('subline');
-  if(el) el.textContent = `${total} תיקים במאגר`;
-}
-
-function populateFilters(){
-  const courts = [...new Set(ALL_CASES.map(c=>c.court).filter(Boolean))].sort();
-  const fCourt = document.getElementById('fCourt');
-  courts.forEach(c=>{
-    const o = document.createElement('option'); o.value=c; o.textContent=c; fCourt.appendChild(o);
-  });
-
-  const usedCategories = new Set(ALL_CASES.map(c=>c._injuryCategory));
-  const fInjury = document.getElementById('fInjury');
-  injuryCategoryOrder.filter(k=>usedCategories.has(k)).forEach(k=>{
-    const o = document.createElement('option'); o.value=k; o.textContent = injuryCategoryLabels[k]; fInjury.appendChild(o);
-  });
-
-  const statuses = [...new Set(ALL_CASES.map(c=>c.verificationStatus).filter(Boolean))];
-  const fStatus = document.getElementById('fStatus');
-  statuses.forEach(s=>{
-    const o = document.createElement('option'); o.value=s; o.textContent = statusLabels[s] || s; fStatus.appendChild(o);
-  });
-
-  const offenseSet = new Set();
-  ALL_CASES.forEach(c => {
-    if(Array.isArray(c.offenses)) c.offenses.forEach(o => { if(o && o !== 'NOT_STATED') offenseSet.add(o); });
-  });
-  const offenses = [...offenseSet].sort((a,b)=>a.localeCompare(b,'he'));
-  const fOffense = document.getElementById('fOffense');
-  offenses.forEach(o=>{
-    const opt = document.createElement('option'); opt.value=o; opt.textContent=o; fOffense.appendChild(opt);
-  });
-
-  const punishTypes = [...new Set(ALL_CASES.map(c=>c._punishmentType))];
-  const order = ['ACTUAL_PRISON','COMMUNITY_SERVICE_PRISON','SUSPENDED_ONLY','COMMUNITY_SERVICE','FINE_ONLY','NOT_STATED'];
-  const fPunishment = document.getElementById('fPunishment');
-  order.filter(k=>punishTypes.includes(k)).forEach(k=>{
-    const opt = document.createElement('option'); opt.value=k; opt.textContent = punishmentLabels[k] || k; fPunishment.appendChild(opt);
-  });
-}
-
-function renderTagbar(){
-  const counts = {};
-  ALL_CASES.forEach(c => (c.tags||[]).forEach(t => counts[t] = (counts[t]||0)+1));
-  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,18);
-  const bar = document.getElementById('tagbar');
-  bar.innerHTML = top.map(([t,n])=>`<span class="tagchip" data-tag="${t}">${t} (${n})</span>`).join('');
-  bar.querySelectorAll('.tagchip').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      const t = el.getAttribute('data-tag');
-      activeTag = (activeTag === t) ? null : t;
-      bar.querySelectorAll('.tagchip').forEach(x=>x.classList.toggle('active', x.getAttribute('data-tag')===activeTag));
-      render();
-    });
-  });
-}
-
-function renderTagGroupBar(){
-  const bar = document.getElementById('tagGroupBar');
+// סרגל תגיות (עבירות / תאונה ופגיעה / נסיבות נלוות) — הבחירה מרובה: לחיצה על
+// תגית מוסיפה/מסירה אותה מ-activeTagGroups, וכל התגיות הפעילות (מכל הסרגלים
+// יחד) פועלות ב-AND (matches() למטה) — לא רק אחת בכל פעם. תגיות העבירה
+// (variant='primary') מסומנות ויזואלית באופן בולט יותר מהתגיות הנלוות.
+function renderTagBar(containerId, tagList, variant){
+  const bar = document.getElementById(containerId);
   if(!bar) return;
-  const chips = TAG_GROUPS.map(g=>{
-    const n = ALL_CASES.filter(c=>matchedGroupIds(c).includes(g.id)).length;
-    return { id:g.id, label:g.label, n };
-  });
-  const comboN = ALL_CASES.filter(isComboCase).length;
-  chips.push({ id:'COMBO', label:'צירופי עבירות', n:comboN });
-  bar.innerHTML = chips.map(g=>`<span class="tagchip groupchip" data-group="${g.id}">${g.label} (${g.n})</span>`).join('');
+  const cls = variant === 'primary' ? 'groupchip' : 'groupchip secondary';
+  const chips = tagList.map(g=>({ id:g.id, label:g.label, n: ALL_CASES.filter(c=>matchedGroupIds(c).includes(g.id)).length }));
+  bar.innerHTML = chips.map(g=>`<span class="tagchip ${cls}" data-group="${g.id}">${g.label} (${g.n})</span>`).join('');
   bar.querySelectorAll('.groupchip').forEach(el=>{
     el.addEventListener('click', ()=>{
       const g = el.getAttribute('data-group');
-      activeTagGroup = (activeTagGroup === g) ? null : g;
-      bar.querySelectorAll('.groupchip').forEach(x=>x.classList.toggle('active', x.getAttribute('data-group')===activeTagGroup));
+      if(activeTagGroups.has(g)) activeTagGroups.delete(g); else activeTagGroups.add(g);
+      el.classList.toggle('active', activeTagGroups.has(g));
       render();
     });
   });
 }
 
 function attachEvents(){
-  ['q','fCourt','fInjury','fStatus','fOffense','fPunishment'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', render);
-    document.getElementById(id).addEventListener('change', render);
+  document.getElementById('q').addEventListener('input', render);
+  document.getElementById('clearSearch').addEventListener('click', ()=>{
+    document.getElementById('q').value = '';
+    activeTagGroups.clear();
+    document.querySelectorAll('.groupchip').forEach(x=>x.classList.remove('active'));
+    render();
   });
 }
 
-function matches(c, q, court, injury, status, offense, punishment){
-  if(court && c.court !== court) return false;
-  if(injury && c._injuryCategory !== injury) return false;
-  if(status && c.verificationStatus !== status) return false;
-  if(offense && !(Array.isArray(c.offenses) && c.offenses.includes(offense))) return false;
-  if(punishment && c._punishmentType !== punishment) return false;
-  if(activeTag && !(c.tags||[]).includes(activeTag)) return false;
-  if(activeTagGroup){
-    if(activeTagGroup === 'COMBO'){
-      if(!isComboCase(c)) return false;
-    } else if(!matchedGroupIds(c).includes(activeTagGroup)){
-      return false;
+function matches(c, q){
+  if(activeTagGroups.size){
+    for(const g of activeTagGroups){
+      if(!matchedGroupIds(c).includes(g)) return false;
     }
   }
   if(q){
+    // חיפוש חופשי סורק: מספר תיק, שם ההליך (כולל שמות הצדדים, כבר חלק מ-caseName),
+    // עובדות, עבירות, prosecutorSummary ותגיות — לפי דרישת יוסי בסעיף 2.
     const offensesText = Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses || '');
-    const hay = [c.caseName, c.caseNumber, c.facts, offensesText, (c.tags||[]).join(' ')]
-      .join(' ').toLowerCase();
+    const hay = [c.caseName, c.caseNumber, c.facts, offensesText, c.prosecutorSummary, (c.tags||[]).join(' ')]
+      .filter(Boolean).join(' ').toLowerCase();
     if(!hay.includes(q.toLowerCase())) return false;
   }
   return true;
@@ -423,13 +432,8 @@ function matches(c, q, court, injury, status, offense, punishment){
 
 function render(){
   const q = document.getElementById('q').value.trim();
-  const court = document.getElementById('fCourt').value;
-  const injury = document.getElementById('fInjury').value;
-  const status = document.getElementById('fStatus').value;
-  const offense = document.getElementById('fOffense').value;
-  const punishment = document.getElementById('fPunishment').value;
 
-  const filtered = ALL_CASES.filter(c => matches(c, q, court, injury, status, offense, punishment));
+  const filtered = ALL_CASES.filter(c => matches(c, q));
   document.getElementById('resultsMeta').textContent = `מציג ${filtered.length} מתוך ${ALL_CASES.length} תיקים`;
 
   const results = document.getElementById('results');
@@ -503,13 +507,15 @@ function cardHtml(c, idx){
     warningText = `אזהרה: סטטוס האימות של רשומה זו הוא "${statusLabels[c.verificationStatus] || c.verificationStatus}" ואינו אימות ישיר.`;
   }
 
-  // ג. תגיות עבירה ענייניות — הקטגוריות שבאמת מתאימות לתיק (סעיף 5); תיק צירוף
-  // מציג את כל הקטגוריות המרכיבות אותו, לא תווית "צירוף" כללית.
+  // ג. תגיות עבירה (בולטות) ותגיות תאונה/נסיבות נלוות (עדינות יותר) — כל התגיות
+  // הספציפיות שבאמת מתאימות לתיק מוצגות בנפרד, בלי תווית "צירוף" כללית (סעיף 2).
   const groupIds = matchedGroupIds(c);
-  const groupBadges = TAG_GROUPS.filter(g=>groupIds.includes(g.id)).map(g=>`<span class="minitag">${g.label}</span>`);
+  const offenseBadges = OFFENSE_TAGS.filter(g=>groupIds.includes(g.id)).map(g=>`<span class="minitag primary">${g.label}</span>`);
   const offensesArr = Array.isArray(c.offenses) ? c.offenses : [];
-  const tagsHtml = groupBadges.length ? groupBadges.join('')
+  const offenseTagsHtml = offenseBadges.length ? offenseBadges.join('')
     : (offensesArr.length ? `<span class="minitag muted">${offensesArr[0]}</span>` : '');
+  const circumstanceBadges = [...ACCIDENT_TAGS, ...CIRCUMSTANCE_TAGS].filter(g=>groupIds.includes(g.id)).map(g=>`<span class="minitag">${g.label}</span>`);
+  const circumstanceTagsHtml = circumstanceBadges.join('');
 
   // ד. עובדות מרכזיות — כולל, כשרלוונטי, פרטי התאונה/הפגיעה (סעיף 3 להנחיה
   // בתוקף מלא: שדה זה מוצג אך ורק כאשר occurred===true; שום דבר לא מוסק מהיעדר נתון).
@@ -528,8 +534,7 @@ function cardHtml(c, idx){
   const recordBlock = dtdd('עבר תעבורתי', c.record && c.record.traffic)
     + dtdd('עבר פלילי', c.record && c.record.criminal)
     + dtdd('תיקים דומים', c.record && c.record.similar);
-  const tagsFullBlock = (c.tags||[]).length ? dtdd('תגיות (מלא)', (c.tags||[]).join(', ')) : '';
-  const factsSection = dtdd('עובדות', c.facts) + accidentBlock + recordBlock + tagsFullBlock;
+  const factsSection = dtdd('עובדות', c.facts) + accidentBlock + recordBlock;
 
   // ה. מתחם הענישה — רק אם יש בו נתון ממשי כלשהו; לעולם לא כותרת "הליך מקורי";
   // כאשר יש ערעור, זהו מפורשות מתחם הענישה של הערכאה הראשונה בלבד.
@@ -570,13 +575,15 @@ function cardHtml(c, idx){
     <div class="card-head">
       <div>
         <div class="card-title">${esc(c.caseName)}</div>
-        <div class="card-sub">${esc(c.caseNumber)} · ${esc(c.court)} · ${esc(c.date)}</div>
+        <div class="card-sub">${esc(c.caseNumber)}</div>
+        <div class="card-sub">${esc(c.court)} · ${esc(c.date)}</div>
       </div>
       <span class="badge ${badgeClass(c.verificationStatus)}">${statusLabels[c.verificationStatus] || c.verificationStatus}</span>
     </div>
     ${warningText ? `<div class="verify-warning">⚠️ ${warningText}</div>` : ''}
     ${c.prosecutorSummary ? `<div class="card-summary">${esc(c.prosecutorSummary)}</div>` : ''}
-    ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
+    ${offenseTagsHtml ? `<div class="card-tags">${offenseTagsHtml}</div>` : ''}
+    ${circumstanceTagsHtml ? `<div class="card-tags">${circumstanceTagsHtml}</div>` : ''}
     <button class="toggle-btn" type="button">הצג פרטים מלאים ▼</button>
     <div class="detail">
       ${factsSection}
