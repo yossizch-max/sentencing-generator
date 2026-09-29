@@ -51,10 +51,7 @@
   @media(min-width:768px){ header .header-inner{padding:24px 32px;} header h1{font-size:1.5rem;} header p{font-size:.9rem;} }
   .wrap{padding:14px 16px;}
   @media(min-width:700px){ .wrap{padding:20px 24px;} }
-  .stats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
-  .stat{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px 14px;font-size:.8rem;color:var(--muted2);flex:1 1 100px;text-align:center;}
-  @media(min-width:700px){ .stat{text-align:right;flex:0 0 auto;padding:10px 16px;font-size:.85rem;border-radius:6px;} }
-  .stat b{display:block;font-size:1.2rem;color:var(--navy);}
+  .subline{font-size:.8rem;color:var(--muted2);margin:0 0 12px;}
   .controls{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr;gap:10px;}
   @media(min-width:700px){.controls{grid-template-columns:2fr 1fr 1fr;}}
   @media(min-width:980px){.controls{grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;}}
@@ -86,8 +83,10 @@
   .badge.secondary{background:var(--warn-bg);color:var(--warn);}
   .badge.unverified{background:var(--bad-bg);color:var(--bad);}
   .verify-warning{margin-top:10px;background:var(--warn-bg);color:var(--warn);border:1px solid #e8cf8a;border-radius:4px;padding:8px 12px;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:6px;}
+  .card-summary{margin-top:8px;font-size:.92rem;color:var(--text);background:var(--blue-lt);border-right:3px solid var(--blue);border-radius:3px;padding:8px 10px;line-height:1.55;}
   .card-tags{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;}
   .minitag{background:var(--blue-lt);color:var(--navy2);border-radius:4px;padding:2px 8px;font-size:.72rem;}
+  .minitag.muted{background:var(--panel);color:var(--muted2);}
   .toggle-btn{
     -webkit-tap-highlight-color:transparent;
     margin-top:10px;background:#fff;color:var(--navy);border:1.5px solid var(--navy);
@@ -101,6 +100,10 @@
   .detail.open{display:block;}
   .detail dt{font-weight:700;color:var(--navy2);margin-top:8px;}
   .detail dd{margin:2px 0 0;color:var(--text);}
+  .range-box{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px 10px;margin-top:4px;font-size:.86rem;}
+  .sentence-box{background:var(--ok-bg);border:1.5px solid var(--ok);border-radius:4px;padding:10px 12px;margin-top:4px;font-size:.94rem;font-weight:600;color:#1a3b28;}
+  .sentence-box .sb-line{font-weight:400;margin-top:3px;}
+  .note-line{color:var(--muted2);font-size:.82rem;font-style:italic;}
   .source-link{display:inline-block;margin-top:10px;font-size:.82rem;color:var(--blue);text-decoration:none;border-bottom:1px dotted var(--blue);}
   .empty{text-align:center;color:var(--muted2);padding:40px 0;}
   .foot{text-align:center;color:var(--muted2);font-size:.78rem;padding:24px 0 40px;}
@@ -113,12 +116,12 @@
 <header>
   <div class="header-inner">
     <h1>⚖️ ספריית פסיקה — עבירות תעבורה</h1>
-    <p>מאגר קנוני ומאומת של תיקי פסיקה. מקור מידע עצמאי בלבד — כל נתון חסר מתועד כ"לא פורט" ולעולם אינו מוסק.</p>
+    <p>חיפוש מהיר בתיקי פסיקה קנוניים ומאומתים.</p>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="stats" id="stats"></div>
+  <div class="subline" id="subline"></div>
 
   <div class="controls">
     <input type="text" id="q" placeholder="חיפוש — מספר תיק, שם הליך, עובדות, תגיות...">
@@ -163,36 +166,84 @@ const injuryCategoryLabels = {
   BELOW_REAL: 'ללא חבלה של ממש',
   PROPERTY_ONLY: 'נזק רכוש בלבד',
   NOT_ACCIDENT: 'לא תאונה',
-  UNSTATED: 'לא פורט (תאונה אירעה, סיווג לא צוין)'
+  UNSTATED: 'תאונה — סיווג פגיעה'
 };
+// נוסח קבוע לפי הנחיית יוסי (סעיף 3): כאשר אירעה תאונה אך סיווג הפגיעה אינו ידוע
+// במקור, אין להציג "לא פורט" — יש להציג את הביטוי הבא בלבד, ורק כשיש בכך צורך ממשי
+// (בפועל: בתוך תצוגת הפרטים המלאה, לא כתגית קומפקטית בראש הכרטיס).
+const UNCLASSIFIED_INJURY_NOTE = 'הפגיעה לא סווגה במקור.';
 function deriveInjuryCategory(c){
   const acc = c.accident || {};
   const ic = acc.injuryClass;
   const occurred = acc.occurred;
+  // occurred must be checked FIRST: in a handful of no-accident records injuryClass
+  // was set to the placeholder value PROPERTY_ONLY purely as a schema-required
+  // default (documented internally — "no dedicated category for no-accident cases"),
+  // not because any property damage actually occurred. Trusting occurred===false
+  // over that placeholder is what section 3 of the spec requires: a non-accident
+  // case must never show an injury/damage classification of any kind.
+  if(occurred === false) return 'NOT_ACCIDENT';
+  if(occurred !== true) return 'UNSTATED'; // occurred itself not on record — show nothing, never guess
   if(ic === 'PROPERTY_ONLY') return 'PROPERTY_ONLY';
   if(ic === 'REAL_INJURY' || ic === 'SEVERE_REAL_INJURY') return 'REAL_INJURY_GROUP';
   if(ic === 'BELOW_REAL') return 'BELOW_REAL';
-  if(occurred === false) return 'NOT_ACCIDENT';
   return 'UNSTATED';
 }
+// "האם מדובר בתיק תאונה" לצורך תצוגה — רק כאשר occurred===true במפורש (סעיף 3
+// להנחיה). לא true ולא false (לא פורט) אינו מטופל כתאונה משוערת ואינו מטופל כ"לא
+// תאונה" — פשוט אין מציגים שדה פגיעה כלל, כדי לעולם לא להסיק דבר שלא נאמר במפורש.
 function isAccidentCase(c){
-  const acc = c.accident || {};
-  return acc.occurred !== false; // true or not-stated -> treated as possible accident, fields shown
+  return (c.accident || {}).occurred === true;
 }
 
-// קיבוץ תגיות תצוגה בלבד (תאונה / פסילה / 10(א) / נהיגה ללא רישיון) — התגיות המקוריות
-// בענן התגיות למטה אינן משתנות ואינן נמחקות; זהו שכבת סינון מהירה נוספת בלבד.
-// ה"קבוצה ללא רישיון" משמרת בפועל את ההבחנה בין "מעולם לא הורשה" לבין "רישיון פקע" –
-// הביטויים המדויקים (למשל "10א-מעולם" מול "10א-פקיעה"/"רישיון פקוע") נשארים זמינים
-// בענן התגיות המקורי, ולא מאוחדים לתווית אחת.
+// קיבוץ תגיות תצוגה בלבד — 9 הקטגוריות המבוקשות (סעיף 5 להנחיה), כשכבת סינון/תיוג
+// מהירה נוספת בלבד. התגיות המקוריות בענן התגיות למטה אינן משתנות ואינן נמחקות.
+// כל קבוצה יכולה לפעול על טקסט תגית בודדת (test) ו/או על התיק כולו (caseTest, כדי
+// להשתמש בשדות מנורמלים כמו _injuryCategory או license.status מבלי לשנות נתון כלשהו).
+// תיק יכול להתאים למספר קבוצות בו-זמנית — כך "צירופי עבירות" מוצג כרשימת הקטגוריות
+// שבאמת מרכיבות אותו, ולא כתווית כללית אחת.
+function textOf(c){
+  const offenses = Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses||'');
+  return (offenses + ' ' + (c.tags||[]).join(' '));
+}
 const TAG_GROUPS = [
-  { id:'ACCIDENT', label:'תאונה', test:t=>t.includes('תאונ') },
-  { id:'DISQ', label:'פסילה', test:t=>t.includes('פסיל') || t.includes('פסול') },
-  { id:'A10', label:'10(א)', test:t=>t.includes('10א') || t.includes('10(א)') },
-  { id:'NOLIC', label:'נהיגה ללא רישיון', test:t=>t.includes('ללא רישיון') || t.includes('רישיון פקוע') || t.includes('פקיעת רישיון') || t.includes('רישיון פקע') }
+  { id:'A10_NEVER', label:'10(א) — ללא רישיון מעולם', caseTest:c=>{
+      const t = textOf(c); const lic = (c.license||{}).status;
+      const has10a = t.includes('10א') || t.includes('10(א)');
+      if(!has10a && lic!=='NEVER_LICENSED') return false;
+      if(lic==='NEVER_LICENSED') return true;
+      if(lic==='EXPIRED') return false;
+      return has10a && t.includes('מעולם');
+  }},
+  { id:'LIC_EXPIRED', label:'פקיעת רישיון', caseTest:c=>{
+      const t = textOf(c); const lic = (c.license||{}).status;
+      if(lic==='EXPIRED') return true;
+      return /פקע|פקוע|פקיע/.test(t);
+  }},
+  { id:'DISQ', label:'נהיגה בזמן פסילה', test:t=>t.includes('פסיל') || t.includes('פסול') },
+  { id:'INTOX', label:'שכרות', caseTest:c=>{
+      const intox = c.intoxication||{};
+      const v = (intox.type||'').trim();
+      if(v && v!=='' && v!=='NOT_STATED' && v!=='לא פורט' && v!=='לא רלוונטי/לא ידוע' && v!=='לא פורט/לא רלוונטי') return true;
+      return /שכרות/.test(textOf(c));
+  }},
+  { id:'ACC_INJURY', label:'תאונה עם חבלה', caseTest:c=>c._injuryCategory==='REAL_INJURY_GROUP' },
+  { id:'ACC_NO_INJURY', label:'תאונה ללא חבלה', caseTest:c=>c._injuryCategory==='BELOW_REAL' },
+  { id:'ACC_PROPERTY', label:'תאונה — נזק רכוש בלבד', caseTest:c=>c._injuryCategory==='PROPERTY_ONLY' },
+  { id:'NO_INSURANCE', label:'ללא ביטוח', test:t=>t.includes('ביטוח') },
 ];
-function tagGroupsForTag(t){
-  return TAG_GROUPS.filter(g=>g.test(t)).map(g=>g.id);
+// "צירופי עבירות" — לא קטגוריה עצמאית עם test/caseTest משלה, אלא חישוב שמסתמך על
+// שאר הקבוצות: תיק שמתאים לשתיים מהן ומעלה. כשהמסנן הזה פעיל, כל כרטיס ממשיך להציג
+// את הקטגוריות הספציפיות שבאמת הרכיבו אותו (ולא תווית "צירוף" גנרית וסתומה).
+function matchedGroupIds(c){
+  return TAG_GROUPS.filter(g=>{
+    if(g.caseTest) return g.caseTest(c);
+    if(g.test) return (c.tags||[]).some(t=>g.test(t)) || g.test(textOf(c));
+    return false;
+  }).map(g=>g.id);
+}
+function isComboCase(c){
+  return matchedGroupIds(c).length >= 2;
 }
 
 const statusLabels = {
@@ -263,15 +314,8 @@ async function init(){
 
 function renderStats(){
   const total = ALL_CASES.length;
-  const direct = ALL_CASES.filter(c=>c.verificationStatus==='VERIFIED_DIRECT').length;
-  const appeal = ALL_CASES.filter(c=>c.verificationStatus!=='VERIFIED_DIRECT').length;
-  const courts = new Set(ALL_CASES.map(c=>c.court)).size;
-  document.getElementById('stats').innerHTML = `
-    <div class="stat"><b>${total}</b>סה"כ תיקים</div>
-    <div class="stat"><b>${direct}</b>אומתו ישירות</div>
-    <div class="stat"><b>${appeal}</b>דורשים תשומת לב (לא VERIFIED_DIRECT)</div>
-    <div class="stat"><b>${courts}</b>ערכאות שונות</div>
-  `;
+  const el = document.getElementById('subline');
+  if(el) el.textContent = `${total} תיקים במאגר`;
 }
 
 function populateFilters(){
@@ -330,10 +374,13 @@ function renderTagbar(){
 function renderTagGroupBar(){
   const bar = document.getElementById('tagGroupBar');
   if(!bar) return;
-  bar.innerHTML = TAG_GROUPS.map(g=>{
-    const n = ALL_CASES.filter(c=>(c.tags||[]).some(t=>g.test(t))).length;
-    return `<span class="tagchip groupchip" data-group="${g.id}">${g.label} (${n})</span>`;
-  }).join('');
+  const chips = TAG_GROUPS.map(g=>{
+    const n = ALL_CASES.filter(c=>matchedGroupIds(c).includes(g.id)).length;
+    return { id:g.id, label:g.label, n };
+  });
+  const comboN = ALL_CASES.filter(isComboCase).length;
+  chips.push({ id:'COMBO', label:'צירופי עבירות', n:comboN });
+  bar.innerHTML = chips.map(g=>`<span class="tagchip groupchip" data-group="${g.id}">${g.label} (${g.n})</span>`).join('');
   bar.querySelectorAll('.groupchip').forEach(el=>{
     el.addEventListener('click', ()=>{
       const g = el.getAttribute('data-group');
@@ -359,8 +406,11 @@ function matches(c, q, court, injury, status, offense, punishment){
   if(punishment && c._punishmentType !== punishment) return false;
   if(activeTag && !(c.tags||[]).includes(activeTag)) return false;
   if(activeTagGroup){
-    const grp = TAG_GROUPS.find(g=>g.id===activeTagGroup);
-    if(!grp || !(c.tags||[]).some(t=>grp.test(t))) return false;
+    if(activeTagGroup === 'COMBO'){
+      if(!isComboCase(c)) return false;
+    } else if(!matchedGroupIds(c).includes(activeTagGroup)){
+      return false;
+    }
   }
   if(q){
     const offensesText = Array.isArray(c.offenses) ? c.offenses.join(' ') : String(c.offenses || '');
@@ -399,14 +449,50 @@ function render(){
   });
 }
 
+// כמה שדות במקור מכילים את הסמן הפנימי "NOT_STATED" יחד עם הבהרה עובדתית אמיתית,
+// למשל "NOT_STATED (בית המשפט לא ציין טווח מספרי מפורש)" — ערך כזה עובר את בדיקת
+// isStated (אינו זהה במדויק ל-NOT_STATED) ולכן חייב ניקוי לפני תצוגה: מסירים את
+// הסמן הגולמי ומשאירים את ההבהרה עצמה (תוכן אמיתי מהמקור), ולעולם לא חושפים את
+// המילה "NOT_STATED" למשתמש. ערך שהוא NOT_STATED בלבד, ללא הבהרה, הופך ל-null
+// (כלומר: השדה מוסתר לגמרי, בדיוק כמו כל שדה ריק אחר).
+function humanize(v){
+  if(v === null || v === undefined || typeof v !== 'string') return v;
+  let m = v.match(/^NOT_STATED\s*\(([\s\S]*)\)\s*$/);
+  if(m) return m[1].trim();
+  m = v.match(/^NOT_STATED\s*-\s*([\s\S]*)$/);
+  if(m) return m[1].trim();
+  if(v.trim() === 'NOT_STATED') return null;
+  if(/\bNOT_STATED\b/.test(v)) return v.replace(/\bNOT_STATED\b/g, '').replace(/\s{2,}/g, ' ').trim();
+  // ערך אחד יחיד במאגר (placement, v4-10599-03-26) פותח במילים "לא פורט" כמשפט
+  // מלא ("לא פורט בפסק הדין באופן מפורש היכן ממוקם..."), ולא כניסוח שלנו — אין בו
+  // תוכן נפרד לשמר, ולכן מוסתר לגמרי בדיוק כמו כל שדה שלא צוין.
+  if(/^לא פורט(\s|$)/.test(v.trim())) return null;
+  return v;
+}
+// מציג dt/dd רק כאשר יש נתון ממשי — שדה ריק אינו מוצג כלל (סעיף 6 להנחיה),
+// ולעולם אינו כותב "לא פורט" בתוך הכרטיס עצמו.
+function dtdd(label, rawValue){
+  const value = humanize(rawValue);
+  if(!isStated(value)) return '';
+  const v = (typeof value === 'boolean') ? (value ? 'כן' : 'לא') : String(value);
+  return `<dt>${label}</dt><dd>${v}</dd>`;
+}
+// שורה פנימית בתוך תיבה (מתחם הענישה / העונש בפועל) — מוצגת רק כאשר יש נתון ממשי.
+function boxLine(label, rawValue){
+  const value = humanize(rawValue);
+  if(!isStated(value)) return '';
+  const v = (typeof value === 'boolean') ? (value ? 'כן' : 'לא') : String(value);
+  return `<div><b>${label}:</b> ${v}</div>`;
+}
+
 function cardHtml(c, idx){
   const acc = c.accident || {};
-  const inj = acc.injuryClass ? (injuryLabels[acc.injuryClass] || acc.injuryClass) : 'לא פורט';
-  const injCategory = injuryCategoryLabels[c._injuryCategory] || c._injuryCategory;
-  const isAccident = isAccidentCase(c);
+  const isAccident = isAccidentCase(c); // true רק כאשר occurred===true במפורש
   const fs = c.finalSentence || {};
+  const cr = c.courtRange || {};
+  const appeal = c.appeal || {};
+  const hasAppeal = appeal.exists === true;
   const sourcePath = c.sourceDocument && c.sourceDocument.file ? c.sourceDocument.file : null;
-  const offensesArr = Array.isArray(c.offenses) ? c.offenses : [];
   const notDirect = c.verificationStatus !== 'VERIFIED_DIRECT';
   const isAppealOnly = c.verificationStatus === 'VERIFIED_VIA_APPEAL_ONLY';
 
@@ -416,6 +502,68 @@ function cardHtml(c, idx){
   } else if(notDirect){
     warningText = `אזהרה: סטטוס האימות של רשומה זו הוא "${statusLabels[c.verificationStatus] || c.verificationStatus}" ואינו אימות ישיר.`;
   }
+
+  // ג. תגיות עבירה ענייניות — הקטגוריות שבאמת מתאימות לתיק (סעיף 5); תיק צירוף
+  // מציג את כל הקטגוריות המרכיבות אותו, לא תווית "צירוף" כללית.
+  const groupIds = matchedGroupIds(c);
+  const groupBadges = TAG_GROUPS.filter(g=>groupIds.includes(g.id)).map(g=>`<span class="minitag">${g.label}</span>`);
+  const offensesArr = Array.isArray(c.offenses) ? c.offenses : [];
+  const tagsHtml = groupBadges.length ? groupBadges.join('')
+    : (offensesArr.length ? `<span class="minitag muted">${offensesArr[0]}</span>` : '');
+
+  // ד. עובדות מרכזיות — כולל, כשרלוונטי, פרטי התאונה/הפגיעה (סעיף 3 להנחיה
+  // בתוקף מלא: שדה זה מוצג אך ורק כאשר occurred===true; שום דבר לא מוסק מהיעדר נתון).
+  let accidentBlock = '';
+  if(isAccident){
+    const ic = acc.injuryClass;
+    const knownClass = (ic === 'PROPERTY_ONLY' || ic === 'BELOW_REAL' || ic === 'REAL_INJURY' || ic === 'SEVERE_REAL_INJURY');
+    const classLine = knownClass
+      ? dtdd('סיווג הפגיעה', injuryLabels[ic] || ic)
+      : `<dt>סיווג הפגיעה</dt><dd class="note-line">${UNCLASSIFIED_INJURY_NOTE}</dd>`;
+    accidentBlock = classLine
+      + dtdd('פרטי הפגיעה', acc.injuryFacts)
+      + dtdd('נזק רכוש', acc.propertyDamage)
+      + (acc.regulation144 === true ? dtdd('תקנה 144 (אי מתן עזרה/עזיבת מקום)', true) : '');
+  }
+  const recordBlock = dtdd('עבר תעבורתי', c.record && c.record.traffic)
+    + dtdd('עבר פלילי', c.record && c.record.criminal)
+    + dtdd('תיקים דומים', c.record && c.record.similar);
+  const tagsFullBlock = (c.tags||[]).length ? dtdd('תגיות (מלא)', (c.tags||[]).join(', ')) : '';
+  const factsSection = dtdd('עובדות', c.facts) + accidentBlock + recordBlock + tagsFullBlock;
+
+  // ה. מתחם הענישה — רק אם יש בו נתון ממשי כלשהו; לעולם לא כותרת "הליך מקורי";
+  // כאשר יש ערעור, זהו מפורשות מתחם הענישה של הערכאה הראשונה בלבד.
+  const rangeParts = boxLine('מאסר', cr.prison) + boxLine('פסילה', cr.disqualification)
+    + boxLine('קנס', cr.fine) + boxLine('אחר', cr.other) + boxLine('מיקום שנקבע בתוך המתחם', c.placement);
+  const rangeTitle = hasAppeal ? 'מתחם הענישה (ערכאה ראשונה)' : 'מתחם הענישה';
+  const rangeSection = rangeParts
+    ? `<dt>${rangeTitle}</dt><dd class="range-box">${rangeParts}</dd>`
+    : '';
+
+  // ו. העונש שנגזר בפועל — בולט יותר ממתחם הענישה; אף שדה ריק אינו מוצג
+  // (לעולם לא "קנס: לא פורט").
+  const fsParts = boxLine('מאסר בפועל', fs.actualPrison) + boxLine('עבודות שירות במקום מאסר', fs.communityServicePrison)
+    + boxLine('מאסר על תנאי', fs.suspendedPrison) + boxLine('פסילה בפועל', fs.disqualification)
+    + boxLine('פסילה על תנאי', fs.conditionalDisqualification) + boxLine('קנס', fs.fine)
+    + boxLine('שירות לתועלת הציבור', fs.communityService) + boxLine('מבחן', fs.probation)
+    + boxLine('פיצוי', fs.compensation) + boxLine('התחייבות', fs.undertaking) + boxLine('אחר', fs.other);
+  const sentenceSection = fsParts
+    ? `<dt>העונש שנגזר בפועל</dt><dd class="sentence-box">${fsParts}</dd>`
+    : '';
+
+  // ז. ערעור — רק אם קיים; הערכאה הראשונה ותוצאת הערעור מוצגות בנפרד.
+  const appealParts = boxLine('גזר דין ערכאה קמא', appeal.lowerCourtSentence)
+    + boxLine('תוצאת הערעור', appeal.result)
+    + boxLine('גזר דין סופי לאחר הערעור', appeal.finalSentence);
+  const appealSection = (hasAppeal && appealParts) ? `<dt>ערעור</dt><dd>${appealParts}</dd>` : '';
+
+  // ח. קישור/מסמך המקור, לצד סטטוס האימות (תוויות בעברית בלבד — אין חשיפת ערכי
+  // enum גולמיים כגון VERIFIED_DIRECT).
+  const sourceSection = dtdd('סטטוס אימות', statusLabels[c.verificationStatus] || c.verificationStatus)
+    + (c.sourceUrl && c.sourceUrl !== 'NOT_STATED'
+        ? `<dt>מקור (אסמכתא)</dt><dd><a class="source-link" href="${c.sourceUrl}" target="_blank" rel="noopener">${c.sourceUrl}</a></dd>`
+        : '')
+    + (sourcePath ? `<dt>מסמך מקור</dt><dd><a class="source-link" href="${encodeURI(sourcePath)}" target="_blank" rel="noopener">📄 הצג / הורד את מסמך המקור</a></dd>` : '');
 
   return `
   <div class="card" data-canonical-id="${esc(c.canonicalId)}">
@@ -427,60 +575,15 @@ function cardHtml(c, idx){
       <span class="badge ${badgeClass(c.verificationStatus)}">${statusLabels[c.verificationStatus] || c.verificationStatus}</span>
     </div>
     ${warningText ? `<div class="verify-warning">⚠️ ${warningText}</div>` : ''}
-    <div class="card-tags">
-      ${offensesArr.length ? offensesArr.slice(0,2).map(o=>`<span class="minitag">${o}</span>`).join('') : '<span class="minitag">עבירות: לא פורט</span>'}
-      <span class="minitag">סוג פגיעה: ${injCategory}</span>
-      ${(c.tags||[]).slice(0,4).map(t=>`<span class="minitag">${t}</span>`).join('')}
-    </div>
+    ${c.prosecutorSummary ? `<div class="card-summary">${esc(c.prosecutorSummary)}</div>` : ''}
+    ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
     <button class="toggle-btn" type="button">הצג פרטים מלאים ▼</button>
     <div class="detail">
-      <dt>תמצית לתביעה</dt><dd>${esc(c.prosecutorSummary)}</dd>
-      <dt>סוג העבירות (מלא)</dt><dd>${offensesArr.length ? offensesArr.join(', ') : 'לא פורט'}</dd>
-      <dt>עובדות</dt><dd>${esc(c.facts)}</dd>
-      <dt>סוג פגיעה (מנורמל)</dt><dd>${injCategory}</dd>
-      ${isAccident ? `
-      <dt>פרטי התאונה והפגיעה</dt><dd>
-        האם אירעה תאונה: ${esc(acc.occurred)}<br>
-        סיווג הפגיעה (כפי שנרשם במקור): ${inj}<br>
-        פרטי הפגיעה: ${esc(acc.injuryFacts)}<br>
-        נזק רכוש: ${esc(acc.propertyDamage)}<br>
-        תקנה 144: ${esc(acc.regulation144)}
-      </dd>` : `
-      <dt>פרטי תאונה</dt><dd>אינו תיק תאונה — שדות פגיעה, נזק רכוש ותקנה 144 אינם רלוונטיים ואינם מוצגים.</dd>`}
-      <dt>עבר תעבורתי ופלילי</dt><dd>
-        עבר תעבורתי: ${esc(c.record && c.record.traffic)}<br>
-        עבר פלילי: ${esc(c.record && c.record.criminal)}<br>
-        תיקים דומים: ${esc(c.record && c.record.similar)}
-      </dd>
-      <dt>מתחם הענישה שנקבע</dt><dd>
-        מאסר: ${esc(c.courtRange && c.courtRange.prison)}<br>
-        פסילה: ${esc(c.courtRange && c.courtRange.disqualification)}<br>
-        קנס: ${esc(c.courtRange && c.courtRange.fine)}<br>
-        אחר: ${esc(c.courtRange && c.courtRange.other)}
-      </dd>
-      <dt>מיקום בתוך המתחם</dt><dd>${esc(c.placement)}</dd>
-      <dt>גזר הדין הסופי (בפועל)</dt><dd>
-        מאסר בפועל: ${esc(fs.actualPrison)}<br>
-        עבודות שירות במקום מאסר: ${esc(fs.communityServicePrison)}<br>
-        מאסר על תנאי: ${esc(fs.suspendedPrison)}<br>
-        פסילה בפועל: ${esc(fs.disqualification)}<br>
-        פסילה על תנאי: ${esc(fs.conditionalDisqualification)}<br>
-        קנס: ${esc(fs.fine)}<br>
-        שירות לתועלת הציבור: ${esc(fs.communityService)}<br>
-        מבחן: ${esc(fs.probation)}<br>
-        פיצוי: ${esc(fs.compensation)}<br>
-        התחייבות: ${esc(fs.undertaking)}<br>
-        אחר: ${esc(fs.other)}
-      </dd>
-      <dt>ערעור</dt><dd>${
-        c.appeal && c.appeal.exists
-          ? `הוגש ערעור. גזר דין ערכאה קמא: ${esc(c.appeal.lowerCourtSentence)} | תוצאת הערעור: ${esc(c.appeal.result)} | גזר דין סופי בערעור: ${esc(c.appeal.finalSentence)}`
-          : 'לא הוגש ערעור (או שלא פורט)'
-      }</dd>
-      <dt>תגיות</dt><dd>${(c.tags||[]).length ? (c.tags||[]).join(', ') : 'לא פורט'}</dd>
-      <dt>סטטוס אימות</dt><dd>${statusLabels[c.verificationStatus] || esc(c.verificationStatus)}</dd>
-      <dt>מקור (אסמכתא)</dt><dd>${c.sourceUrl && c.sourceUrl !== 'NOT_STATED' ? `<a class="source-link" href="${c.sourceUrl}" target="_blank" rel="noopener">${esc(c.sourceUrl)}</a>` : 'לא פורט'}</dd>
-      ${sourcePath ? `<dt>מסמך מקור</dt><dd><a class="source-link" href="${encodeURI(sourcePath)}" target="_blank" rel="noopener">📄 הצג / הורד את מסמך המקור</a></dd>` : ''}
+      ${factsSection}
+      ${rangeSection}
+      ${sentenceSection}
+      ${appealSection}
+      ${sourceSection}
     </div>
   </div>`;
 }
