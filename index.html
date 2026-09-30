@@ -134,16 +134,9 @@
   </div>
 
   <div class="tag-group-block">
-    <div class="tag-section-label">עבירות</div>
-    <div class="tagbar" id="tagBarOffense"></div>
-  </div>
-  <div class="tag-group-block">
-    <div class="tag-section-label">תאונה ופגיעה</div>
-    <div class="tagbar" id="tagBarAccident"></div>
-  </div>
-  <div class="tag-group-block">
-    <div class="tag-section-label">נסיבות נלוות</div>
-    <div class="tagbar" id="tagBarCircumstance"></div>
+    <div class="tag-section-label">סינון לפי מאפיינים</div>
+    <div class="tagbar" id="tagBarPrimary"></div>
+    <button type="button" id="clearFilters" class="clear-btn" style="margin-top:8px;">נקה סינון</button>
   </div>
 
   <div class="results-meta" id="resultsMeta"></div>
@@ -291,7 +284,7 @@ const OFFENSE_TAGS = [
       if(lic==='EXPIRED') return true;
       return /פקע|פקוע|פקיע/.test(t);
   }},
-  { id:'A10_WRONG_CLASS', label:'10(א) — רישיון לסוג רכב אחר', caseTest:c=>A10_VERIFIED[c.canonicalId] === 'WRONG_CLASS' },
+  { id:'A10_WRONG_CLASS', label:'10(א) — סוג רכב אחר', caseTest:c=>A10_VERIFIED[c.canonicalId] === 'WRONG_CLASS' },
   { id:'DISQ', label:'נהיגה בזמן פסילה', caseTest:c=>DISQ_RE.test(offensesOnly(c)) },
   { id:'INTOX', label:'שכרות', caseTest:c=>{
       const ot = offensesOnly(c);
@@ -299,7 +292,7 @@ const OFFENSE_TAGS = [
       if(/NOT_STATED/.test(ot) && ALCOHOL_WORD.test(c.facts||'')) return true;
       return false;
   }},
-  { id:'REFUSAL', label:'סירוב', caseTest:c=>{
+  { id:'REFUSAL', label:'סירוב לבדיקה', caseTest:c=>{
       const ot = offensesOnly(c) + ' ' + (c.facts||'');
       if(/זוכה מסירוב|זיכוי מסירוב/.test(ot)) return false;
       return /סירוב|סירב|הכשיל.{0,8}בדיק|חזקת סירוב/.test(ot);
@@ -315,7 +308,7 @@ const OFFENSE_TAGS = [
 const ACCIDENT_TAGS = [
   { id:'ACC_INJURY', label:'תאונה עם חבלה', caseTest:c=>c._injuryCategory==='REAL_INJURY_GROUP' },
   { id:'ACC_NO_INJURY', label:'תאונה ללא חבלה', caseTest:c=>c._injuryCategory==='BELOW_REAL' },
-  { id:'ACC_PROPERTY', label:'תאונה — נזק רכוש בלבד', caseTest:c=>c._injuryCategory==='PROPERTY_ONLY' },
+  { id:'ACC_PROPERTY', label:'תאונה עם נזק רכוש בלבד', caseTest:c=>c._injuryCategory==='PROPERTY_ONLY' },
 ];
 // "נאשם נפגע בעצמו": אין שדה מובנה בנתונים לכך — זו התאמת-טקסט best-effort על
 // עובדות/פרטי הפגיעה בלבד (לא על tags/offenses), לבדיקה ידנית של יוסי לפני אימוץ קבוע.
@@ -331,6 +324,14 @@ const CIRCUMSTANCE_TAGS = [
   { id:'APPEAL', label:'ערעור', caseTest:c=>(c.appeal||{}).exists === true },
 ];
 const ALL_TAG_GROUPS = [...OFFENSE_TAGS, ...ACCIDENT_TAGS, ...CIRCUMSTANCE_TAGS];
+
+// אזור סינון יחיד "סינון לפי מאפיינים" — רשימה סגורה של 13 הקטגוריות לפי הנחיית
+// יוסי (2026-09-30), בסדר המבוקש. ACCIDENT (״תאונה״ הכללית) ו-PRIOR_RECORD (״עבר
+// תעבורתי״) ממשיכים להיות מחושבים ומוצגים כתגית משנית על כרטיס תיק בודד (להצלבה
+// בלבד), אך אינם מופיעים ככפתור סינון בפאנל הראשי — לא התבקשו ברשימה הסגורה,
+// והתאונה הכללית חופפת מהותית לשלוש קטגוריות סיווג הפגיעה הספציפיות שכבר ברשימה.
+const PRIMARY_TAG_IDS = ['A10_NEVER','LIC_EXPIRED','A10_WRONG_CLASS','DISQ','INTOX','DRUGS','REFUSAL','ACC_INJURY','ACC_NO_INJURY','ACC_PROPERTY','NO_INSURANCE','SELF_INJURED','APPEAL'];
+const PRIMARY_TAGS = PRIMARY_TAG_IDS.map(id => ALL_TAG_GROUPS.find(g => g.id === id));
 
 function matchedGroupIds(c){
   return ALL_TAG_GROUPS.filter(g=>{
@@ -376,17 +377,14 @@ async function init(){
   ALL_CASES.forEach(c => {
     c._injuryCategory = deriveInjuryCategory(c);
   });
-  renderTagBar('tagBarOffense', OFFENSE_TAGS, 'primary');
-  renderTagBar('tagBarAccident', ACCIDENT_TAGS, 'secondary');
-  renderTagBar('tagBarCircumstance', CIRCUMSTANCE_TAGS, 'secondary');
+  renderTagBar('tagBarPrimary', PRIMARY_TAGS, 'primary');
   attachEvents();
   render();
 }
 
-// סרגל תגיות (עבירות / תאונה ופגיעה / נסיבות נלוות) — הבחירה מרובה: לחיצה על
-// תגית מוסיפה/מסירה אותה מ-activeTagGroups, וכל התגיות הפעילות (מכל הסרגלים
-// יחד) פועלות ב-AND (matches() למטה) — לא רק אחת בכל פעם. תגיות העבירה
-// (variant='primary') מסומנות ויזואלית באופן בולט יותר מהתגיות הנלוות.
+// סרגל "סינון לפי מאפיינים" — הבחירה מרובה: לחיצה על קטגוריה מוסיפה/מסירה אותה
+// מ-activeTagGroups, וכל הקטגוריות הפעילות פועלות יחד ב-AND (matches() למטה) —
+// תיק מוצג רק כאשר הוא תואם לכל הקטגוריות שנבחרו בו-זמנית, לא רק לאחת מהן.
 function renderTagBar(containerId, tagList, variant){
   const bar = document.getElementById(containerId);
   if(!bar) return;
@@ -405,8 +403,13 @@ function renderTagBar(containerId, tagList, variant){
 
 function attachEvents(){
   document.getElementById('q').addEventListener('input', render);
+  // "נקה חיפוש" מנקה את תיבת החיפוש החופשי בלבד, ללא נגיעה בסינון הקטגוריות.
   document.getElementById('clearSearch').addEventListener('click', ()=>{
     document.getElementById('q').value = '';
+    render();
+  });
+  // "נקה סינון" מנקה את בחירת הקטגוריות בפאנל "סינון לפי מאפיינים" בלבד.
+  document.getElementById('clearFilters').addEventListener('click', ()=>{
     activeTagGroups.clear();
     document.querySelectorAll('.groupchip').forEach(x=>x.classList.remove('active'));
     render();
